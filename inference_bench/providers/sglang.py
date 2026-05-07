@@ -9,10 +9,14 @@ class SglangProvider(Provider):
     name = "sglang"
     repo_url = "https://github.com/sgl-project/sglang.git"
 
+    @property
+    def _python_dir(self):
+        return self.repo_dir / "python"
+
     def build(self) -> None:
         self._create_venv()
         self._pip_install("--upgrade", "pip")
-        self._pip_install("-e", ".[all]", cwd=self.repo_dir)
+        self._pip_install("-e", ".", cwd=self._python_dir)
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         return [

@@ -72,11 +72,15 @@ class Provider(ABC):
         env = os.environ.copy()
         env["PATH"] = str(self.venv_dir / "bin") + ":" + env.get("PATH", "")
 
+        self._log_path = self.build_dir / f"{self.name}_server.log"
+        self._log_file = open(self._log_path, "w")
+
         print(f"[{self.name}] Starting server: {' '.join(cmd)}")
+        print(f"[{self.name}] Server log: {self._log_path}")
         self._server_process = subprocess.Popen(
             cmd,
             env=env,
-            stdout=subprocess.PIPE,
+            stdout=self._log_file,
             stderr=subprocess.STDOUT,
             preexec_fn=os.setsid,
         )
@@ -92,14 +96,20 @@ class Provider(ABC):
                 if resp.status_code == 200:
                     print(f"[{self.name}] Server ready in {time.time() - start:.1f}s")
                     return
-            except (httpx.ConnectError, httpx.ReadTimeout):
+            except (httpx.ConnectError, httpx.ReadTimeout, httpx.RemoteProtocolError):
                 pass
 
             if self._server_process and self._server_process.poll() is not None:
-                stdout = self._server_process.stdout.read().decode() if self._server_process.stdout else ""
+                self._log_file.flush()
+                log_tail = ""
+                try:
+                    with open(self._log_path) as f:
+                        log_tail = f.read()[-3000:]
+                except Exception:
+                    pass
                 raise RuntimeError(
                     f"[{self.name}] Server process exited with code "
-                    f"{self._server_process.returncode}.\nOutput:\n{stdout[-2000:]}"
+                    f"{self._server_process.returncode}.\nLog tail:\n{log_tail}"
                 )
             time.sleep(5)
         raise TimeoutError(
@@ -119,3 +129,6 @@ class Provider(ABC):
             except ProcessLookupError:
                 pass
         self._server_process = None
+        if hasattr(self, "_log_file") and self._log_file:
+            self._log_file.close()
+            self._log_file = None

@@ -43,6 +43,14 @@ def parse_args() -> argparse.Namespace:
         "--results-dir", type=str, default=None,
         help="Directory for result JSON files (default: ./results)",
     )
+    p.add_argument(
+        "--skip-build", action="store_true",
+        help="Skip clone+build steps (assumes builds already exist)",
+    )
+    p.add_argument(
+        "--build-times", type=str, default=None,
+        help="Comma-separated provider:seconds pairs for pre-recorded build times (e.g. vllm:868,sglang:221)",
+    )
     return p.parse_args()
 
 
@@ -70,7 +78,13 @@ def main() -> None:
     print(f"  Results dir: {config.results_dir}")
     print("=" * 60)
 
-    results = run_all(config)
+    build_times = {}
+    if args.build_times:
+        for pair in args.build_times.split(","):
+            name, secs = pair.split(":")
+            build_times[name.strip()] = float(secs.strip())
+
+    results = run_all(config, skip_build=args.skip_build, build_times=build_times)
     results.print_comparison()
     results.save(config.results_dir)
 
