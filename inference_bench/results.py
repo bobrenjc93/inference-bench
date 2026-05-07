@@ -85,17 +85,18 @@ class RunResults:
                 if bname not in benchmark_names:
                     benchmark_names.append(bname)
 
-        all_metric_keys: list[str] = []
-        for pr in self.providers.values():
-            for br in pr.benchmarks.values():
-                for mk in br.metrics:
-                    if mk not in all_metric_keys:
-                        all_metric_keys.append(mk)
-
         for bname in benchmark_names:
+            bench_metric_keys: list[str] = []
+            for pname in provider_names:
+                pr = self.providers[pname]
+                if bname in pr.benchmarks:
+                    for mk in pr.benchmarks[bname].metrics:
+                        if mk not in bench_metric_keys:
+                            bench_metric_keys.append(mk)
+
             w.writerow([bname])
             w.writerow(["metric"] + provider_names + ["winner"])
-            for mk in all_metric_keys:
+            for mk in bench_metric_keys:
                 values: dict[str, float] = {}
                 row = [mk]
                 for pname in provider_names:
