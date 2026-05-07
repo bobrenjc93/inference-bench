@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import csv
+import io
 import json
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
@@ -51,6 +53,88 @@ class RunResults:
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
         print(f"\nResults saved to {path}")
+        return path
+
+    def save_csv(self, results_dir: str | Path) -> Path:
+        results_dir = Path(results_dir)
+        results_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        path = results_dir / f"results_{ts}.csv"
+
+        provider_names = list(self.providers.keys())
+        if not provider_names:
+            return path
+
+        buf = io.StringIO()
+        w = csv.writer(buf)
+
+        w.writerow(["model", self.model])
+        w.writerow(["tensor_parallel_size", self.tensor_parallel_size])
+        w.writerow(["timestamp", self.timestamp])
+        w.writerow([])
+
+        w.writerow(["Build Times"])
+        w.writerow(["provider", "build_time_s"])
+        for pname in provider_names:
+            w.writerow([pname, f"{self.providers[pname].build_time_s:.1f}"])
+        w.writerow([])
+
+        benchmark_names: list[str] = []
+        for pr in self.providers.values():
+            for bname in pr.benchmarks:
+                if bname not in benchmark_names:
+                    benchmark_names.append(bname)
+
+        all_metric_keys: list[str] = []
+        for pr in self.providers.values():
+            for br in pr.benchmarks.values():
+                for mk in br.metrics:
+                    if mk not in all_metric_keys:
+                        all_metric_keys.append(mk)
+
+        for bname in benchmark_names:
+            w.writerow([bname])
+            w.writerow(["metric"] + provider_names + ["winner"])
+            for mk in all_metric_keys:
+                values: dict[str, float] = {}
+                row = [mk]
+                for pname in provider_names:
+                    pr = self.providers[pname]
+                    if bname in pr.benchmarks and mk in pr.benchmarks[bname].metrics:
+                        val = pr.benchmarks[bname].metrics[mk]
+                        values[pname] = val
+                        row.append(f"{val:.2f}" if isinstance(val, float) else str(val))
+                    else:
+                        row.append("")
+                winner = self._pick_winner(mk, values)
+                row.append(winner)
+                w.writerow(row)
+            w.writerow([])
+
+        w.writerow(["Per-Request Raw Data"])
+        w.writerow([
+            "provider", "benchmark", "request_idx",
+            "ttft_ms", "tpot_ms", "e2e_latency_ms",
+            "output_tokens", "throughput_tps",
+        ])
+        for pname in provider_names:
+            pr = self.providers[pname]
+            for bname in benchmark_names:
+                if bname not in pr.benchmarks:
+                    continue
+                for i, rm in enumerate(pr.benchmarks[bname].raw_requests):
+                    w.writerow([
+                        pname, bname, i,
+                        f"{rm.ttft_ms:.2f}",
+                        f"{rm.tpot_ms:.2f}",
+                        f"{rm.e2e_latency_ms:.2f}",
+                        rm.output_tokens,
+                        f"{rm.throughput_tps:.2f}",
+                    ])
+
+        with open(path, "w", newline="") as f:
+            f.write(buf.getvalue())
+        print(f"CSV saved to {path}")
         return path
 
     def print_comparison(self) -> None:

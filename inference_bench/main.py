@@ -87,6 +87,7 @@ def main() -> None:
     results = run_all(config, skip_build=args.skip_build, build_times=build_times)
     results.print_comparison()
     results.save(config.results_dir)
+    results.save_csv(config.results_dir)
 
 
 if __name__ == "__main__":
