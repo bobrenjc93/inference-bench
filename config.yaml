@@ -1,0 +1,14 @@
+model: meta-llama/Meta-Llama-3.1-70B-Instruct
+tensor_parallel_size: 8
+providers:
+  - vllm
+  - sglang
+benchmarks:
+  - few_shot
+  - self_consistency
+  - multi_turn
+  - tree_of_thought
+build_dir: ./builds
+results_dir: ./results
+server_port: 8000
+server_startup_timeout: 600

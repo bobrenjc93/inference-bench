@@ -1,0 +1,121 @@
+from __future__ import annotations
+
+import os
+import signal
+import subprocess
+import sys
+import time
+from abc import ABC, abstractmethod
+from pathlib import Path
+
+import httpx
+
+
+class Provider(ABC):
+    name: str
+    repo_url: str
+
+    def __init__(self, build_dir: str = "./builds"):
+        self.build_dir = Path(build_dir)
+        self.repo_dir = self.build_dir / self.name
+        self.venv_dir = self.repo_dir / "venv"
+        self._server_process: subprocess.Popen | None = None
+
+    @property
+    def venv_python(self) -> str:
+        return str(self.venv_dir / "bin" / "python")
+
+    @property
+    def api_base(self) -> str:
+        return f"http://localhost:{self._port}/v1"
+
+    def clone(self) -> None:
+        if (self.repo_dir / ".git").exists():
+            print(f"[{self.name}] Repo already cloned at {self.repo_dir}, pulling latest...")
+            subprocess.run(
+                ["git", "pull"],
+                cwd=self.repo_dir,
+                check=True,
+            )
+            return
+        self.repo_dir.parent.mkdir(parents=True, exist_ok=True)
+        print(f"[{self.name}] Cloning {self.repo_url} -> {self.repo_dir}")
+        subprocess.run(
+            ["git", "clone", self.repo_url, str(self.repo_dir)],
+            check=True,
+        )
+
+    def _create_venv(self) -> None:
+        if not self.venv_dir.exists():
+            print(f"[{self.name}] Creating virtualenv at {self.venv_dir}")
+            subprocess.run(
+                [sys.executable, "-m", "venv", str(self.venv_dir)],
+                check=True,
+            )
+
+    def _pip_install(self, *args: str, cwd: str | Path | None = None) -> None:
+        cmd = [self.venv_python, "-m", "pip", "install", *args]
+        print(f"[{self.name}] Running: {' '.join(cmd)}")
+        subprocess.run(cmd, check=True, cwd=cwd)
+
+    @abstractmethod
+    def build(self) -> None:
+        ...
+
+    @abstractmethod
+    def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
+        ...
+
+    def start_server(self, model: str, tp: int, port: int, timeout: int = 600) -> None:
+        self._port = port
+        cmd = self._server_cmd(model, tp, port)
+        env = os.environ.copy()
+        env["PATH"] = str(self.venv_dir / "bin") + ":" + env.get("PATH", "")
+
+        print(f"[{self.name}] Starting server: {' '.join(cmd)}")
+        self._server_process = subprocess.Popen(
+            cmd,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            preexec_fn=os.setsid,
+        )
+
+        self._wait_for_health(timeout)
+
+    def _wait_for_health(self, timeout: int) -> None:
+        print(f"[{self.name}] Waiting for server to be ready (timeout={timeout}s)...")
+        start = time.time()
+        while time.time() - start < timeout:
+            try:
+                resp = httpx.get(f"http://localhost:{self._port}/v1/models", timeout=5)
+                if resp.status_code == 200:
+                    print(f"[{self.name}] Server ready in {time.time() - start:.1f}s")
+                    return
+            except (httpx.ConnectError, httpx.ReadTimeout):
+                pass
+
+            if self._server_process and self._server_process.poll() is not None:
+                stdout = self._server_process.stdout.read().decode() if self._server_process.stdout else ""
+                raise RuntimeError(
+                    f"[{self.name}] Server process exited with code "
+                    f"{self._server_process.returncode}.\nOutput:\n{stdout[-2000:]}"
+                )
+            time.sleep(5)
+        raise TimeoutError(
+            f"[{self.name}] Server did not become ready within {timeout}s"
+        )
+
+    def stop_server(self) -> None:
+        if self._server_process is None:
+            return
+        print(f"[{self.name}] Stopping server (pid={self._server_process.pid})")
+        try:
+            os.killpg(os.getpgid(self._server_process.pid), signal.SIGTERM)
+            self._server_process.wait(timeout=30)
+        except (ProcessLookupError, subprocess.TimeoutExpired):
+            try:
+                os.killpg(os.getpgid(self._server_process.pid), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        self._server_process = None
