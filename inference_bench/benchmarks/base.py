@@ -10,7 +10,7 @@ import openai
 @dataclass
 class RequestMetrics:
     ttft_ms: float = 0.0
-    itl_ms: float = 0.0
+    tpot_ms: float = 0.0
     e2e_latency_ms: float = 0.0
     output_tokens: int = 0
     throughput_tps: float = 0.0
@@ -26,7 +26,7 @@ class BenchmarkResult:
         if not self.raw_requests:
             return self.metrics
         ttfts = [r.ttft_ms for r in self.raw_requests if r.ttft_ms > 0]
-        itls = [r.itl_ms for r in self.raw_requests if r.itl_ms > 0]
+        tpots = [r.tpot_ms for r in self.raw_requests if r.tpot_ms > 0]
         e2es = [r.e2e_latency_ms for r in self.raw_requests]
         tps_list = [r.throughput_tps for r in self.raw_requests if r.throughput_tps > 0]
         total_tokens = sum(r.output_tokens for r in self.raw_requests)
@@ -50,8 +50,8 @@ class BenchmarkResult:
         self.metrics = {
             "ttft_median_ms": _median(ttfts),
             "ttft_p99_ms": _p99(ttfts),
-            "itl_median_ms": _median(itls),
-            "itl_p99_ms": _p99(itls),
+            "tpot_median_ms": _median(tpots),
+            "tpot_p99_ms": _p99(tpots),
             "e2e_median_ms": _median(e2es),
             "e2e_p99_ms": _p99(e2es),
             "throughput_median_tps": _median(tps_list),
@@ -83,7 +83,6 @@ class Benchmark(ABC):
         """
         metrics = RequestMetrics()
         chunks: list[str] = []
-        token_times: list[float] = []
 
         start = time.perf_counter()
         stream = client.chat.completions.create(
@@ -96,27 +95,20 @@ class Benchmark(ABC):
 
         first_token_seen = False
         for chunk in stream:
-            now = time.perf_counter()
             delta = chunk.choices[0].delta if chunk.choices else None
             if delta and delta.content:
                 if not first_token_seen:
-                    metrics.ttft_ms = (now - start) * 1000
+                    metrics.ttft_ms = (time.perf_counter() - start) * 1000
                     first_token_seen = True
-                token_times.append(now)
                 chunks.append(delta.content)
 
         end = time.perf_counter()
         metrics.e2e_latency_ms = (end - start) * 1000
         metrics.output_tokens = len(chunks)
 
-        if len(token_times) > 1:
-            deltas = [
-                (token_times[i] - token_times[i - 1]) * 1000
-                for i in range(1, len(token_times))
-            ]
-            deltas.sort()
-            n = len(deltas)
-            metrics.itl_ms = deltas[n // 2] if n else 0.0
+        if metrics.output_tokens > 1 and metrics.ttft_ms > 0:
+            decode_time_ms = metrics.e2e_latency_ms - metrics.ttft_ms
+            metrics.tpot_ms = decode_time_ms / (metrics.output_tokens - 1)
 
         if metrics.e2e_latency_ms > 0 and metrics.output_tokens > 0:
             metrics.throughput_tps = metrics.output_tokens / (metrics.e2e_latency_ms / 1000)

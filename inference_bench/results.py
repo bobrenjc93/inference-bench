@@ -96,7 +96,7 @@ class RunResults:
         display_metrics = [
             "ttft_median_ms",
             "ttft_p99_ms",
-            "itl_median_ms",
+            "tpot_median_ms",
             "e2e_median_ms",
             "e2e_p99_ms",
             "throughput_median_tps",
@@ -164,7 +164,7 @@ class RunResults:
                 pass
 
         scorable = [
-            "ttft_median_ms", "itl_median_ms", "e2e_median_ms",
+            "ttft_median_ms", "tpot_median_ms", "e2e_median_ms",
             "throughput_median_tps",
         ]
 
