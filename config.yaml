@@ -9,6 +9,7 @@ benchmarks:
   - self_consistency
   - multi_turn
   - tree_of_thought
+  - long_output
 build_dir: ./builds
 results_dir: ./results
 server_port: 8000
