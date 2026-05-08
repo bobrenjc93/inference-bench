@@ -9,10 +9,15 @@ After every benchmark run, results are saved to `results/runs/<timestamp>/` cont
 - `results.csv` — human-readable CSV with summary tables and raw data
 - `plots/` — auto-generated line charts and summary bar charts
 
-The plotting script runs automatically at the end of each benchmark. To regenerate plots manually:
+Two plotting scripts run automatically at the end of each benchmark:
+- `scripts/plot_results.py` — per-run charts (line charts per request, summary bars)
+- `scripts/plot_progress.py` — cross-run progress charts tracking metrics over time
+
+To regenerate manually:
 ```
 python scripts/plot_results.py \
   results/runs/<timestamp>/results.json
+python scripts/plot_progress.py
 ```
 
 All results and plots should be committed to the repo so we can track performance over time.
@@ -45,6 +50,11 @@ python -m inference_bench \
 
 ```
 results/
+  plots/                          # cross-run progress charts (auto-regenerated)
+    long_output_throughput_median_tps.png
+    self_consistency_ttft_median_ms.png
+    build_times.png
+    ...
   runs/
     20260508_064628/
       results.json

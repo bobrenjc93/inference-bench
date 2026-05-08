@@ -93,7 +93,13 @@ def main() -> None:
         from scripts.plot_results import main as plot_main
         plot_main(str(json_path))
     except Exception as exc:
-        print(f"\nWarning: could not generate plots: {exc}")
+        print(f"\nWarning: could not generate per-run plots: {exc}")
+
+    try:
+        from scripts.plot_progress import main as progress_main
+        progress_main(config.results_dir)
+    except Exception as exc:
+        print(f"\nWarning: could not generate progress plots: {exc}")
 
 
 if __name__ == "__main__":
