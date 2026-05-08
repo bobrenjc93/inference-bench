@@ -86,8 +86,14 @@ def main() -> None:
 
     results = run_all(config, skip_build=args.skip_build, build_times=build_times)
     results.print_comparison()
-    results.save(config.results_dir)
+    json_path = results.save(config.results_dir)
     results.save_csv(config.results_dir)
+
+    try:
+        from scripts.plot_results import main as plot_main
+        plot_main(str(json_path))
+    except Exception as exc:
+        print(f"\nWarning: could not generate plots: {exc}")
 
 
 if __name__ == "__main__":

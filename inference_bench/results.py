@@ -27,10 +27,8 @@ class RunResults:
     providers: dict[str, ProviderResults] = field(default_factory=dict)
 
     def save(self, results_dir: str | Path) -> Path:
-        results_dir = Path(results_dir)
-        results_dir.mkdir(parents=True, exist_ok=True)
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        path = results_dir / f"results_{ts}.json"
+        run_dir = self._run_dir(results_dir)
+        path = run_dir / "results.json"
 
         data = {
             "model": self.model,
@@ -44,7 +42,18 @@ class RunResults:
                 "benchmarks": {
                     bname: {
                         "metrics": br.metrics,
-                        "num_requests": len(br.raw_requests),
+                        "raw_requests": [
+                            {
+                                "request_idx": i,
+                                "ttft_ms": rm.ttft_ms,
+                                "tpot_ms": rm.tpot_ms,
+                                "e2e_latency_ms": rm.e2e_latency_ms,
+                                "output_tokens": rm.output_tokens,
+                                "throughput_tps": rm.throughput_tps,
+                                "correct": rm.correct,
+                            }
+                            for i, rm in enumerate(br.raw_requests)
+                        ],
                     }
                     for bname, br in pr.benchmarks.items()
                 },
@@ -56,10 +65,8 @@ class RunResults:
         return path
 
     def save_csv(self, results_dir: str | Path) -> Path:
-        results_dir = Path(results_dir)
-        results_dir.mkdir(parents=True, exist_ok=True)
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        path = results_dir / f"results_{ts}.csv"
+        run_dir = self._run_dir(results_dir)
+        path = run_dir / "results.csv"
 
         provider_names = list(self.providers.keys())
         if not provider_names:
@@ -138,6 +145,13 @@ class RunResults:
             f.write(buf.getvalue())
         print(f"CSV saved to {path}")
         return path
+
+    def _run_dir(self, results_dir: str | Path) -> Path:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        if not hasattr(self, "_cached_run_dir"):
+            self._cached_run_dir = Path(results_dir) / "runs" / ts
+        self._cached_run_dir.mkdir(parents=True, exist_ok=True)
+        return self._cached_run_dir
 
     def print_comparison(self) -> None:
         provider_names = list(self.providers.keys())
