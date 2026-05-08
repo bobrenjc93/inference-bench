@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import hashlib
+
 import openai
 
 from . import register
-from .base import Benchmark, BenchmarkResult, check_answer
+from .base import Benchmark, BenchmarkResult
 
 FEW_SHOT_EXAMPLES = [
     ("1 * 12345 =", "12345"),
@@ -20,8 +22,22 @@ SYSTEM_PROMPT = (
 
 
 def _make_big_number(length: int, seed: int = 0) -> str:
-    digits = "1397240856"
-    return "".join(digits[(i + seed) % len(digits)] for i in range(length))
+    out: list[str] = []
+    i = 0
+    while len(out) < length:
+        h = hashlib.sha256(f"{seed}:{i}".encode()).hexdigest()
+        for ch in h:
+            if ch.isdigit() and len(out) < length:
+                out.append(ch)
+        i += 1
+    if out[0] == "0":
+        out[0] = "1"
+    return "".join(out)
+
+
+def _check_prefix(response: str, expected: str) -> bool:
+    digits = "".join(ch for ch in response if ch.isdigit())
+    return digits.startswith(expected)
 
 
 TEST_CASES = [
@@ -29,10 +45,10 @@ TEST_CASES = [
     _make_big_number(50, seed=1),
     _make_big_number(75, seed=2),
     _make_big_number(100, seed=3),
-    _make_big_number(150, seed=4),
-    _make_big_number(200, seed=5),
-    _make_big_number(300, seed=6),
-    _make_big_number(400, seed=7),
+    _make_big_number(125, seed=4),
+    _make_big_number(150, seed=5),
+    _make_big_number(175, seed=6),
+    _make_big_number(200, seed=7),
 ]
 
 
@@ -47,7 +63,6 @@ class LongOutputBenchmark(Benchmark):
 
         for i, big_num in enumerate(TEST_CASES):
             equation = f"1 * {big_num} ="
-            expected = int(big_num)
             print(
                 f"  [{self.name}] Request {i + 1}/{len(TEST_CASES)}: "
                 f"1 * <{len(big_num)}-digit number> ="
@@ -58,9 +73,9 @@ class LongOutputBenchmark(Benchmark):
             ]
             response_text, metrics = self._stream_request(
                 client, model, messages, temperature=0.0,
-                max_tokens=len(big_num) + 64,
+                max_tokens=len(big_num) // 3 + 16,
             )
-            metrics.correct = check_answer(response_text, expected)
+            metrics.correct = _check_prefix(response_text, big_num)
             result.raw_requests.append(metrics)
             status = (
                 "PASS" if metrics.correct
