@@ -15,7 +15,7 @@ def register(name: str):
 
 def get_provider(name: str, **kwargs) -> Provider:
     if name not in _REGISTRY:
-        from . import vllm as _vllm, sglang as _sglang  # noqa: F811
+        from . import vllm as _vllm, sglang as _sglang, torchinferno as _torchinferno  # noqa: F811
 
     if name not in _REGISTRY:
         raise ValueError(

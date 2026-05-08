@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import re
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 import openai
+
+
+def check_answer(response: str, expected: int) -> bool:
+    return bool(re.search(r'\b' + re.escape(str(expected)) + r'\b', response))
 
 
 @dataclass
@@ -14,6 +19,7 @@ class RequestMetrics:
     e2e_latency_ms: float = 0.0
     output_tokens: int = 0
     throughput_tps: float = 0.0
+    correct: bool | None = None
 
 
 @dataclass
@@ -58,6 +64,11 @@ class BenchmarkResult:
             "total_output_tokens": total_tokens,
             "num_requests": len(self.raw_requests),
         }
+
+        correct_list = [r.correct for r in self.raw_requests if r.correct is not None]
+        if correct_list:
+            self.metrics["correctness_rate"] = sum(correct_list) / len(correct_list)
+
         return self.metrics
 
 

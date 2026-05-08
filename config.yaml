@@ -3,6 +3,7 @@ tensor_parallel_size: 8
 providers:
   - vllm
   - sglang
+  - torchinferno
 benchmarks:
   - few_shot
   - self_consistency

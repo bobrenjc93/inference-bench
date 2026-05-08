@@ -116,7 +116,7 @@ class RunResults:
         w.writerow([
             "provider", "benchmark", "request_idx",
             "ttft_ms", "tpot_ms", "e2e_latency_ms",
-            "output_tokens", "throughput_tps",
+            "output_tokens", "throughput_tps", "correct",
         ])
         for pname in provider_names:
             pr = self.providers[pname]
@@ -131,6 +131,7 @@ class RunResults:
                         f"{rm.e2e_latency_ms:.2f}",
                         rm.output_tokens,
                         f"{rm.throughput_tps:.2f}",
+                        "" if rm.correct is None else int(rm.correct),
                     ])
 
         with open(path, "w", newline="") as f:
@@ -187,6 +188,7 @@ class RunResults:
             "throughput_median_tps",
             "total_output_tokens",
             "num_requests",
+            "correctness_rate",
         ]
 
         headers = ["Metric"] + provider_names + ["Winner"]
@@ -229,7 +231,7 @@ class RunResults:
     def _pick_winner(self, metric_key: str, values: dict[str, float]) -> str:
         if len(values) < 2:
             return ""
-        higher_is_better = {"throughput_median_tps", "total_output_tokens"}
+        higher_is_better = {"throughput_median_tps", "total_output_tokens", "correctness_rate"}
         if metric_key in higher_is_better:
             best = max(values, key=lambda k: values[k])
         elif metric_key == "num_requests":
@@ -250,7 +252,7 @@ class RunResults:
 
         scorable = [
             "ttft_median_ms", "tpot_median_ms", "e2e_median_ms",
-            "throughput_median_tps",
+            "throughput_median_tps", "correctness_rate",
         ]
 
         for bname in set().union(*(pr.benchmarks.keys() for pr in self.providers.values())):

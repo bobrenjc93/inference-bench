@@ -16,7 +16,7 @@ class Provider(ABC):
     repo_url: str
 
     def __init__(self, build_dir: str = "./builds"):
-        self.build_dir = Path(build_dir)
+        self.build_dir = Path(build_dir).resolve()
         self.repo_dir = self.build_dir / self.name
         self.venv_dir = self.repo_dir / "venv"
         self._server_process: subprocess.Popen | None = None
