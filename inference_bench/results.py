@@ -147,9 +147,10 @@ class RunResults:
         return path
 
     def _run_dir(self, results_dir: str | Path) -> Path:
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         if not hasattr(self, "_cached_run_dir"):
-            self._cached_run_dir = Path(results_dir) / "runs" / ts
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+            model_slug = self.model.replace("/", "--")
+            self._cached_run_dir = Path(results_dir) / model_slug / "runs" / ts
         self._cached_run_dir.mkdir(parents=True, exist_ok=True)
         return self._cached_run_dir
 

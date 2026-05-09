@@ -16,8 +16,9 @@ Two plotting scripts run automatically at the end of each benchmark:
 To regenerate manually:
 ```
 python scripts/plot_results.py \
-  results/runs/<timestamp>/results.json
-python scripts/plot_progress.py
+  results/meta-llama--Meta-Llama-3.1-70B-Instruct/runs/<timestamp>/results.json
+python scripts/plot_progress.py \
+  results/meta-llama--Meta-Llama-3.1-70B-Instruct
 ```
 
 All results and plots should be committed to the repo so we can track performance over time.
@@ -50,21 +51,30 @@ python -m inference_bench \
 
 ```
 results/
-  plots/                          # cross-run progress charts (auto-regenerated)
-    long_output_throughput_median_tps.png
-    self_consistency_ttft_median_ms.png
-    build_times.png
-    ...
-  runs/
-    20260508_064628/
-      results.json
-      results.csv
-      plots/
+  meta-llama--Meta-Llama-3.1-70B-Instruct/   # one dir per model
+    plots/                                     # cross-run progress charts
+      few_shot/
+        ttft_median_ms.png
+        throughput_median_tps.png
+      long_output/
+        tpot_median_ms.png
+        throughput_median_tps.png
+      summary/
         build_times.png
-        few_shot_ttft_ms.png
-        long_output_throughput_tps.png
-        summary_throughput_median_tps.png
-        ...
+    runs/
+      20260508_064628/
+        results.json
+        results.csv
+        plots/                                 # per-run charts
+          few_shot/
+            ttft_ms.png
+            throughput_tps.png
+          long_output/
+            tpot_ms.png
+            throughput_tps.png
+          summary/
+            build_times.png
+            throughput_median_tps.png
 ```
 
 ## Adding a new provider

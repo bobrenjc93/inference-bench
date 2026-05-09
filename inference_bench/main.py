@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 from .config import Config
 from .runner import run_all
@@ -97,7 +98,8 @@ def main() -> None:
 
     try:
         from scripts.plot_progress import main as progress_main
-        progress_main(config.results_dir)
+        model_slug = config.model.replace("/", "--")
+        progress_main(str(Path(config.results_dir) / model_slug))
     except Exception as exc:
         print(f"\nWarning: could not generate progress plots: {exc}")
 

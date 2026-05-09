@@ -2,10 +2,10 @@
 """Generate per-request line charts from an inference-bench results JSON.
 
 Usage:
-    python scripts/plot_results.py results/runs/20260508_064628/results.json
+    python scripts/plot_results.py results/<model>/runs/<ts>/results.json
 
-Reads the JSON, produces one PNG per (benchmark, metric) pair into a plots/
-subdirectory next to the JSON.
+Reads the JSON, produces one PNG per (benchmark, metric) pair into
+plots/<benchmark>/ subdirectories next to the JSON.
 """
 from __future__ import annotations
 
@@ -45,7 +45,12 @@ METRIC_LABELS = {
 
 LONG_OUTPUT_DIGITS = [25, 50, 75, 100, 125, 150, 175, 200]
 
-MULTI_TURN_LABELS = [f"Turn {i+1}" for i in range(8)]
+SUMMARY_METRICS = [
+    ("ttft_median_ms", "TTFT Median (ms)", False),
+    ("tpot_median_ms", "TPOT Median (ms)", False),
+    ("e2e_median_ms", "E2E Median (ms)", False),
+    ("throughput_median_tps", "Throughput (tok/s)", True),
+]
 
 
 def x_axis_for_benchmark(benchmark: str, n_requests: int) -> tuple[list, str]:
@@ -57,13 +62,13 @@ def x_axis_for_benchmark(benchmark: str, n_requests: int) -> tuple[list, str]:
 
 
 def plot_benchmark_metric(
-    run_dir: Path,
+    plot_dir: Path,
     benchmark: str,
     metric: str,
     providers: dict,
 ) -> Path | None:
-    plot_dir = run_dir / "plots"
-    plot_dir.mkdir(exist_ok=True)
+    bench_dir = plot_dir / benchmark
+    bench_dir.mkdir(parents=True, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(8, 5))
     has_data = False
@@ -98,15 +103,15 @@ def plot_benchmark_metric(
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
 
-    path = plot_dir / f"{benchmark}_{metric}.png"
+    path = bench_dir / f"{metric}.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
     return path
 
 
-def plot_summary_bars(run_dir: Path, data: dict) -> Path:
-    plot_dir = run_dir / "plots"
-    plot_dir.mkdir(exist_ok=True)
+def plot_summary_bars(plot_dir: Path, data: dict) -> None:
+    summary_dir = plot_dir / "summary"
+    summary_dir.mkdir(parents=True, exist_ok=True)
 
     providers = data["providers"]
     pnames = list(providers.keys())
@@ -116,14 +121,7 @@ def plot_summary_bars(run_dir: Path, data: dict) -> Path:
             if bname not in benchmarks:
                 benchmarks.append(bname)
 
-    summary_metrics = [
-        ("ttft_median_ms", "TTFT Median (ms)", False),
-        ("tpot_median_ms", "TPOT Median (ms)", False),
-        ("e2e_median_ms", "E2E Median (ms)", False),
-        ("throughput_median_tps", "Throughput (tok/s)", True),
-    ]
-
-    for metric_key, metric_label, higher_better in summary_metrics:
+    for metric_key, metric_label, higher_better in SUMMARY_METRICS:
         fig, ax = plt.subplots(figsize=(max(8, len(benchmarks) * 2.5), 5))
         x_positions = range(len(benchmarks))
         bar_width = 0.8 / len(pnames)
@@ -154,16 +152,13 @@ def plot_summary_bars(run_dir: Path, data: dict) -> Path:
         ax.grid(True, alpha=0.3, axis="y")
         fig.tight_layout()
 
-        path = plot_dir / f"summary_{metric_key}.png"
-        fig.savefig(path, dpi=150)
+        fig.savefig(summary_dir / f"{metric_key}.png", dpi=150)
         plt.close(fig)
 
-    return plot_dir
 
-
-def plot_build_times(run_dir: Path, data: dict) -> Path:
-    plot_dir = run_dir / "plots"
-    plot_dir.mkdir(exist_ok=True)
+def plot_build_times(plot_dir: Path, data: dict) -> None:
+    summary_dir = plot_dir / "summary"
+    summary_dir.mkdir(parents=True, exist_ok=True)
 
     providers = data["providers"]
     pnames = list(providers.keys())
@@ -179,10 +174,8 @@ def plot_build_times(run_dir: Path, data: dict) -> Path:
     ax.grid(True, alpha=0.3, axis="y")
     fig.tight_layout()
 
-    path = plot_dir / "build_times.png"
-    fig.savefig(path, dpi=150)
+    fig.savefig(summary_dir / "build_times.png", dpi=150)
     plt.close(fig)
-    return path
 
 
 def main(json_path: str) -> None:
@@ -195,6 +188,7 @@ def main(json_path: str) -> None:
         data = json.load(f)
 
     run_dir = path.parent
+    plot_dir = run_dir / "plots"
     providers = data["providers"]
 
     benchmarks = []
@@ -203,19 +197,18 @@ def main(json_path: str) -> None:
             if bname not in benchmarks:
                 benchmarks.append(bname)
 
-    generated = []
-
+    generated = 0
     for benchmark in benchmarks:
         for metric in RAW_METRICS:
-            result = plot_benchmark_metric(run_dir, benchmark, metric, providers)
+            result = plot_benchmark_metric(plot_dir, benchmark, metric, providers)
             if result:
-                generated.append(result)
+                generated += 1
 
-    plot_summary_bars(run_dir, data)
-    plot_build_times(run_dir, data)
+    plot_summary_bars(plot_dir, data)
+    plot_build_times(plot_dir, data)
 
-    print(f"Generated {len(generated)} per-request charts + summary charts")
-    print(f"Plots saved to {run_dir / 'plots'}/")
+    print(f"Generated {generated} per-request charts + summary charts")
+    print(f"Plots saved to {plot_dir}/")
 
 
 if __name__ == "__main__":

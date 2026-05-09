@@ -2,22 +2,22 @@
 """Generate cross-run progress charts from all inference-bench runs.
 
 Usage:
-    python scripts/plot_progress.py
+    python scripts/plot_progress.py results/meta-llama--Meta-Llama-3.1-70B-Instruct
 
-Scans results/runs/*/results.json, extracts summary metrics per provider
-per run, and generates time-series line charts to results/plots/.
+Scans <model_dir>/runs/*/results.json, generates time-series charts
+to <model_dir>/plots/<benchmark>/<metric>.png.
 """
 from __future__ import annotations
 
 import json
 import sys
 from pathlib import Path
+from datetime import datetime
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from datetime import datetime
 
 PROVIDER_COLORS = {
     "vllm": "#1f77b4",
@@ -32,17 +32,17 @@ PROVIDER_MARKERS = {
 }
 
 TRACKED_METRICS = [
-    ("ttft_median_ms", "TTFT Median (ms)", False),
-    ("tpot_median_ms", "TPOT Median (ms)", False),
-    ("e2e_median_ms", "E2E Median (ms)", False),
-    ("throughput_median_tps", "Throughput Median (tok/s)", True),
-    ("correctness_rate", "Correctness Rate", True),
+    ("ttft_median_ms", "TTFT Median (ms)"),
+    ("tpot_median_ms", "TPOT Median (ms)"),
+    ("e2e_median_ms", "E2E Median (ms)"),
+    ("throughput_median_tps", "Throughput Median (tok/s)"),
+    ("correctness_rate", "Correctness Rate"),
 ]
 
 
-def load_all_runs(results_dir: Path) -> list[dict]:
+def load_all_runs(model_dir: Path) -> list[dict]:
     runs = []
-    runs_dir = results_dir / "runs"
+    runs_dir = model_dir / "runs"
     if not runs_dir.exists():
         return runs
     for run_dir in sorted(runs_dir.iterdir()):
@@ -57,17 +57,15 @@ def load_all_runs(results_dir: Path) -> list[dict]:
 
 
 def parse_run_time(run: dict) -> datetime:
-    dirname = run["_run_dir"]
-    return datetime.strptime(dirname, "%Y%m%d_%H%M%S")
+    return datetime.strptime(run["_run_dir"], "%Y%m%d_%H%M%S")
 
 
 def plot_metric_over_time(
+    plot_dir: Path,
     runs: list[dict],
     benchmark: str,
     metric_key: str,
     metric_label: str,
-    higher_is_better: bool,
-    plot_dir: Path,
 ) -> Path | None:
     providers_data: dict[str, list[tuple[datetime, float]]] = {}
 
@@ -80,12 +78,15 @@ def plot_metric_over_time(
             if metric_key not in metrics:
                 continue
             val = metrics[metric_key]
-            if val == 0 and metric_key in ("tpot_median_ms",):
+            if val == 0 and metric_key == "tpot_median_ms":
                 continue
             providers_data.setdefault(pname, []).append((ts, val))
 
     if not providers_data:
         return None
+
+    bench_dir = plot_dir / benchmark
+    bench_dir.mkdir(parents=True, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(9, 5))
 
@@ -109,13 +110,13 @@ def plot_metric_over_time(
     fig.autofmt_xdate(rotation=30)
     fig.tight_layout()
 
-    path = plot_dir / f"{benchmark}_{metric_key}.png"
+    path = bench_dir / f"{metric_key}.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
     return path
 
 
-def plot_build_times_over_time(runs: list[dict], plot_dir: Path) -> Path | None:
+def plot_build_times_over_time(plot_dir: Path, runs: list[dict]) -> Path | None:
     providers_data: dict[str, list[tuple[datetime, float]]] = {}
 
     for run in runs:
@@ -127,6 +128,9 @@ def plot_build_times_over_time(runs: list[dict], plot_dir: Path) -> Path | None:
 
     if not providers_data:
         return None
+
+    summary_dir = plot_dir / "summary"
+    summary_dir.mkdir(parents=True, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(9, 5))
 
@@ -150,21 +154,20 @@ def plot_build_times_over_time(runs: list[dict], plot_dir: Path) -> Path | None:
     fig.autofmt_xdate(rotation=30)
     fig.tight_layout()
 
-    path = plot_dir / "build_times.png"
+    path = summary_dir / "build_times.png"
     fig.savefig(path, dpi=150)
     plt.close(fig)
     return path
 
 
-def main(results_dir: str = "results") -> None:
-    results_path = Path(results_dir)
-    runs = load_all_runs(results_path)
+def main(model_dir: str) -> None:
+    model_path = Path(model_dir)
+    runs = load_all_runs(model_path)
     if len(runs) < 2:
         print(f"Need at least 2 runs for progress charts (found {len(runs)})")
         return
 
-    plot_dir = results_path / "plots"
-    plot_dir.mkdir(parents=True, exist_ok=True)
+    plot_dir = model_path / "plots"
 
     benchmarks: list[str] = []
     for run in runs:
@@ -175,20 +178,21 @@ def main(results_dir: str = "results") -> None:
 
     generated = 0
     for benchmark in benchmarks:
-        for metric_key, metric_label, higher_better in TRACKED_METRICS:
+        for metric_key, metric_label in TRACKED_METRICS:
             result = plot_metric_over_time(
-                runs, benchmark, metric_key, metric_label,
-                higher_better, plot_dir,
+                plot_dir, runs, benchmark, metric_key, metric_label,
             )
             if result:
                 generated += 1
 
-    plot_build_times_over_time(runs, plot_dir)
+    plot_build_times_over_time(plot_dir, runs)
 
     print(f"Generated {generated} progress charts from {len(runs)} runs")
     print(f"Progress plots saved to {plot_dir}/")
 
 
 if __name__ == "__main__":
-    results_dir = sys.argv[1] if len(sys.argv) > 1 else "results"
-    main(results_dir)
+    if len(sys.argv) != 2:
+        print(f"Usage: {sys.argv[0]} <model_dir>")
+        sys.exit(1)
+    main(sys.argv[1])
