@@ -36,7 +36,7 @@ class TreeOfThoughtBenchmark(Benchmark):
     description = "Branching concurrent math requests (4-wide x 3-deep) — tests scheduling"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = openai.OpenAI(base_url=api_base, api_key="not-needed")
+        client = openai.OpenAI(base_url=api_base, api_key="not-needed", timeout=300)
         result = BenchmarkResult(name=self.name)
 
         eq_idx = 0
