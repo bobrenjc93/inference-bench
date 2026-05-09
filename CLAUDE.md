@@ -16,9 +16,9 @@ Two plotting scripts run automatically at the end of each benchmark:
 To regenerate manually:
 ```
 python scripts/plot_results.py \
-  results/meta-llama--Meta-Llama-3.1-70B-Instruct/runs/<timestamp>/results.json
+  results/meta-llama--Meta-Llama-3.1-70B-Instruct/8xH100/runs/<timestamp>/results.json
 python scripts/plot_progress.py \
-  results/meta-llama--Meta-Llama-3.1-70B-Instruct
+  results/meta-llama--Meta-Llama-3.1-70B-Instruct/8xH100
 ```
 
 All results and plots should be committed to the repo so we can track performance over time.
@@ -27,7 +27,9 @@ All results and plots should be committed to the repo so we can track performanc
 
 Full run (clone + build + benchmark all providers):
 ```
-python -m inference_bench --port 8001
+python -m inference_bench \
+  --port 8001 \
+  --hardware 8xH100
 ```
 
 Skip build (reuse existing builds, inject recorded build times):
@@ -36,7 +38,8 @@ python -m inference_bench \
   --providers vllm sglang torchinferno \
   --skip-build \
   --build-times "vllm:807.8,sglang:87.5,torchinferno:38.3" \
-  --port 8001
+  --port 8001 \
+  --hardware 8xH100
 ```
 
 Single provider:
@@ -44,7 +47,13 @@ Single provider:
 python -m inference_bench \
   --providers torchinferno \
   --skip-build \
-  --port 8001
+  --port 8001 \
+  --hardware 8xH100
+```
+
+Via gpu-dev (reserves 8xH100, runs benchmark, syncs results back, commits):
+```
+bash run_benchmark.sh
 ```
 
 ## Results directory structure
@@ -52,29 +61,24 @@ python -m inference_bench \
 ```
 results/
   meta-llama--Meta-Llama-3.1-70B-Instruct/   # one dir per model
-    plots/                                     # cross-run progress charts
-      few_shot/
-        ttft_median_ms.png
-        throughput_median_tps.png
-      long_output/
-        tpot_median_ms.png
-        throughput_median_tps.png
-      summary/
-        build_times.png
-    runs/
-      20260508_064628/
-        results.json
-        results.csv
-        plots/                                 # per-run charts
-          few_shot/
-            ttft_ms.png
-            throughput_tps.png
-          long_output/
-            tpot_ms.png
-            throughput_tps.png
-          summary/
-            build_times.png
-            throughput_median_tps.png
+    8xH100/                                    # one dir per hardware
+      plots/                                   # cross-run progress charts
+        few_shot/
+          ttft_median_ms.png
+          throughput_median_tps.png
+        summary/
+          build_times.png
+      runs/
+        20260508_064628/
+          results.json
+          results.csv
+          plots/                               # per-run charts
+            few_shot/
+              ttft_ms.png
+              throughput_tps.png
+            summary/
+              build_times.png
+              throughput_median_tps.png
 ```
 
 ## Adding a new provider

@@ -64,7 +64,13 @@ else
     pip install openai httpx pyyaml tabulate matplotlib
 fi
 
+GPU_COUNT=$(nvidia-smi -L 2>/dev/null | wc -l)
+GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1 | \
+  sed 's/NVIDIA //' | sed 's/ .*//')
+HARDWARE="${GPU_COUNT}x${GPU_NAME}"
+echo "=== Detected hardware: ${HARDWARE} ==="
+
 echo "=== Running full benchmark (clone + build + bench) ==="
-python -m inference_bench --port 8001
+python -m inference_bench --port 8001 --hardware "$HARDWARE"
 
 echo "=== Benchmark complete ==="

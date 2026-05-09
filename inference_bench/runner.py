@@ -16,6 +16,7 @@ def run_all(
     results = RunResults(
         model=config.model,
         tensor_parallel_size=config.tensor_parallel_size,
+        hardware=config.hardware,
     )
     build_times = build_times or {}
 

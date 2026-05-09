@@ -23,6 +23,7 @@ class ProviderResults:
 class RunResults:
     model: str
     tensor_parallel_size: int
+    hardware: str = ""
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     providers: dict[str, ProviderResults] = field(default_factory=dict)
 
@@ -33,6 +34,7 @@ class RunResults:
         data = {
             "model": self.model,
             "tensor_parallel_size": self.tensor_parallel_size,
+            "hardware": self.hardware,
             "timestamp": self.timestamp,
             "providers": {},
         }
@@ -150,7 +152,10 @@ class RunResults:
         if not hasattr(self, "_cached_run_dir"):
             ts = datetime.now().strftime("%Y%m%d_%H%M%S")
             model_slug = self.model.replace("/", "--")
-            self._cached_run_dir = Path(results_dir) / model_slug / "runs" / ts
+            base = Path(results_dir) / model_slug
+            if self.hardware:
+                base = base / self.hardware
+            self._cached_run_dir = base / "runs" / ts
         self._cached_run_dir.mkdir(parents=True, exist_ok=True)
         return self._cached_run_dir
 

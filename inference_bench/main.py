@@ -37,6 +37,10 @@ def parse_args() -> argparse.Namespace:
         help="Server port (default: 8000)",
     )
     p.add_argument(
+        "--hardware", type=str, default=None,
+        help="Hardware description (e.g. 8xH100, 4xA100). Included in results path.",
+    )
+    p.add_argument(
         "--build-dir", type=str, default=None,
         help="Directory for cloned repos and venvs (default: ./builds)",
     )
@@ -63,6 +67,7 @@ def main() -> None:
         providers=args.providers,
         benchmarks=args.benchmarks,
         tp=args.tp,
+        hardware=args.hardware,
         build_dir=args.build_dir,
         results_dir=args.results_dir,
         port=args.port,
@@ -73,6 +78,7 @@ def main() -> None:
     print("=" * 60)
     print(f"  Model:      {config.model}")
     print(f"  TP:         {config.tensor_parallel_size}")
+    print(f"  Hardware:   {config.hardware or '(not set)'}")
     print(f"  Providers:  {', '.join(config.providers)}")
     print(f"  Benchmarks: {', '.join(config.benchmarks)}")
     print(f"  Build dir:  {config.build_dir}")
@@ -99,7 +105,10 @@ def main() -> None:
     try:
         from scripts.plot_progress import main as progress_main
         model_slug = config.model.replace("/", "--")
-        progress_main(str(Path(config.results_dir) / model_slug))
+        progress_dir = Path(config.results_dir) / model_slug
+        if config.hardware:
+            progress_dir = progress_dir / config.hardware
+        progress_main(str(progress_dir))
     except Exception as exc:
         print(f"\nWarning: could not generate progress plots: {exc}")
 

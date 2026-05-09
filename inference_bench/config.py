@@ -20,6 +20,7 @@ class Config:
             "tree_of_thought",
         ]
     )
+    hardware: str = ""
     build_dir: str = "./builds"
     results_dir: str = "./results"
     server_port: int = 8000
@@ -43,6 +44,7 @@ class Config:
         providers: list[str] | None = None,
         benchmarks: list[str] | None = None,
         tp: int | None = None,
+        hardware: str | None = None,
         build_dir: str | None = None,
         results_dir: str | None = None,
         port: int | None = None,
@@ -55,6 +57,8 @@ class Config:
             self.benchmarks = benchmarks
         if tp is not None:
             self.tensor_parallel_size = tp
+        if hardware is not None:
+            self.hardware = hardware
         if build_dir is not None:
             self.build_dir = build_dir
         if results_dir is not None:
