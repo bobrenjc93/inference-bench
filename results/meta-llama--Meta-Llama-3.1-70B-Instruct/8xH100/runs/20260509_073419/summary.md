@@ -3,7 +3,7 @@
 - **Model:** meta-llama/Meta-Llama-3.1-70B-Instruct
 - **TP:** 8
 - **Hardware:** 8xH100
-- **Timestamp:** 2026-05-09T07:32:04.877834
+- **Timestamp:** 12:32 AM PT, May 9 2026
 
 ## Scorecard
 

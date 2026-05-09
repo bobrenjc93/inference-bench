@@ -2,7 +2,7 @@
 
 - **Model:** meta-llama/Meta-Llama-3.1-70B-Instruct
 - **TP:** 8
-- **Timestamp:** 2026-05-08T19:13:16.021135
+- **Timestamp:** 12:13 PM PT, May 8 2026
 
 ## Scorecard
 

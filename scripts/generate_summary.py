@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 
@@ -102,7 +103,15 @@ def generate(results_json: str | Path) -> str:
     if hardware:
         lines.append(f"- **Hardware:** {hardware}")
     if timestamp:
-        lines.append(f"- **Timestamp:** {timestamp}")
+        try:
+            dt = datetime.fromisoformat(timestamp)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            pt = dt.astimezone(timezone(timedelta(hours=-7)))
+            friendly = pt.strftime("%-I:%M %p PT, %b %-d %Y")
+            lines.append(f"- **Timestamp:** {friendly}")
+        except (ValueError, TypeError):
+            lines.append(f"- **Timestamp:** {timestamp}")
     lines.append("")
 
     # -- Scorecard: one row per benchmark, one column per provider, cell = wins --

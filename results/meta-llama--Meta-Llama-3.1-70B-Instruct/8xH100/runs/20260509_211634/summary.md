@@ -3,7 +3,7 @@
 - **Model:** meta-llama/Meta-Llama-3.1-70B-Instruct
 - **TP:** 8
 - **Hardware:** 8xH100
-- **Timestamp:** 12:53 PM PT, May 9 2026
+- **Timestamp:** 1:42 PM PT, May 9 2026
 
 ## Scorecard
 
@@ -22,9 +22,9 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 
 | Provider     |             Time |
 | :----------- | ---------------: |
-| vllm         |  1026.2s (17.1m) |
-| sglang       |    310.4s (5.2m) |
-| torchinferno | **77.2s (1.3m)** |
+| vllm         |  1022.8s (17.0m) |
+| sglang       |    295.5s (4.9m) |
+| torchinferno | **73.2s (1.2m)** |
 
 ## Per-Benchmark Results
 
@@ -32,58 +32,58 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 
 | Metric                    |     vllm | sglang | torchinferno |
 | :------------------------ | -------: | -----: | -----------: |
-| TTFT median (ms)          | **25.5** |   33.2 |         36.6 |
+| TTFT median (ms)          | **25.3** |   31.6 |         36.8 |
 | TPOT median (ms)          |  **0.0** |    0.0 |          0.0 |
-| E2E median (ms)           | **36.3** |   41.3 |         46.5 |
-| Throughput median (tok/s) | **27.5** |   24.2 |         21.5 |
+| E2E median (ms)           | **36.0** |   40.0 |         46.7 |
+| Throughput median (tok/s) | **27.8** |   25.0 |         21.4 |
 | Correctness               | **100%** |   100% |         100% |
 
 ### self_consistency
 
 | Metric                    |     vllm | sglang | torchinferno |
 | :------------------------ | -------: | -----: | -----------: |
-| TTFT median (ms)          | **65.3** |  504.5 |        925.2 |
+| TTFT median (ms)          | **71.5** |  511.2 |        740.3 |
 | TPOT median (ms)          |  **0.0** |    0.0 |          0.0 |
-| E2E median (ms)           | **84.3** |  515.5 |       1438.2 |
-| Throughput median (tok/s) | **11.9** |    1.9 |          0.7 |
+| E2E median (ms)           | **86.0** |  521.8 |       1613.0 |
+| Throughput median (tok/s) | **11.6** |    1.9 |          0.6 |
 | Correctness               | **100%** |   100% |         100% |
 
 ### multi_turn
 
 | Metric                    |     vllm | sglang | torchinferno |
 | :------------------------ | -------: | -----: | -----------: |
-| TTFT median (ms)          | **24.6** |   28.9 |        629.2 |
+| TTFT median (ms)          | **24.4** |   29.5 |        468.1 |
 | TPOT median (ms)          |  **0.0** |    0.0 |          0.0 |
-| E2E median (ms)           | **35.4** |   38.0 |        965.6 |
-| Throughput median (tok/s) | **28.2** |   26.3 |          1.1 |
+| E2E median (ms)           | **35.1** |   38.3 |        787.8 |
+| Throughput median (tok/s) | **28.5** |   26.1 |          1.3 |
 | Correctness               | **100%** |   100% |         100% |
 
 ### tree_of_thought
 
 | Metric                    |     vllm |   sglang | torchinferno |
 | :------------------------ | -------: | -------: | -----------: |
-| TTFT median (ms)          | **37.9** |     46.1 |         82.0 |
-| TPOT median (ms)          |     22.7 | **18.5** |        113.4 |
-| E2E median (ms)           | **49.1** |     56.3 |        194.2 |
-| Throughput median (tok/s) | **21.4** |     18.0 |          5.2 |
+| TTFT median (ms)          | **38.5** |     45.8 |         83.6 |
+| TPOT median (ms)          |     76.2 | **18.0** |        115.9 |
+| E2E median (ms)           | **51.3** |     56.3 |        198.7 |
+| Throughput median (tok/s) | **20.0** |     17.9 |          5.1 |
 | Correctness               | **100%** |     100% |         100% |
 
 ### long_output
 
 | Metric                    |     vllm |    sglang | torchinferno |
 | :------------------------ | -------: | --------: | -----------: |
-| TTFT median (ms)          | **25.7** |      30.2 |        501.9 |
-| TPOT median (ms)          |     11.2 |   **9.3** |          9.8 |
-| E2E median (ms)           |    442.0 | **376.7** |       1065.9 |
-| Throughput median (tok/s) |     85.9 | **100.8** |         30.8 |
+| TTFT median (ms)          | **25.2** |      29.9 |        211.2 |
+| TPOT median (ms)          |     11.1 |   **9.3** |         10.0 |
+| E2E median (ms)           |    436.4 | **378.0** |        579.6 |
+| Throughput median (tok/s) |     87.0 | **100.5** |         65.4 |
 | Correctness               | **100%** |      100% |         100% |
 
 ## Cross-Benchmark Averages
 
 | Metric                    |      vllm |  sglang | torchinferno |
 | :------------------------ | --------: | ------: | -----------: |
-| TTFT median (ms)          |  **35.8** |   128.6 |        434.9 |
-| TPOT median (ms)          |       6.8 | **5.6** |         24.6 |
-| E2E median (ms)           | **129.4** |   205.6 |        742.1 |
-| Throughput median (tok/s) |  **35.0** |    34.2 |         11.9 |
+| TTFT median (ms)          |  **37.0** |   129.6 |        308.0 |
+| TPOT median (ms)          |      17.5 | **5.5** |         25.2 |
+| E2E median (ms)           | **129.0** |   206.9 |        645.2 |
+| Throughput median (tok/s) |  **35.0** |    34.3 |         18.8 |
 | Correctness               |  **100%** |    100% |         100% |
