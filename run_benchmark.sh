@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+trap '' PIPE
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOURS=4
@@ -25,7 +26,8 @@ gpu-dev submit \
   --gpus 8 \
   --hours "$HOURS" \
   --runtime "$PROJECT_DIR" \
-  -- bash _remote_benchmark.sh
+  -- bash _remote_benchmark.sh \
+  >> "$LOGFILE" 2>&1
 GPU_EXIT=$?
 
 {
