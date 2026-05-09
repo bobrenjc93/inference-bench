@@ -6,3 +6,4 @@ dist/
 .venv/
 .hf_token
 logs/
+.benchmark.lock
