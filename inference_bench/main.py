@@ -97,6 +97,12 @@ def main() -> None:
     results.save_csv(config.results_dir)
 
     try:
+        from scripts.generate_summary import main as summary_main
+        summary_main(str(json_path))
+    except Exception as exc:
+        print(f"\nWarning: could not generate summary: {exc}")
+
+    try:
         from scripts.plot_results import main as plot_main
         plot_main(str(json_path))
     except Exception as exc:
