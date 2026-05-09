@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68.0"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "inference-bench"
@@ -13,6 +13,9 @@ dependencies = [
     "pyyaml>=6.0",
     "tabulate>=0.9",
 ]
+
+[tool.setuptools.packages.find]
+include = ["inference_bench*", "scripts*"]
 
 [project.scripts]
 inference-bench = "inference_bench.main:main"

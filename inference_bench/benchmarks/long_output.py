@@ -58,7 +58,7 @@ class LongOutputBenchmark(Benchmark):
     description = "1 * <huge number> — forces long token output, tests decode throughput"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = openai.OpenAI(base_url=api_base, api_key="not-needed", timeout=300)
+        client = self._make_client(api_base)
         result = BenchmarkResult(name=self.name)
 
         for i, big_num in enumerate(TEST_CASES):

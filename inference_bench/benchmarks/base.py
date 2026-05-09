@@ -80,6 +80,13 @@ class Benchmark(ABC):
     def run(self, api_base: str, model: str) -> BenchmarkResult:
         ...
 
+    def _make_client(self, api_base: str) -> openai.OpenAI:
+        return openai.OpenAI(
+            base_url=api_base,
+            api_key="not-needed",
+            timeout=300.0,
+        )
+
     def _stream_request(
         self,
         client: openai.OpenAI,

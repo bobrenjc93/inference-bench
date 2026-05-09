@@ -19,7 +19,7 @@ class SelfConsistencyBenchmark(Benchmark):
     description = "N concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = openai.OpenAI(base_url=api_base, api_key="not-needed", timeout=300)
+        client = self._make_client(api_base)
         result = BenchmarkResult(name=self.name)
 
         messages = [

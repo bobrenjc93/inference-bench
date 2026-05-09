@@ -31,7 +31,7 @@ class FewShotBenchmark(Benchmark):
     description = "5-shot math equations — long input, short output, tests prefill speed"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = openai.OpenAI(base_url=api_base, api_key="not-needed", timeout=300)
+        client = self._make_client(api_base)
         result = BenchmarkResult(name=self.name)
 
         example_text = "\n\n".join(

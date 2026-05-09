@@ -48,11 +48,16 @@ def run_all(
 
             for bench_name in config.benchmarks:
                 print(f"\n--- Running benchmark: {bench_name} ---")
-                benchmark = get_benchmark(bench_name)
-                bench_result = benchmark.run(provider.api_base, config.model)
-                pr.benchmarks[bench_name] = bench_result
-                print(f"--- {bench_name} complete ---")
+                try:
+                    benchmark = get_benchmark(bench_name)
+                    bench_result = benchmark.run(provider.api_base, config.model)
+                    pr.benchmarks[bench_name] = bench_result
+                    print(f"--- {bench_name} complete ---")
+                except Exception as exc:
+                    print(f"--- {bench_name} FAILED: {exc} ---")
 
+        except Exception as exc:
+            print(f"[{provider_name}] Server error: {exc}")
         finally:
             provider.stop_server()
 

@@ -23,7 +23,7 @@ class MultiTurnBenchmark(Benchmark):
     description = "8-turn growing conversation of math equations — tests KV cache management"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = openai.OpenAI(base_url=api_base, api_key="not-needed", timeout=300)
+        client = self._make_client(api_base)
         result = BenchmarkResult(name=self.name)
 
         messages: list[dict] = [

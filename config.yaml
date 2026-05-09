@@ -13,4 +13,4 @@ benchmarks:
 build_dir: ./builds
 results_dir: ./results
 server_port: 8000
-server_startup_timeout: 600
+server_startup_timeout: 1800
