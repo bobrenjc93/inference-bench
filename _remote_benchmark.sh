@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+trap '' PIPE
 
 echo "=== Remote benchmark starting ==="
 echo "Host: $(hostname)"
@@ -29,7 +30,7 @@ sudo apt-get update -qq && sudo apt-get install -y -qq \
 
 # conda images may not have apt/sudo — install via conda instead
 if command -v conda &>/dev/null; then
-    conda install -y -c conda-forge pkg-config openssl protobuf 2>/dev/null || true
+    conda install -y -q -c conda-forge pkg-config openssl protobuf 2>/dev/null || true
 fi
 
 # Install protoc from GitHub if not available via apt
@@ -56,12 +57,12 @@ source "$HOME/.cargo/env" 2>/dev/null || true
 echo "=== Setting up Python environment ==="
 if command -v conda &>/dev/null; then
     echo "Conda detected, using conda python directly"
-    pip install openai httpx pyyaml tabulate matplotlib
+    pip install -q openai httpx pyyaml tabulate matplotlib
 else
     echo "No conda, creating venv"
     python3 -m venv --system-site-packages /tmp/bench-venv
     source /tmp/bench-venv/bin/activate
-    pip install openai httpx pyyaml tabulate matplotlib
+    pip install -q openai httpx pyyaml tabulate matplotlib
 fi
 
 GPU_COUNT=$(nvidia-smi -L 2>/dev/null | wc -l)
@@ -72,5 +73,8 @@ echo "=== Detected hardware: ${HARDWARE} ==="
 
 echo "=== Running full benchmark (clone + build + bench) ==="
 python -m inference_bench --port 8001 --hardware "$HARDWARE"
+
+echo "=== Cleaning builds/ to avoid syncing ~27GB back ==="
+rm -rf builds/
 
 echo "=== Benchmark complete ==="
