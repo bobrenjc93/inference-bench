@@ -1,61 +1,99 @@
 from __future__ import annotations
 
+import concurrent.futures
+import random
+
 import openai
 
 from . import register
-from .base import Benchmark, BenchmarkResult, check_answer
+from .base import Benchmark, BenchmarkResult, RequestMetrics, check_answer
 
-MATH_TURNS = [
-    ("8 + 13 =", 21),
-    ("95 - 38 =", 57),
-    ("6 * 14 =", 84),
-    ("72 / 9 =", 8),
-    ("234 + 567 =", 801),
-    ("1024 - 512 =", 512),
-    ("33 * 11 =", 363),
-    ("450 / 15 =", 30),
-]
+TURNS_PER_CONVERSATION = 8
+NUM_CONVERSATIONS = 1250
+MAX_WORKERS = 64
+
+
+def _generate_turns(n: int, seed: int) -> list[tuple[str, int]]:
+    rng = random.Random(seed)
+    turns = []
+    for _ in range(n):
+        op = rng.choice(["+", "-", "*", "/"])
+        if op == "/":
+            b = rng.randint(2, 50)
+            a = b * rng.randint(2, 50)
+            answer = a // b
+        elif op == "*":
+            a = rng.randint(2, 99)
+            b = rng.randint(2, 99)
+            answer = a * b
+        elif op == "-":
+            a = rng.randint(50, 2000)
+            b = rng.randint(1, a)
+            answer = a - b
+        else:
+            a = rng.randint(1, 2000)
+            b = rng.randint(1, 2000)
+            answer = a + b
+        turns.append((f"{a} {op} {b} =", answer))
+    return turns
 
 
 @register("multi_turn")
 class MultiTurnBenchmark(Benchmark):
     name = "multi_turn"
-    description = "8-turn growing conversation of math equations — tests KV cache management"
+    description = "1250 concurrent 8-turn conversations (10k requests) — tests KV cache management under load"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
         client = self._make_client(api_base)
         result = BenchmarkResult(name=self.name)
+        completed = [0]
 
-        messages: list[dict] = [
-            {"role": "system", "content": "You are a calculator. Respond with only the numerical answer, nothing else."},
-        ]
+        def _run_conversation(conv_idx: int) -> list[RequestMetrics]:
+            turns = _generate_turns(TURNS_PER_CONVERSATION, seed=conv_idx)
+            conv_metrics = []
+            messages: list[dict] = [
+                {"role": "system", "content": "You are a calculator. Respond with only the numerical answer, nothing else."},
+            ]
+            for turn, (equation, expected) in enumerate(turns):
+                messages.append({"role": "user", "content": equation})
+                response_text, metrics = self._stream_request(
+                    client, model, messages, temperature=0.0, max_tokens=512
+                )
+                metrics.correct = check_answer(response_text, expected)
+                conv_metrics.append(metrics)
+                messages.append({"role": "assistant", "content": response_text})
 
-        for turn, (equation, expected) in enumerate(MATH_TURNS):
-            messages.append({"role": "user", "content": equation})
-            print(f"  [{self.name}] Turn {turn + 1}/{len(MATH_TURNS)}: {equation}")
+            completed[0] += 1
+            if completed[0] % 100 == 0:
+                print(f"  [{self.name}] Conversations done: {completed[0]}/{NUM_CONVERSATIONS}")
+            return conv_metrics
 
-            response_text, metrics = self._stream_request(
-                client, model, messages, temperature=0.0, max_tokens=512
-            )
-            metrics.correct = check_answer(response_text, expected)
-            result.raw_requests.append(metrics)
+        total_requests = NUM_CONVERSATIONS * TURNS_PER_CONVERSATION
+        print(
+            f"  [{self.name}] Running {NUM_CONVERSATIONS} conversations × "
+            f"{TURNS_PER_CONVERSATION} turns = {total_requests} requests "
+            f"with {MAX_WORKERS} workers..."
+        )
 
-            messages.append({"role": "assistant", "content": response_text})
-            approx_ctx = sum(len(m["content"].split()) for m in messages)
-            status = "PASS" if metrics.correct else f"FAIL (expected {expected}, got: {response_text.strip()[:40]})"
-            print(
-                f"    TTFT={metrics.ttft_ms:.0f}ms  "
-                f"E2E={metrics.e2e_latency_ms:.0f}ms  "
-                f"tokens={metrics.output_tokens}  "
-                f"~ctx_words={approx_ctx}  "
-                f"{status}"
-            )
+        all_conv_metrics: list[list[RequestMetrics]] = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+            futures = [pool.submit(_run_conversation, i) for i in range(NUM_CONVERSATIONS)]
+            for f in concurrent.futures.as_completed(futures):
+                conv_metrics = f.result()
+                all_conv_metrics.append(conv_metrics)
+                result.raw_requests.extend(conv_metrics)
 
         result.summarize()
 
-        ttfts = [r.ttft_ms for r in result.raw_requests]
-        if len(ttfts) >= 2:
-            result.metrics["ttft_first_turn_ms"] = ttfts[0]
-            result.metrics["ttft_last_turn_ms"] = ttfts[-1]
-            result.metrics["ttft_growth_ratio"] = ttfts[-1] / ttfts[0] if ttfts[0] > 0 else 0
+        first_turns = [cm[0].ttft_ms for cm in all_conv_metrics if cm]
+        last_turns = [cm[-1].ttft_ms for cm in all_conv_metrics if cm]
+        if first_turns and last_turns:
+            avg_first = sum(first_turns) / len(first_turns)
+            avg_last = sum(last_turns) / len(last_turns)
+            result.metrics["ttft_first_turn_ms"] = avg_first
+            result.metrics["ttft_last_turn_ms"] = avg_last
+            result.metrics["ttft_growth_ratio"] = avg_last / avg_first if avg_first > 0 else 0
+
+        correct = sum(1 for r in result.raw_requests if r.correct)
+        print(f"  [{self.name}] Done: {correct}/{total_requests} correct")
         return result

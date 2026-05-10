@@ -9,14 +9,14 @@ from .base import Benchmark, BenchmarkResult, RequestMetrics, check_answer
 EQUATION = "17 * 23 ="
 EXPECTED_ANSWER = 391
 
-NUM_SAMPLES = 16
-MAX_WORKERS = 16
+NUM_SAMPLES = 10000
+MAX_WORKERS = 128
 
 
 @register("self_consistency")
 class SelfConsistencyBenchmark(Benchmark):
     name = "self_consistency"
-    description = "N concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching"
+    description = "10k concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
         client = self._make_client(api_base)
@@ -27,21 +27,17 @@ class SelfConsistencyBenchmark(Benchmark):
             {"role": "user", "content": EQUATION},
         ]
 
-        print(f"  [{self.name}] Sending {NUM_SAMPLES} concurrent requests...")
+        print(f"  [{self.name}] Sending {NUM_SAMPLES} concurrent requests with {MAX_WORKERS} workers...")
+        completed = [0]
 
         def _do_request(idx: int) -> tuple[str, RequestMetrics]:
             text, metrics = self._stream_request(
                 client, model, messages, temperature=0.7, max_tokens=256
             )
             metrics.correct = check_answer(text, EXPECTED_ANSWER)
-            status = "PASS" if metrics.correct else f"FAIL (got: {text.strip()[:40]})"
-            print(
-                f"    request {idx + 1}/{NUM_SAMPLES} done: "
-                f"TTFT={metrics.ttft_ms:.0f}ms  "
-                f"E2E={metrics.e2e_latency_ms:.0f}ms  "
-                f"tps={metrics.throughput_tps:.1f}  "
-                f"{status}"
-            )
+            completed[0] += 1
+            if completed[0] % 1000 == 0:
+                print(f"  [{self.name}] Progress: {completed[0]}/{NUM_SAMPLES}")
             return text, metrics
 
         responses: list[str] = []

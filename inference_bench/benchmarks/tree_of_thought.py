@@ -1,99 +1,117 @@
 from __future__ import annotations
 
 import concurrent.futures
+import random
+
 import openai
 
 from . import register
 from .base import Benchmark, BenchmarkResult, RequestMetrics, check_answer
 
-EQUATIONS = [
-    ("37 + 84 =", 121),
-    ("195 - 67 =", 128),
-    ("13 * 11 =", 143),
-    ("192 / 6 =", 32),
-    ("456 + 123 =", 579),
-    ("78 - 29 =", 49),
-    ("15 * 18 =", 270),
-    ("360 / 12 =", 30),
-    ("567 + 234 =", 801),
-    ("99 * 3 =", 297),
-    ("1024 - 256 =", 768),
-    ("17 * 19 =", 323),
-    ("288 / 16 =", 18),
-    ("845 + 155 =", 1000),
-    ("729 / 27 =", 27),
-]
-
 BRANCHES = 4
 DEPTH = 3
+NUM_TREES = 323
+MAX_TREE_WORKERS = 16
 
 SYSTEM_PROMPT = "You are a calculator. Respond with only the numerical answer, nothing else."
+
+
+def _generate_equations(n: int, seed: int) -> list[tuple[str, int]]:
+    rng = random.Random(seed)
+    equations = []
+    for _ in range(n):
+        op = rng.choice(["+", "-", "*", "/"])
+        if op == "/":
+            b = rng.randint(2, 50)
+            a = b * rng.randint(2, 50)
+            answer = a // b
+        elif op == "*":
+            a = rng.randint(2, 99)
+            b = rng.randint(2, 99)
+            answer = a * b
+        elif op == "-":
+            a = rng.randint(50, 2000)
+            b = rng.randint(1, a)
+            answer = a - b
+        else:
+            a = rng.randint(1, 2000)
+            b = rng.randint(1, 2000)
+            answer = a + b
+        equations.append((f"{a} {op} {b} =", answer))
+    return equations
 
 
 @register("tree_of_thought")
 class TreeOfThoughtBenchmark(Benchmark):
     name = "tree_of_thought"
-    description = "Branching concurrent math requests (4-wide x 3-deep) — tests scheduling"
+    description = "323 tree searches (4-wide × 3-deep, ~10k requests) — tests bursty scheduling under load"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
         client = self._make_client(api_base)
         result = BenchmarkResult(name=self.name)
+        completed = [0]
 
-        eq_idx = 0
+        def _run_tree(tree_idx: int) -> list[RequestMetrics]:
+            equations = _generate_equations(50, seed=tree_idx)
+            tree_metrics: list[RequestMetrics] = []
+            eq_idx = 0
 
-        for depth in range(DEPTH):
-            num_candidates = max(1, BRANCHES // (depth + 1))
-            print(
-                f"  [{self.name}] Depth {depth + 1}/{DEPTH}: "
-                f"expanding {num_candidates} candidate(s) x {BRANCHES} branches"
-            )
-            depth_metrics: list[RequestMetrics] = []
+            for depth in range(DEPTH):
+                num_candidates = max(1, BRANCHES // (depth + 1))
 
-            for cand_idx in range(num_candidates):
-                def _generate(local_eq_idx, branch_idx):
-                    eq, expected = EQUATIONS[local_eq_idx % len(EQUATIONS)]
-                    messages = [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": eq},
-                    ]
-                    text, metrics = self._stream_request(
-                        client, model, messages, temperature=0.7, max_tokens=300
-                    )
-                    metrics.correct = check_answer(text, expected)
-                    status = "PASS" if metrics.correct else f"FAIL (expected {expected}, got: {text.strip()[:40]})"
-                    print(
-                        f"    branch {branch_idx + 1}: "
-                        f"TTFT={metrics.ttft_ms:.0f}ms  "
-                        f"E2E={metrics.e2e_latency_ms:.0f}ms  "
-                        f"tps={metrics.throughput_tps:.1f}  "
-                        f"{status}"
-                    )
-                    return text, metrics
+                for cand_idx in range(num_candidates):
+                    def _generate(local_eq_idx, branch_idx):
+                        eq, expected = equations[local_eq_idx % len(equations)]
+                        messages = [
+                            {"role": "system", "content": SYSTEM_PROMPT},
+                            {"role": "user", "content": eq},
+                        ]
+                        text, metrics = self._stream_request(
+                            client, model, messages, temperature=0.7, max_tokens=300
+                        )
+                        metrics.correct = check_answer(text, expected)
+                        return metrics
 
-                with concurrent.futures.ThreadPoolExecutor(max_workers=BRANCHES) as pool:
-                    futures = [
-                        pool.submit(_generate, eq_idx + b, b)
-                        for b in range(BRANCHES)
-                    ]
-                    for f in concurrent.futures.as_completed(futures):
-                        text, metrics = f.result()
-                        depth_metrics.append(metrics)
-                        result.raw_requests.append(metrics)
-                eq_idx += BRANCHES
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=BRANCHES) as pool:
+                        futures = [
+                            pool.submit(_generate, eq_idx + b, b)
+                            for b in range(BRANCHES)
+                        ]
+                        for f in concurrent.futures.as_completed(futures):
+                            tree_metrics.append(f.result())
+                    eq_idx += BRANCHES
 
-            eval_eq, eval_expected = EQUATIONS[eq_idx % len(EQUATIONS)]
-            eval_messages = [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": eval_eq},
-            ]
+                eval_eq, eval_expected = equations[eq_idx % len(equations)]
+                eval_messages = [
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": eval_eq},
+                ]
+                _, eval_metrics = self._stream_request(
+                    client, model, eval_messages, temperature=0.0, max_tokens=400
+                )
+                eval_metrics.correct = check_answer(_, eval_expected)
+                tree_metrics.append(eval_metrics)
+                eq_idx += 1
 
-            print(f"  [{self.name}] Depth {depth + 1}: evaluating ({eval_eq})")
-            eval_text, eval_metrics = self._stream_request(
-                client, model, eval_messages, temperature=0.0, max_tokens=400
-            )
-            eval_metrics.correct = check_answer(eval_text, eval_expected)
-            result.raw_requests.append(eval_metrics)
-            eq_idx += 1
+            completed[0] += 1
+            if completed[0] % 50 == 0:
+                print(f"  [{self.name}] Trees done: {completed[0]}/{NUM_TREES}")
+            return tree_metrics
 
+        print(
+            f"  [{self.name}] Running {NUM_TREES} trees "
+            f"({BRANCHES}-wide × {DEPTH}-deep) with {MAX_TREE_WORKERS} workers..."
+        )
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_TREE_WORKERS) as pool:
+            futures = [pool.submit(_run_tree, i) for i in range(NUM_TREES)]
+            for f in concurrent.futures.as_completed(futures):
+                result.raw_requests.extend(f.result())
+
+        correct = sum(1 for r in result.raw_requests if r.correct)
+        print(
+            f"  [{self.name}] Done: {len(result.raw_requests)} total requests, "
+            f"{correct} correct"
+        )
         result.summarize()
         return result

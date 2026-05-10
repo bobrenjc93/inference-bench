@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import concurrent.futures
+import random
+
 import openai
 
 from . import register
@@ -13,22 +16,39 @@ FEW_SHOT_EXAMPLES = [
     {"question": "347 + 258 =", "answer": 605},
 ]
 
-TEST_QUESTIONS = [
-    ("23 + 47 =", 70),
-    ("156 - 89 =", 67),
-    ("12 * 15 =", 180),
-    ("144 / 12 =", 12),
-    ("500 + 378 =", 878),
-    ("1000 - 247 =", 753),
-    ("25 * 16 =", 400),
-    ("256 / 8 =", 32),
-]
+NUM_REQUESTS = 10000
+MAX_WORKERS = 64
+
+
+def _generate_questions(n: int, seed: int = 42) -> list[tuple[str, int]]:
+    rng = random.Random(seed)
+    questions = []
+    for _ in range(n):
+        op = rng.choice(["+", "-", "*", "/"])
+        if op == "/":
+            b = rng.randint(2, 50)
+            a = b * rng.randint(2, 50)
+            answer = a // b
+        elif op == "*":
+            a = rng.randint(2, 99)
+            b = rng.randint(2, 99)
+            answer = a * b
+        elif op == "-":
+            a = rng.randint(50, 2000)
+            b = rng.randint(1, a)
+            answer = a - b
+        else:
+            a = rng.randint(1, 2000)
+            b = rng.randint(1, 2000)
+            answer = a + b
+        questions.append((f"{a} {op} {b} =", answer))
+    return questions
 
 
 @register("few_shot")
 class FewShotBenchmark(Benchmark):
     name = "few_shot"
-    description = "5-shot math equations — long input, short output, tests prefill speed"
+    description = "5-shot math × 10k requests (64 concurrent) — tests prefill speed under load"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
         client = self._make_client(api_base)
@@ -43,8 +63,12 @@ class FewShotBenchmark(Benchmark):
             "Examples:\n\n" + example_text
         )
 
-        for i, (question, expected) in enumerate(TEST_QUESTIONS):
-            print(f"  [{self.name}] Request {i + 1}/{len(TEST_QUESTIONS)}: {question}")
+        questions = _generate_questions(NUM_REQUESTS)
+
+        def _do_request(idx: int):
+            question, expected = questions[idx]
+            if idx % 1000 == 0:
+                print(f"  [{self.name}] Progress: {idx}/{NUM_REQUESTS}")
             messages = [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Q: {question}\nA:"},
@@ -53,15 +77,15 @@ class FewShotBenchmark(Benchmark):
                 client, model, messages, temperature=0.0, max_tokens=256
             )
             metrics.correct = check_answer(response_text, expected)
-            result.raw_requests.append(metrics)
-            status = "PASS" if metrics.correct else f"FAIL (expected {expected}, got: {response_text.strip()[:40]})"
-            print(
-                f"    TTFT={metrics.ttft_ms:.0f}ms  "
-                f"E2E={metrics.e2e_latency_ms:.0f}ms  "
-                f"tokens={metrics.output_tokens}  "
-                f"tps={metrics.throughput_tps:.1f}  "
-                f"{status}"
-            )
+            return metrics
 
+        print(f"  [{self.name}] Sending {NUM_REQUESTS} requests with {MAX_WORKERS} workers...")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+            futures = [pool.submit(_do_request, i) for i in range(NUM_REQUESTS)]
+            for f in concurrent.futures.as_completed(futures):
+                result.raw_requests.append(f.result())
+
+        correct = sum(1 for r in result.raw_requests if r.correct)
+        print(f"  [{self.name}] Done: {correct}/{NUM_REQUESTS} correct")
         result.summarize()
         return result

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import concurrent.futures
 import hashlib
 
 import openai
@@ -19,6 +20,9 @@ SYSTEM_PROMPT = (
     "Examples:\n\n"
     + "\n\n".join(f"Q: {q}\nA: {a}" for q, a in FEW_SHOT_EXAMPLES)
 )
+
+NUM_REQUESTS = 10000
+MAX_WORKERS = 64
 
 
 def _make_big_number(length: int, seed: int = 0) -> str:
@@ -40,33 +44,29 @@ def _check_prefix(response: str, expected: str) -> bool:
     return digits.startswith(expected)
 
 
-TEST_CASES = [
-    _make_big_number(25, seed=0),
-    _make_big_number(50, seed=1),
-    _make_big_number(75, seed=2),
-    _make_big_number(100, seed=3),
-    _make_big_number(125, seed=4),
-    _make_big_number(150, seed=5),
-    _make_big_number(175, seed=6),
-    _make_big_number(200, seed=7),
-]
+def _generate_test_cases(n: int) -> list[str]:
+    cases = []
+    for i in range(n):
+        length = 25 + (i % 176)
+        cases.append(_make_big_number(length, seed=i))
+    return cases
 
 
 @register("long_output")
 class LongOutputBenchmark(Benchmark):
     name = "long_output"
-    description = "1 * <huge number> — forces long token output, tests decode throughput"
+    description = "1 × <huge number> × 10k requests (64 concurrent) — tests decode throughput under load"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
         client = self._make_client(api_base)
         result = BenchmarkResult(name=self.name)
 
-        for i, big_num in enumerate(TEST_CASES):
+        test_cases = _generate_test_cases(NUM_REQUESTS)
+        completed = [0]
+
+        def _do_request(idx: int):
+            big_num = test_cases[idx]
             equation = f"1 * {big_num} ="
-            print(
-                f"  [{self.name}] Request {i + 1}/{len(TEST_CASES)}: "
-                f"1 * <{len(big_num)}-digit number> ="
-            )
             messages = [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": f"Q: {equation}\nA:"},
@@ -76,18 +76,18 @@ class LongOutputBenchmark(Benchmark):
                 max_tokens=len(big_num) // 3 + 16,
             )
             metrics.correct = _check_prefix(response_text, big_num)
-            result.raw_requests.append(metrics)
-            status = (
-                "PASS" if metrics.correct
-                else f"FAIL (got {metrics.output_tokens} tokens: {response_text.strip()[:60]}...)"
-            )
-            print(
-                f"    TTFT={metrics.ttft_ms:.0f}ms  "
-                f"E2E={metrics.e2e_latency_ms:.0f}ms  "
-                f"tokens={metrics.output_tokens}  "
-                f"tps={metrics.throughput_tps:.1f}  "
-                f"{status}"
-            )
+            completed[0] += 1
+            if completed[0] % 1000 == 0:
+                print(f"  [{self.name}] Progress: {completed[0]}/{NUM_REQUESTS}")
+            return metrics
 
+        print(f"  [{self.name}] Sending {NUM_REQUESTS} requests with {MAX_WORKERS} workers...")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+            futures = [pool.submit(_do_request, i) for i in range(NUM_REQUESTS)]
+            for f in concurrent.futures.as_completed(futures):
+                result.raw_requests.append(f.result())
+
+        correct = sum(1 for r in result.raw_requests if r.correct)
+        print(f"  [{self.name}] Done: {correct}/{NUM_REQUESTS} correct")
         result.summarize()
         return result

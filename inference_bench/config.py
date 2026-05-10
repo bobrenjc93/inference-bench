@@ -22,7 +22,7 @@ class Config:
     )
     hardware: str = ""
     build_dir: str = "./builds"
-    results_dir: str = "./results"
+    results_dir: str = "./results/v1"
     server_port: int = 8000
     server_startup_timeout: int = 600
 

@@ -23,7 +23,7 @@ and it's not on PATH by default on this machine. protoc lives at
 
 Port 8000 is often occupied on dev machines. Always use `--port 8001`.
 
-This takes ~1.5-2 hours total (builds ~15 min each, server startup, 5 benchmarks per provider).
+This takes several hours total (builds ~15 min each, server startup, 5 benchmarks × 10k requests per provider).
 
 ### Remote (via gpu-dev)
 
@@ -58,7 +58,11 @@ python -m inference_bench \
 
 ## Results
 
-After every benchmark run, results are saved to `results/runs/<timestamp>/` containing:
+Results are versioned. `v0` contains the original low-volume latency-focused runs
+(8-16 requests per benchmark). `v1` scales every benchmark to ~10,000 requests with
+high concurrency for realistic throughput measurement.
+
+After every benchmark run, results are saved to `results/v1/<model>/<hw>/runs/<timestamp>/` containing:
 - `results.json` — full results with per-request raw data
 - `results.csv` — human-readable CSV with summary tables and raw data
 - `plots/` — auto-generated line charts and summary bar charts
@@ -73,14 +77,18 @@ All results and plots should be committed to the repo so we can track performanc
 
 ```
 results/
-  meta-llama--Meta-Llama-3.1-70B-Instruct/   # one dir per model
-    8xH100/                                    # one dir per hardware
-      plots/                                   # cross-run progress charts
-      runs/
-        20260508_064628/
-          results.json
-          results.csv
-          plots/                               # per-run charts
+  v0/                                          # legacy low-volume runs
+    meta-llama--Meta-Llama-3.1-70B-Instruct/
+      ...
+  v1/                                          # current: 10k requests/benchmark
+    meta-llama--Meta-Llama-3.1-70B-Instruct/   # one dir per model
+      8xH100/                                  # one dir per hardware
+        plots/                                 # cross-run progress charts
+        runs/
+          20260510_123456/
+            results.json
+            results.csv
+            plots/                             # per-run charts
 ```
 
 ## Adding a new provider
