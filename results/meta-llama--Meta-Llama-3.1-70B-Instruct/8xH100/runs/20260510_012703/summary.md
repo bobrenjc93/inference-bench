@@ -29,6 +29,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 ## Per-Benchmark Results
 
 ### few_shot
+> 5-shot math equations — long input, short output, tests prefill speed ([source](../../../../../inference_bench/benchmarks/few_shot.py))
 
 | Metric                    |     vllm | sglang | torchinferno |
 | :------------------------ | -------: | -----: | -----------: |
@@ -39,6 +40,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 | Correctness               | **100%** |   100% |         100% |
 
 ### self_consistency
+> N concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching ([source](../../../../../inference_bench/benchmarks/self_consistency.py))
 
 | Metric                    |      vllm | sglang | torchinferno |
 | :------------------------ | --------: | -----: | -----------: |
@@ -49,6 +51,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 | Correctness               |  **100%** |   100% |         100% |
 
 ### multi_turn
+> 8-turn growing conversation of math equations — tests KV cache management ([source](../../../../../inference_bench/benchmarks/multi_turn.py))
 
 | Metric                    |     vllm | sglang | torchinferno |
 | :------------------------ | -------: | -----: | -----------: |
@@ -59,6 +62,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 | Correctness               | **100%** |   100% |         100% |
 
 ### tree_of_thought
+> Branching concurrent math requests (4-wide x 3-deep) — tests scheduling ([source](../../../../../inference_bench/benchmarks/tree_of_thought.py))
 
 | Metric                    |     vllm |   sglang | torchinferno |
 | :------------------------ | -------: | -------: | -----------: |
@@ -69,6 +73,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 | Correctness               | **100%** |     100% |         100% |
 
 ### long_output
+> 1 * <huge number> — forces long token output, tests decode throughput ([source](../../../../../inference_bench/benchmarks/long_output.py))
 
 | Metric                    |     vllm |    sglang | torchinferno |
 | :------------------------ | -------: | --------: | -----------: |

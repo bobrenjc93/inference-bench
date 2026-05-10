@@ -2,9 +2,34 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+
+BENCHMARK_INFO = {
+    "few_shot": {
+        "description": "5-shot math equations — long input, short output, tests prefill speed",
+        "source": "inference_bench/benchmarks/few_shot.py",
+    },
+    "self_consistency": {
+        "description": "N concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching",
+        "source": "inference_bench/benchmarks/self_consistency.py",
+    },
+    "multi_turn": {
+        "description": "8-turn growing conversation of math equations — tests KV cache management",
+        "source": "inference_bench/benchmarks/multi_turn.py",
+    },
+    "tree_of_thought": {
+        "description": "Branching concurrent math requests (4-wide x 3-deep) — tests scheduling",
+        "source": "inference_bench/benchmarks/tree_of_thought.py",
+    },
+    "long_output": {
+        "description": "1 * <huge number> — forces long token output, tests decode throughput",
+        "source": "inference_bench/benchmarks/long_output.py",
+    },
+}
 
 
 SCORABLE_METRICS = [
@@ -78,9 +103,22 @@ def _bold(text: str) -> str:
     return f"**{text}**"
 
 
+def _find_repo_root(start: Path) -> Path | None:
+    p = start.resolve()
+    while p != p.parent:
+        if (p / "inference_bench").is_dir():
+            return p
+        p = p.parent
+    return None
+
+
 def generate(results_json: str | Path) -> str:
+    results_json = Path(results_json)
     with open(results_json) as f:
         data = json.load(f)
+
+    repo_root = _find_repo_root(results_json)
+    summary_dir = results_json.resolve().parent
 
     model = data["model"]
     tp = data["tensor_parallel_size"]
@@ -186,6 +224,14 @@ def generate(results_json: str | Path) -> str:
 
     for bn in benchmark_names:
         lines.append(f"### {bn}")
+        info = BENCHMARK_INFO.get(bn)
+        if info:
+            desc = info["description"]
+            if repo_root:
+                rel = os.path.relpath(repo_root / info["source"], summary_dir)
+                lines.append(f"> {desc} ([source]({rel}))")
+            else:
+                lines.append(f"> {desc}")
         lines.append("")
         rows = []
         for mk in SCORABLE_METRICS:
