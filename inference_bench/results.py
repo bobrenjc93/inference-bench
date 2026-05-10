@@ -16,6 +16,7 @@ from .benchmarks.base import BenchmarkResult
 class ProviderResults:
     provider: str
     build_time_s: float = 0.0
+    commit_hash: str = ""
     benchmarks: dict[str, BenchmarkResult] = field(default_factory=dict)
 
 
@@ -41,6 +42,7 @@ class RunResults:
         for pname, pr in self.providers.items():
             data["providers"][pname] = {
                 "build_time_s": pr.build_time_s,
+                "commit_hash": pr.commit_hash,
                 "benchmarks": {
                     bname: {
                         "metrics": br.metrics,
@@ -53,6 +55,7 @@ class RunResults:
                                 "output_tokens": rm.output_tokens,
                                 "throughput_tps": rm.throughput_tps,
                                 "correct": rm.correct,
+                                **({"response_text": rm.response_text} if rm.response_text is not None else {}),
                             }
                             for i, rm in enumerate(br.raw_requests)
                         ],
@@ -121,19 +124,29 @@ class RunResults:
                 w.writerow(row)
             w.writerow([])
 
+        has_response_text = any(
+            rm.response_text is not None
+            for pr in self.providers.values()
+            for br in pr.benchmarks.values()
+            for rm in br.raw_requests
+        )
+
         w.writerow(["Per-Request Raw Data"])
-        w.writerow([
+        header = [
             "provider", "benchmark", "request_idx",
             "ttft_ms", "tpot_ms", "e2e_latency_ms",
             "output_tokens", "throughput_tps", "correct",
-        ])
+        ]
+        if has_response_text:
+            header.append("response_text")
+        w.writerow(header)
         for pname in provider_names:
             pr = self.providers[pname]
             for bname in benchmark_names:
                 if bname not in pr.benchmarks:
                     continue
                 for i, rm in enumerate(pr.benchmarks[bname].raw_requests):
-                    w.writerow([
+                    row = [
                         pname, bname, i,
                         f"{rm.ttft_ms:.2f}",
                         f"{rm.tpot_ms:.2f}",
@@ -141,7 +154,10 @@ class RunResults:
                         rm.output_tokens,
                         f"{rm.throughput_tps:.2f}",
                         "" if rm.correct is None else int(rm.correct),
-                    ])
+                    ]
+                    if has_response_text:
+                        row.append(rm.response_text or "")
+                    w.writerow(row)
 
         with open(path, "w", newline="") as f:
             f.write(buf.getvalue())

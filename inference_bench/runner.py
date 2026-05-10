@@ -12,6 +12,7 @@ def run_all(
     config: Config,
     skip_build: bool = False,
     build_times: dict[str, float] | None = None,
+    debug: bool = False,
 ) -> RunResults:
     results = RunResults(
         model=config.model,
@@ -39,6 +40,10 @@ def run_all(
             pr.build_time_s = time.time() - build_start
             print(f"[{provider_name}] Build completed in {pr.build_time_s:.1f}s")
 
+        pr.commit_hash = provider.get_commit_hash()
+        if pr.commit_hash:
+            print(f"[{provider_name}] Commit: {pr.commit_hash[:12]}")
+
         try:
             provider.start_server(
                 model=config.model,
@@ -51,6 +56,7 @@ def run_all(
                 print(f"\n--- Running benchmark: {bench_name} ---")
                 try:
                     benchmark = get_benchmark(bench_name)
+                    benchmark.debug = debug
                     bench_result = benchmark.run(provider.api_base, config.model)
                     pr.benchmarks[bench_name] = bench_result
                     print(f"--- {bench_name} complete ---")

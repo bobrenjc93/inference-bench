@@ -205,17 +205,27 @@ def generate(results_json: str | Path) -> str:
     lines.append("")
     build_rows = []
     build_vals = {}
+    has_commits = False
     for pn in provider_names:
         secs = providers_data[pn].get("build_time_s", 0)
         build_vals[pn] = secs
+        if providers_data[pn].get("commit_hash"):
+            has_commits = True
     fastest = min(build_vals, key=lambda k: build_vals[k]) if build_vals else None
     for pn in provider_names:
         secs = build_vals[pn]
         cell = f"{secs:.1f}s ({secs / 60:.1f}m)"
         if pn == fastest:
             cell = _bold(cell)
-        build_rows.append([pn, cell])
-    lines.append(_md_table(["Provider", "Time"], build_rows))
+        row = [pn, cell]
+        if has_commits:
+            commit = providers_data[pn].get("commit_hash", "")
+            row.append(f"`{commit[:7]}`" if commit else "-")
+        build_rows.append(row)
+    headers = ["Provider", "Time"]
+    if has_commits:
+        headers.append("Commit")
+    lines.append(_md_table(headers, build_rows))
     lines.append("")
 
     # -- Per-benchmark detail tables --

@@ -56,6 +56,10 @@ def parse_args() -> argparse.Namespace:
         "--build-times", type=str, default=None,
         help="Comma-separated provider:seconds pairs for pre-recorded build times (e.g. vllm:868,sglang:221)",
     )
+    p.add_argument(
+        "--debug", action="store_true",
+        help="Save response text in results for correctness auditing",
+    )
     return p.parse_args()
 
 
@@ -91,7 +95,7 @@ def main() -> None:
             name, secs = pair.split(":")
             build_times[name.strip()] = float(secs.strip())
 
-    results = run_all(config, skip_build=args.skip_build, build_times=build_times)
+    results = run_all(config, skip_build=args.skip_build, build_times=build_times, debug=args.debug)
     results.print_comparison()
     json_path = results.save(config.results_dir)
     results.save_csv(config.results_dir)

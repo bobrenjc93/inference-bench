@@ -29,6 +29,17 @@ class Provider(ABC):
     def api_base(self) -> str:
         return f"http://localhost:{self._port}/v1"
 
+    def get_commit_hash(self) -> str:
+        if not (self.repo_dir / ".git").exists():
+            return ""
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.repo_dir,
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip() if result.returncode == 0 else ""
+
     def clone(self) -> None:
         if (self.repo_dir / ".git").exists():
             print(f"[{self.name}] Repo already cloned at {self.repo_dir}, pulling latest...")

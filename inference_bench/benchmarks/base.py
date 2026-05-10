@@ -20,6 +20,7 @@ class RequestMetrics:
     output_tokens: int = 0
     throughput_tps: float = 0.0
     correct: bool | None = None
+    response_text: str | None = None
 
 
 @dataclass
@@ -75,6 +76,7 @@ class BenchmarkResult:
 class Benchmark(ABC):
     name: str
     description: str
+    debug: bool = False
 
     @abstractmethod
     def run(self, api_base: str, model: str) -> BenchmarkResult:
@@ -131,4 +133,8 @@ class Benchmark(ABC):
         if metrics.e2e_latency_ms > 0 and metrics.output_tokens > 0:
             metrics.throughput_tps = metrics.output_tokens / (metrics.e2e_latency_ms / 1000)
 
-        return "".join(chunks), metrics
+        full_text = "".join(chunks)
+        if self.debug:
+            metrics.response_text = full_text
+
+        return full_text, metrics
