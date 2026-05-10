@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import signal
+import socket
 import subprocess
 import sys
 import time
@@ -135,6 +136,7 @@ class Provider(ABC):
     def stop_server(self) -> None:
         if self._server_process is None:
             return
+        port = getattr(self, "_port", None)
         self._log(f"[{self.name}] Stopping server (pid={self._server_process.pid})")
         try:
             os.killpg(os.getpgid(self._server_process.pid), signal.SIGTERM)
@@ -148,3 +150,29 @@ class Provider(ABC):
         if hasattr(self, "_log_file") and self._log_file:
             self._log_file.close()
             self._log_file = None
+        if isinstance(port, int):
+            self._wait_for_port_release(port)
+        cleanup_wait_s = float(os.environ.get("INFERENCE_BENCH_PROVIDER_CLEANUP_WAIT_S", "30"))
+        if cleanup_wait_s > 0:
+            self._log(f"[{self.name}] Waiting {cleanup_wait_s:.1f}s for provider cleanup")
+            time.sleep(cleanup_wait_s)
+
+    def _wait_for_port_release(self, port: int, timeout: int = 60) -> None:
+        start = time.time()
+        while time.time() - start < timeout:
+            if self._port_can_bind(port):
+                return
+            time.sleep(1)
+        self._log(f"[{self.name}] Port {port} was still busy after {timeout}s")
+
+    @staticmethod
+    def _port_can_bind(port: int) -> bool:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(("0.0.0.0", port))
+            return True
+        except OSError:
+            return False
+        finally:
+            sock.close()

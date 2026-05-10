@@ -22,12 +22,13 @@ def run_all(
     )
     build_times = build_times or {}
 
-    for provider_name in config.providers:
+    for provider_index, provider_name in enumerate(config.providers):
         print(f"\n[{provider_name}] Starting...")
 
         provider = get_provider(provider_name, build_dir=config.build_dir)
         provider.verbose = verbose
         pr = ProviderResults(provider=provider_name)
+        provider_port = config.server_port + provider_index
 
         if skip_build:
             pr.build_time_s = build_times.get(provider_name, 0.0)
@@ -46,7 +47,7 @@ def run_all(
             provider.start_server(
                 model=config.model,
                 tp=config.tensor_parallel_size,
-                port=config.server_port,
+                port=provider_port,
                 timeout=config.server_startup_timeout,
             )
 
