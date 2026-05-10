@@ -17,14 +17,14 @@ reflect how inference engines behave under realistic production load.
 
 ## v1 — Throughput at scale
 
-Every benchmark scaled to ~10,000 requests with high concurrency to saturate the
+Every benchmark scaled to ~1,000 requests with high concurrency to saturate the
 server and measure sustained throughput. Test data is generated programmatically
 via seeded RNG for reproducibility.
 
 | Benchmark | Requests | Concurrency |
 |---|---|---|
-| few_shot | 10,000 | 64 workers |
-| self_consistency | 10,000 | 128 workers |
-| multi_turn | 10,000 (1,250 conversations × 8 turns) | 64 concurrent conversations |
-| tree_of_thought | ~10,013 (323 trees × ~31 requests) | 16 concurrent trees |
-| long_output | 10,000 | 64 workers |
+| few_shot | 1,000 | 64 workers |
+| self_consistency | 1,000 | 128 workers |
+| multi_turn | 1,000 (125 conversations × 8 turns) | 64 concurrent conversations |
+| tree_of_thought | ~992 (32 trees × ~31 requests) | 16 concurrent trees |
+| long_output | 1,000 | 64 workers |
