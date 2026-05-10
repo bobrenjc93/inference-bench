@@ -39,12 +39,15 @@ fi
 echo "=== $(date) Job complete, results synced back ==="
 
 cd "$PROJECT_DIR"
-git add results/
-git stash --include-untracked
-git pull --rebase
-git stash pop || true
-git add results/
-git commit -m "Benchmark run $(date +%Y%m%d_%H%M%S)"
-git push
-echo "=== $(date) Committed and pushed to main ==="
+(
+    flock -w 300 9 || { echo "=== $(date) Could not acquire git lock ==="; exit 1; }
+    git add results/
+    git stash --include-untracked
+    git pull --rebase
+    git stash pop || true
+    git add results/
+    git commit -m "Benchmark run $(date +%Y%m%d_%H%M%S)"
+    git push
+    echo "=== $(date) Committed and pushed to main ==="
+) 9>"$PROJECT_DIR/.git-push.lock"
 } >> "$LOGFILE" 2>&1
