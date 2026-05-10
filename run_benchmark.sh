@@ -4,17 +4,8 @@ trap '' PIPE
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOURS=4
-LOCKFILE="$PROJECT_DIR/.benchmark.lock"
 mkdir -p "$PROJECT_DIR/logs"
 LOGFILE="$PROJECT_DIR/logs/benchmark_$(date +%Y%m%d_%H%M%S).log"
-
-# Prevent concurrent runs. If a previous run is still going,
-# skip this one rather than fighting over git/gpu-dev/files.
-exec 9>"$LOCKFILE"
-if ! flock -n 9; then
-    echo "$(date) Another benchmark is still running, skipping." >> "$LOGFILE"
-    exit 0
-fi
 
 echo "Logging to $LOGFILE"
 
