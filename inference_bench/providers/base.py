@@ -19,7 +19,12 @@ class Provider(ABC):
         self.build_dir = Path(build_dir).resolve()
         self.repo_dir = self.build_dir / self.name
         self.venv_dir = self.repo_dir / "venv"
+        self.verbose: bool = False
         self._server_process: subprocess.Popen | None = None
+
+    def _log(self, msg: str) -> None:
+        if self.verbose:
+            print(msg)
 
     @property
     def venv_python(self) -> str:
@@ -42,7 +47,7 @@ class Provider(ABC):
 
     def clone(self) -> None:
         if (self.repo_dir / ".git").exists():
-            print(f"[{self.name}] Repo already cloned at {self.repo_dir}, pulling latest...")
+            self._log(f"[{self.name}] Repo already cloned at {self.repo_dir}, pulling latest...")
             subprocess.run(
                 ["git", "pull"],
                 cwd=self.repo_dir,
@@ -50,7 +55,7 @@ class Provider(ABC):
             )
             return
         self.repo_dir.parent.mkdir(parents=True, exist_ok=True)
-        print(f"[{self.name}] Cloning {self.repo_url} -> {self.repo_dir}")
+        self._log(f"[{self.name}] Cloning {self.repo_url} -> {self.repo_dir}")
         subprocess.run(
             ["git", "clone", self.repo_url, str(self.repo_dir)],
             check=True,
@@ -58,7 +63,7 @@ class Provider(ABC):
 
     def _create_venv(self) -> None:
         if not self.venv_dir.exists():
-            print(f"[{self.name}] Creating virtualenv at {self.venv_dir}")
+            self._log(f"[{self.name}] Creating virtualenv at {self.venv_dir}")
             subprocess.run(
                 [sys.executable, "-m", "venv", str(self.venv_dir)],
                 check=True,
@@ -66,7 +71,7 @@ class Provider(ABC):
 
     def _pip_install(self, *args: str, cwd: str | Path | None = None) -> None:
         cmd = [self.venv_python, "-m", "pip", "install", *args]
-        print(f"[{self.name}] Running: {' '.join(cmd)}")
+        self._log(f"[{self.name}] Running: {' '.join(cmd)}")
         subprocess.run(cmd, check=True, cwd=cwd)
 
     @abstractmethod
@@ -86,8 +91,8 @@ class Provider(ABC):
         self._log_path = self.build_dir / f"{self.name}_server.log"
         self._log_file = open(self._log_path, "w")
 
-        print(f"[{self.name}] Starting server: {' '.join(cmd)}")
-        print(f"[{self.name}] Server log: {self._log_path}")
+        self._log(f"[{self.name}] Starting server: {' '.join(cmd)}")
+        self._log(f"[{self.name}] Server log: {self._log_path}")
         self._server_process = subprocess.Popen(
             cmd,
             env=env,
@@ -99,7 +104,7 @@ class Provider(ABC):
         self._wait_for_health(timeout)
 
     def _wait_for_health(self, timeout: int) -> None:
-        print(f"[{self.name}] Waiting for server to be ready (timeout={timeout}s)...")
+        self._log(f"[{self.name}] Waiting for server to be ready (timeout={timeout}s)...")
         start = time.time()
         while time.time() - start < timeout:
             try:
@@ -130,7 +135,7 @@ class Provider(ABC):
     def stop_server(self) -> None:
         if self._server_process is None:
             return
-        print(f"[{self.name}] Stopping server (pid={self._server_process.pid})")
+        self._log(f"[{self.name}] Stopping server (pid={self._server_process.pid})")
         try:
             os.killpg(os.getpgid(self._server_process.pid), signal.SIGTERM)
             self._server_process.wait(timeout=30)

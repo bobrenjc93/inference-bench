@@ -60,6 +60,10 @@ def parse_args() -> argparse.Namespace:
         "--debug", action="store_true",
         help="Save response text in results for correctness auditing",
     )
+    p.add_argument(
+        "--verbose", "-v", action="store_true",
+        help="Print detailed progress (default: quiet, only milestones)",
+    )
     return p.parse_args()
 
 
@@ -77,17 +81,11 @@ def main() -> None:
         port=args.port,
     )
 
-    print("=" * 60)
-    print("inference-bench")
-    print("=" * 60)
-    print(f"  Model:      {config.model}")
-    print(f"  TP:         {config.tensor_parallel_size}")
-    print(f"  Hardware:   {config.hardware or '(not set)'}")
-    print(f"  Providers:  {', '.join(config.providers)}")
-    print(f"  Benchmarks: {', '.join(config.benchmarks)}")
-    print(f"  Build dir:  {config.build_dir}")
-    print(f"  Results dir: {config.results_dir}")
-    print("=" * 60)
+    print(
+        f"inference-bench: {config.model} | "
+        f"{', '.join(config.providers)} | "
+        f"{config.hardware or 'no-hw'}"
+    )
 
     build_times = {}
     if args.build_times:
@@ -95,7 +93,7 @@ def main() -> None:
             name, secs = pair.split(":")
             build_times[name.strip()] = float(secs.strip())
 
-    results = run_all(config, skip_build=args.skip_build, build_times=build_times, debug=args.debug)
+    results = run_all(config, skip_build=args.skip_build, build_times=build_times, debug=args.debug, verbose=args.verbose)
     results.print_comparison()
     json_path = results.save(config.results_dir)
     results.save_csv(config.results_dir)

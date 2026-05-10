@@ -66,7 +66,7 @@ class RunResults:
 
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
-        print(f"\nResults saved to {path}")
+        return path
         return path
 
     def save_csv(self, results_dir: str | Path) -> Path:
@@ -161,7 +161,6 @@ class RunResults:
 
         with open(path, "w", newline="") as f:
             f.write(buf.getvalue())
-        print(f"CSV saved to {path}")
         return path
 
     def _run_dir(self, results_dir: str | Path) -> Path:

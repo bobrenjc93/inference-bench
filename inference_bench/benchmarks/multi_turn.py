@@ -64,16 +64,17 @@ class MultiTurnBenchmark(Benchmark):
                 messages.append({"role": "assistant", "content": response_text})
 
             completed[0] += 1
-            if completed[0] % 100 == 0:
+            if self.verbose and completed[0] % 100 == 0:
                 print(f"  [{self.name}] Conversations done: {completed[0]}/{NUM_CONVERSATIONS}")
             return conv_metrics
 
         total_requests = NUM_CONVERSATIONS * TURNS_PER_CONVERSATION
-        print(
-            f"  [{self.name}] Running {NUM_CONVERSATIONS} conversations × "
-            f"{TURNS_PER_CONVERSATION} turns = {total_requests} requests "
-            f"with {MAX_WORKERS} workers..."
-        )
+        if self.verbose:
+            print(
+                f"  [{self.name}] Running {NUM_CONVERSATIONS} conversations × "
+                f"{TURNS_PER_CONVERSATION} turns = {total_requests} requests "
+                f"with {MAX_WORKERS} workers..."
+            )
 
         all_conv_metrics: list[list[RequestMetrics]] = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:

@@ -77,11 +77,12 @@ class LongOutputBenchmark(Benchmark):
             )
             metrics.correct = _check_prefix(response_text, big_num)
             completed[0] += 1
-            if completed[0] % 1000 == 0:
+            if self.verbose and completed[0] % 1000 == 0:
                 print(f"  [{self.name}] Progress: {completed[0]}/{NUM_REQUESTS}")
             return metrics
 
-        print(f"  [{self.name}] Sending {NUM_REQUESTS} requests with {MAX_WORKERS} workers...")
+        if self.verbose:
+            print(f"  [{self.name}] Sending {NUM_REQUESTS} requests with {MAX_WORKERS} workers...")
         with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
             futures = [pool.submit(_do_request, i) for i in range(NUM_REQUESTS)]
             for f in concurrent.futures.as_completed(futures):

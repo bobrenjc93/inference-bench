@@ -77,6 +77,7 @@ class Benchmark(ABC):
     name: str
     description: str
     debug: bool = False
+    verbose: bool = False
 
     @abstractmethod
     def run(self, api_base: str, model: str) -> BenchmarkResult:

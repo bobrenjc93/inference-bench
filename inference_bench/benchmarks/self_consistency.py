@@ -27,7 +27,8 @@ class SelfConsistencyBenchmark(Benchmark):
             {"role": "user", "content": EQUATION},
         ]
 
-        print(f"  [{self.name}] Sending {NUM_SAMPLES} concurrent requests with {MAX_WORKERS} workers...")
+        if self.verbose:
+            print(f"  [{self.name}] Sending {NUM_SAMPLES} concurrent requests with {MAX_WORKERS} workers...")
         completed = [0]
 
         def _do_request(idx: int) -> tuple[str, RequestMetrics]:
@@ -36,7 +37,7 @@ class SelfConsistencyBenchmark(Benchmark):
             )
             metrics.correct = check_answer(text, EXPECTED_ANSWER)
             completed[0] += 1
-            if completed[0] % 1000 == 0:
+            if self.verbose and completed[0] % 1000 == 0:
                 print(f"  [{self.name}] Progress: {completed[0]}/{NUM_SAMPLES}")
             return text, metrics
 

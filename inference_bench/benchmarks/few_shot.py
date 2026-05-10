@@ -67,7 +67,7 @@ class FewShotBenchmark(Benchmark):
 
         def _do_request(idx: int):
             question, expected = questions[idx]
-            if idx % 1000 == 0:
+            if self.verbose and idx % 1000 == 0:
                 print(f"  [{self.name}] Progress: {idx}/{NUM_REQUESTS}")
             messages = [
                 {"role": "system", "content": system_prompt},
@@ -79,7 +79,8 @@ class FewShotBenchmark(Benchmark):
             metrics.correct = check_answer(response_text, expected)
             return metrics
 
-        print(f"  [{self.name}] Sending {NUM_REQUESTS} requests with {MAX_WORKERS} workers...")
+        if self.verbose:
+            print(f"  [{self.name}] Sending {NUM_REQUESTS} requests with {MAX_WORKERS} workers...")
         with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
             futures = [pool.submit(_do_request, i) for i in range(NUM_REQUESTS)]
             for f in concurrent.futures.as_completed(futures):

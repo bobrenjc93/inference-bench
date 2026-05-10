@@ -94,14 +94,15 @@ class TreeOfThoughtBenchmark(Benchmark):
                 eq_idx += 1
 
             completed[0] += 1
-            if completed[0] % 50 == 0:
+            if self.verbose and completed[0] % 50 == 0:
                 print(f"  [{self.name}] Trees done: {completed[0]}/{NUM_TREES}")
             return tree_metrics
 
-        print(
-            f"  [{self.name}] Running {NUM_TREES} trees "
-            f"({BRANCHES}-wide × {DEPTH}-deep) with {MAX_TREE_WORKERS} workers..."
-        )
+        if self.verbose:
+            print(
+                f"  [{self.name}] Running {NUM_TREES} trees "
+                f"({BRANCHES}-wide × {DEPTH}-deep) with {MAX_TREE_WORKERS} workers..."
+            )
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_TREE_WORKERS) as pool:
             futures = [pool.submit(_run_tree, i) for i in range(NUM_TREES)]
