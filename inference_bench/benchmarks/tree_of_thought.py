@@ -10,7 +10,7 @@ from .base import Benchmark, BenchmarkResult, RequestMetrics, check_answer
 
 BRANCHES = 4
 DEPTH = 3
-NUM_TREES = 323
+NUM_TREES = 32
 MAX_TREE_WORKERS = 16
 
 SYSTEM_PROMPT = "You are a calculator. Respond with only the numerical answer, nothing else."

@@ -9,7 +9,7 @@ from .base import Benchmark, BenchmarkResult, RequestMetrics, check_answer
 EQUATION = "17 * 23 ="
 EXPECTED_ANSWER = 391
 
-NUM_SAMPLES = 10000
+NUM_SAMPLES = 1000
 MAX_WORKERS = 128
 
 

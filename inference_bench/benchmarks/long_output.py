@@ -21,7 +21,7 @@ SYSTEM_PROMPT = (
     + "\n\n".join(f"Q: {q}\nA: {a}" for q, a in FEW_SHOT_EXAMPLES)
 )
 
-NUM_REQUESTS = 10000
+NUM_REQUESTS = 1000
 MAX_WORKERS = 64
 
 

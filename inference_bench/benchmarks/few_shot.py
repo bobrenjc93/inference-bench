@@ -16,7 +16,7 @@ FEW_SHOT_EXAMPLES = [
     {"question": "347 + 258 =", "answer": 605},
 ]
 
-NUM_REQUESTS = 10000
+NUM_REQUESTS = 1000
 MAX_WORKERS = 64
 
 

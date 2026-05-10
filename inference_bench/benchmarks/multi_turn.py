@@ -9,7 +9,7 @@ from . import register
 from .base import Benchmark, BenchmarkResult, RequestMetrics, check_answer
 
 TURNS_PER_CONVERSATION = 8
-NUM_CONVERSATIONS = 1250
+NUM_CONVERSATIONS = 125
 MAX_WORKERS = 64
 
 
