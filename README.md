@@ -1,0 +1,289 @@
+# inference-bench
+
+Benchmark and compare LLM inference engines side-by-side on identical hardware
+with identical prompts.
+
+inference-bench builds each engine from source, launches an
+[OpenAI-compatible](https://platform.openai.com/docs/api-reference/chat) server,
+and runs a suite of benchmarks that stress different parts of the serving stack
+(prefill, decode, KV cache, scheduling). Every request is streamed and timed
+token-by-token to produce per-request TTFT, TPOT, E2E latency, and throughput
+numbers.
+
+---
+
+## Table of contents
+
+- [Providers](#providers)
+- [Benchmarks](#benchmarks)
+- [Metrics](#metrics)
+- [Quick start](#quick-start)
+- [CLI reference](#cli-reference)
+- [Configuration](#configuration)
+- [Results](#results)
+- [Architecture](#architecture)
+- [Extending](#extending)
+
+---
+
+## Providers
+
+| Provider | Repository | Description |
+|----------|-----------|-------------|
+| **vLLM** | [vllm-project/vllm](https://github.com/vllm-project/vllm) | High-throughput LLM serving with PagedAttention |
+| **SGLang** | [sgl-project/sglang](https://github.com/sgl-project/sglang) | Fast serving framework with RadixAttention |
+| **TorchInferno** | [bobrenjc93/TorchInferno](https://github.com/bobrenjc93/TorchInferno) | PyTorch-native inference engine |
+
+Each provider implements the [`Provider`](inference_bench/providers/base.py) ABC:
+clone → build → start OpenAI-compatible server → health-check → benchmark → stop.
+
+---
+
+## Benchmarks
+
+All benchmarks target ~10,000 requests to produce statistically meaningful results.
+
+| Benchmark | Requests | Concurrency | What it tests | Source |
+|-----------|----------|-------------|---------------|--------|
+| **few_shot** | 10,000 | 64 workers | 5-shot math prompts — prefill speed under load | [`few_shot.py`](inference_bench/benchmarks/few_shot.py) |
+| **self_consistency** | 10,000 | 128 workers | Identical prompts at temp=0.7 — batch throughput & prefix caching | [`self_consistency.py`](inference_bench/benchmarks/self_consistency.py) |
+| **multi_turn** | 10,000 | 64 workers | 1,250 eight-turn conversations — KV cache management | [`multi_turn.py`](inference_bench/benchmarks/multi_turn.py) |
+| **tree_of_thought** | ~10,000 | 16 trees | 323 tree searches (4-wide × 3-deep) — bursty scheduling | [`tree_of_thought.py`](inference_bench/benchmarks/tree_of_thought.py) |
+| **long_output** | 10,000 | 64 workers | 1 × large-number echo — decode throughput | [`long_output.py`](inference_bench/benchmarks/long_output.py) |
+
+Each benchmark subclasses [`Benchmark`](inference_bench/benchmarks/base.py) and
+uses the OpenAI streaming chat completions API via the
+[`openai`](https://github.com/openai/openai-python) SDK.
+
+---
+
+## Metrics
+
+Every request is streamed and timed to capture:
+
+| Metric | Description |
+|--------|-------------|
+| **TTFT** | Time to First Token — latency from request send to first token received (ms) |
+| **TPOT** | Time per Output Token — average inter-token latency during decode (ms) |
+| **E2E** | End-to-end latency — total wall-clock time per request (ms) |
+| **Throughput** | Output tokens per second per request (tok/s) |
+| **Correctness** | Whether the model's answer matches the expected result |
+
+These are aggregated across all requests in each benchmark as **median** and
+**p99** values. A
+[scorecard](scripts/generate_summary.py) counts metric wins per provider per
+benchmark to determine the overall winner.
+
+---
+
+## Quick start
+
+### Prerequisites
+
+- **Python** ≥ 3.10
+- **NVIDIA GPUs** (tested on 8×H100)
+- [**protoc**](https://github.com/protocolbuffers/protobuf/releases) — required by SGLang's Rust gRPC build
+- [**Rust**](https://rustup.rs/) — required by SGLang / outlines_core
+- [**HuggingFace token**](https://huggingface.co/settings/tokens) — for gated model access (e.g. [Llama 3.1 70B](https://huggingface.co/meta-llama/Meta-Llama-3.1-70B-Instruct))
+
+### Install
+
+```bash
+pip install -e .
+```
+
+> **Note:** [matplotlib](https://matplotlib.org/) is needed for plot generation but
+> is not a core dependency. Install separately: `pip install matplotlib`
+
+### Run
+
+```bash
+python -m inference_bench \
+  --port 8001 \
+  --hardware 8xH100
+```
+
+This clones and builds all providers from source, then runs every benchmark.
+Expect several hours for a full run (builds ~15 min each, then 5 benchmarks ×
+10k requests per provider).
+
+The package also installs an `inference-bench` console entry point, so after
+`pip install -e .` you can run `inference-bench --help` directly.
+
+### Run remotely (via gpu-dev)
+
+```bash
+bash run_benchmark.sh
+```
+
+Reserves 8×H100 for 8 hours via `gpu-dev submit`, runs
+[`_remote_benchmark.sh`](_remote_benchmark.sh) on the remote node (installs all
+dependencies, creates a venv, runs the full benchmark), then syncs results back,
+commits, and pushes. See [`run_benchmark.sh`](run_benchmark.sh) for details.
+
+### Skip builds (reuse existing)
+
+```bash
+python -m inference_bench \
+  --providers vllm sglang torchinferno \
+  --skip-build \
+  --build-times "vllm:807.8,sglang:87.5,torchinferno:38.3" \
+  --port 8001 \
+  --hardware 8xH100
+```
+
+### Single provider
+
+```bash
+python -m inference_bench \
+  --providers torchinferno \
+  --skip-build \
+  --port 8001 \
+  --hardware 8xH100
+```
+
+---
+
+## CLI reference
+
+All flags override the corresponding value in [`config.yaml`](config.yaml).
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--config` | `config.yaml` (repo root) | Path to config file |
+| `--model` | `meta-llama/Meta-Llama-3.1-70B-Instruct` | [HuggingFace](https://huggingface.co/) model name or path |
+| `--providers` | all from config | Space-separated provider names (e.g. `vllm sglang`) |
+| `--benchmarks` | all from config | Space-separated benchmark names (e.g. `few_shot multi_turn`) |
+| `--tp` | `8` | Tensor parallel size |
+| `--port` | `8000` | Server port |
+| `--hardware` | _(none)_ | Hardware label (e.g. `8xH100`); used in results directory path |
+| `--build-dir` | `./builds` | Directory for cloned repos and virtualenvs |
+| `--results-dir` | `./results/v1` | Base directory for result files |
+| `--skip-build` | `false` | Skip clone + build; assumes builds already exist |
+| `--build-times` | _(none)_ | Pre-recorded build times, e.g. `vllm:808,sglang:88,torchinferno:38` |
+
+---
+
+## Configuration
+
+[`config.yaml`](config.yaml) sets defaults for every run. CLI flags take precedence.
+
+```yaml
+model: meta-llama/Meta-Llama-3.1-70B-Instruct
+tensor_parallel_size: 8
+providers:
+  - vllm
+  - sglang
+  - torchinferno
+benchmarks:
+  - few_shot
+  - self_consistency
+  - multi_turn
+  - tree_of_thought
+  - long_output
+build_dir: ./builds
+results_dir: ./results/v1
+server_port: 8000
+server_startup_timeout: 1800    # seconds; SGLang can take ~20 min to load
+```
+
+---
+
+## Results
+
+Results are versioned. **`v0/`** contains legacy low-volume latency-focused runs
+(8–16 requests per benchmark). **`v1/`** scales every benchmark to ~10,000
+requests with high concurrency for realistic throughput measurement.
+
+### Output files
+
+After each run, four artifacts are saved to
+`results/v1/<model>/<hardware>/runs/<timestamp>/`:
+
+| File | Description |
+|------|-------------|
+| `results.json` | Full results with per-request raw data |
+| `results.csv` | Summary tables + per-request CSV |
+| `summary.md` | Markdown scorecard with winner highlights |
+| `plots/` | Per-run line charts and summary bar charts |
+
+### Post-processing scripts
+
+Three scripts run automatically at the end of each benchmark:
+
+| Script | Output | Description |
+|--------|--------|-------------|
+| [`generate_summary.py`](scripts/generate_summary.py) | `summary.md` | Markdown scorecard with per-benchmark tables and cross-benchmark averages |
+| [`plot_results.py`](scripts/plot_results.py) | `plots/` (per-run) | Line charts per request and summary bar charts |
+| [`plot_progress.py`](scripts/plot_progress.py) | `plots/` (cross-run) | Time-series charts tracking metrics across runs |
+
+### Directory structure
+
+```
+results/
+├── v0/                                            # legacy low-volume runs
+│   └── meta-llama--Meta-Llama-3.1-70B-Instruct/
+└── v1/                                            # current: 10k requests/benchmark
+    └── meta-llama--Meta-Llama-3.1-70B-Instruct/   # one dir per model
+        └── 8xH100/                                # one dir per hardware config
+            ├── plots/                             # cross-run progress charts
+            └── runs/
+                └── 20260510_052141/               # one dir per run
+                    ├── results.json
+                    ├── results.csv
+                    ├── summary.md
+                    └── plots/                     # per-run charts
+```
+
+All results and plots are committed to the repo to track performance over time.
+
+---
+
+## Architecture
+
+```
+inference_bench/
+├── __main__.py            # python -m inference_bench entry point
+├── main.py                # CLI parsing and orchestration
+├── config.py              # Config dataclass, YAML loading, CLI overrides
+├── runner.py              # build → start → benchmark → stop loop
+├── results.py             # Result aggregation, JSON/CSV export, comparison tables
+├── providers/
+│   ├── base.py            # Provider ABC: clone, build, start/stop, health check
+│   ├── vllm.py            # vLLM provider
+│   ├── sglang.py          # SGLang provider
+│   └── torchinferno.py    # TorchInferno provider
+└── benchmarks/
+    ├── base.py            # Benchmark ABC, RequestMetrics, streaming helper
+    ├── few_shot.py
+    ├── self_consistency.py
+    ├── multi_turn.py
+    ├── tree_of_thought.py
+    └── long_output.py
+
+scripts/
+├── generate_summary.py    # Markdown summary from results.json
+├── plot_results.py        # Per-run charts (line + bar)
+└── plot_progress.py       # Cross-run time-series charts
+```
+
+---
+
+## Extending
+
+### Adding a new provider
+
+1. Create `inference_bench/providers/<name>.py` subclassing [`Provider`](inference_bench/providers/base.py)
+2. Implement `build()` and `_server_cmd()` — the server must expose an OpenAI-compatible `/v1/chat/completions` endpoint
+3. Add the `@register("<name>")` decorator (from [`providers/__init__.py`](inference_bench/providers/__init__.py))
+4. Add a lazy import in [`inference_bench/providers/__init__.py`](inference_bench/providers/__init__.py)
+5. Add the name to the `providers` list in [`config.yaml`](config.yaml)
+
+### Adding a new benchmark
+
+1. Create `inference_bench/benchmarks/<name>.py` subclassing [`Benchmark`](inference_bench/benchmarks/base.py)
+2. Implement `run(api_base, model) -> BenchmarkResult` using `_stream_request()` for per-token timing
+3. Add the `@register("<name>")` decorator (from [`benchmarks/__init__.py`](inference_bench/benchmarks/__init__.py))
+4. Add a lazy import in [`inference_bench/benchmarks/__init__.py`](inference_bench/benchmarks/__init__.py)
+5. Add the name to the `benchmarks` list in [`config.yaml`](config.yaml)
+6. Add a description entry to [`BENCHMARK_INFO`](scripts/generate_summary.py) in `scripts/generate_summary.py`

@@ -29,7 +29,7 @@ If the user wants only specific providers, add `--providers <name1> <name2>`.
 When the user says to run the benchmark remotely (or "via gpu-dev"):
 
 1. Run: `cd /home/bobren/local/e/inference-bench && bash run_benchmark.sh`
-2. This submits a job to gpu-dev reserving 8xH100 for 4 hours.
+2. This submits a job to gpu-dev reserving 8xH100 for 8 hours.
 3. The remote script (`_remote_benchmark.sh`) handles all deps (protoc, Rust,
    Python venv) and runs the full benchmark.
 4. Results sync back automatically, get committed, and pushed.

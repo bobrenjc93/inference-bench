@@ -2,6 +2,9 @@
 
 Benchmark and compare LLM inference engines (vllm, sglang, torchinferno).
 
+See [`README.md`](README.md) for full project documentation (architecture,
+benchmarks, CLI reference, results format, extending).
+
 ## Running benchmarks
 
 ### Local (machine has GPUs)
@@ -31,7 +34,7 @@ This takes several hours total (builds ~15 min each, server startup, 5 benchmark
 bash run_benchmark.sh
 ```
 
-This reserves 8xH100 for 4 hours via `gpu-dev submit`, runs `_remote_benchmark.sh`
+This reserves 8xH100 for 8 hours via `gpu-dev submit`, runs `_remote_benchmark.sh`
 on the remote node (which installs deps including protoc, creates a venv, and
 runs the benchmark), syncs results back, commits, and pushes.
 
@@ -65,9 +68,11 @@ high concurrency for realistic throughput measurement.
 After every benchmark run, results are saved to `results/v1/<model>/<hw>/runs/<timestamp>/` containing:
 - `results.json` — full results with per-request raw data
 - `results.csv` — human-readable CSV with summary tables and raw data
+- `summary.md` — markdown scorecard with winner highlights
 - `plots/` — auto-generated line charts and summary bar charts
 
-Two plotting scripts run automatically at the end of each benchmark:
+Three scripts run automatically at the end of each benchmark:
+- `scripts/generate_summary.py` — markdown summary with scorecard and per-benchmark tables
 - `scripts/plot_results.py` — per-run charts (line charts per request, summary bars)
 - `scripts/plot_progress.py` — cross-run progress charts tracking metrics over time
 
@@ -88,6 +93,7 @@ results/
           20260510_123456/
             results.json
             results.csv
+            summary.md
             plots/                             # per-run charts
 ```
 
