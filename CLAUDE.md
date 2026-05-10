@@ -100,6 +100,16 @@ results/
 ## Adding a new provider
 
 1. Create `inference_bench/providers/<name>.py` subclassing `Provider`
-2. Add `@register("<name>")` decorator
-3. Add lazy import in `inference_bench/providers/__init__.py`
-4. Add to `config.yaml` providers list
+2. Implement `build()` and `_server_cmd()` — server must expose `/v1/chat/completions`
+3. Add `@register("<name>")` decorator
+4. Add lazy import in `inference_bench/providers/__init__.py`
+5. Add to `config.yaml` providers list
+
+## Adding a new benchmark
+
+1. Create `inference_bench/benchmarks/<name>.py` subclassing `Benchmark`
+2. Implement `run(api_base, model) -> BenchmarkResult` using `_stream_request()`
+3. Add `@register("<name>")` decorator
+4. Add lazy import in `inference_bench/benchmarks/__init__.py`
+5. Add to `config.yaml` benchmarks list
+6. Add entry to `BENCHMARK_INFO` in `scripts/generate_summary.py`
