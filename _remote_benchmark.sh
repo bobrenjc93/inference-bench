@@ -74,7 +74,9 @@ echo "=== Detected hardware: ${HARDWARE} ==="
 echo "=== Running full benchmark (clone + build + bench) ==="
 python -m inference_bench --port 8001 --hardware "$HARDWARE"
 
-echo "=== Cleaning builds/ to avoid syncing ~27GB back ==="
+echo "=== Preserving server logs, cleaning builds/ ==="
+mkdir -p server_logs
+cp builds/*_server.log server_logs/ 2>/dev/null || true
 rm -rf builds/
 
 echo "=== Benchmark complete ==="

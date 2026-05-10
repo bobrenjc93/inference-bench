@@ -8,3 +8,4 @@ dist/
 logs/
 .benchmark.lock
 .git-push.lock
+server_logs/
