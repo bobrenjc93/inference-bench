@@ -3,7 +3,8 @@ set -euo pipefail
 trap '' PIPE
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-HOURS=4
+HOURS=1
+TIMEOUT=3600
 mkdir -p "$PROJECT_DIR/logs"
 LOGFILE="$PROJECT_DIR/logs/benchmark_$(date +%Y%m%d_%H%M%S).log"
 
@@ -18,10 +19,10 @@ if [ -f "$HOME/.cache/huggingface/token" ]; then
 fi
 trap 'rm -f "$PROJECT_DIR/.hf_token"' EXIT
 
-echo "=== $(date) Submitting benchmark job to 8xH100 ==="
+echo "=== $(date) Submitting benchmark job to 8xH100 (timeout=${TIMEOUT}s) ==="
 } >> "$LOGFILE" 2>&1
 
-gpu-dev submit \
+timeout "$TIMEOUT" gpu-dev submit \
   --gpu-type h100 \
   --gpus 8 \
   --hours "$HOURS" \
@@ -31,6 +32,11 @@ gpu-dev submit \
 GPU_EXIT=$?
 
 {
+if [ "$GPU_EXIT" -eq 124 ]; then
+    echo "=== $(date) Run timed out after ${TIMEOUT}s ==="
+    exit 1
+fi
+
 if [ "$GPU_EXIT" -ne 0 ]; then
     echo "=== $(date) gpu-dev submit failed with exit code $GPU_EXIT ==="
     exit "$GPU_EXIT"
