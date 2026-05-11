@@ -37,10 +37,11 @@ SCORABLE_METRICS = [
     "tpot_median_ms",
     "e2e_median_ms",
     "throughput_median_tps",
-    "correctness_rate",
 ]
 
-HIGHER_IS_BETTER = {"throughput_median_tps", "correctness_rate"}
+DISPLAY_METRICS = SCORABLE_METRICS + ["correctness_rate"]
+
+HIGHER_IS_BETTER = {"throughput_median_tps"}
 
 METRIC_LABELS = {
     "ttft_median_ms": "TTFT median (ms)",
@@ -196,7 +197,7 @@ def generate(results_json: str | Path) -> str:
     lines.append(_md_table(["Benchmark"] + provider_names, rows))
     lines.append("")
     lines.append(f"Each cell = metric wins out of {len(SCORABLE_METRICS)} "
-                 f"(TTFT, TPOT, E2E, throughput, correctness). "
+                 f"(TTFT, TPOT, E2E, throughput). "
                  f"**Bold** = best in row.")
     lines.append("")
 
@@ -244,7 +245,7 @@ def generate(results_json: str | Path) -> str:
                 lines.append(f"> {desc}")
         lines.append("")
         rows = []
-        for mk in SCORABLE_METRICS:
+        for mk in DISPLAY_METRICS:
             values: dict[str, float] = {}
             for pn in provider_names:
                 metrics = providers_data[pn].get("benchmarks", {}).get(bn, {}).get("metrics", {})
@@ -254,7 +255,7 @@ def generate(results_json: str | Path) -> str:
             if not values:
                 continue
 
-            winner = _pick_winner(mk, values)
+            winner = _pick_winner(mk, values) if mk in SCORABLE_METRICS else None
             row = [METRIC_LABELS.get(mk, mk)]
             for pn in provider_names:
                 if pn in values:
@@ -273,7 +274,7 @@ def generate(results_json: str | Path) -> str:
     lines.append("")
 
     avg_rows = []
-    for mk in SCORABLE_METRICS:
+    for mk in DISPLAY_METRICS:
         row = [METRIC_LABELS.get(mk, mk)]
         averages: dict[str, float] = {}
         for pn in provider_names:
@@ -284,7 +285,7 @@ def generate(results_json: str | Path) -> str:
                     vals.append(metrics[mk])
             if vals:
                 averages[pn] = sum(vals) / len(vals)
-        winner = _pick_winner(mk, averages) if len(averages) >= 2 else None
+        winner = _pick_winner(mk, averages) if mk in SCORABLE_METRICS and len(averages) >= 2 else None
         for pn in provider_names:
             if pn in averages:
                 cell = _fmt(mk, averages[pn])
