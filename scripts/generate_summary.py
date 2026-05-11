@@ -10,23 +10,23 @@ from pathlib import Path
 
 BENCHMARK_INFO = {
     "few_shot": {
-        "description": "5-shot math × 10k requests (64 concurrent) — tests prefill speed under load",
+        "description": "5-shot math × 1k requests (64 concurrent) — tests prefill speed under load",
         "source": "inference_bench/benchmarks/few_shot.py",
     },
     "self_consistency": {
-        "description": "10k concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching",
+        "description": "1k concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching",
         "source": "inference_bench/benchmarks/self_consistency.py",
     },
     "multi_turn": {
-        "description": "1250 concurrent 8-turn conversations (10k requests) — tests KV cache management under load",
+        "description": "125 concurrent 8-turn conversations (1k requests) — tests KV cache management under load",
         "source": "inference_bench/benchmarks/multi_turn.py",
     },
     "tree_of_thought": {
-        "description": "323 tree searches (4-wide × 3-deep, ~10k requests) — tests bursty scheduling under load",
+        "description": "32 tree searches (4-wide × 3-deep, ~1k requests) — tests bursty scheduling under load",
         "source": "inference_bench/benchmarks/tree_of_thought.py",
     },
     "long_output": {
-        "description": "1 × <huge number> × 10k requests (64 concurrent) — tests decode throughput under load",
+        "description": "1 × <huge number> × 1k requests (64 concurrent) — tests decode throughput under load",
         "source": "inference_bench/benchmarks/long_output.py",
     },
 }

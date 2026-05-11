@@ -29,7 +29,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 ## Per-Benchmark Results
 
 ### few_shot
-> 5-shot math × 10k requests (64 concurrent) — tests prefill speed under load ([source](../../../../../../inference_bench/benchmarks/few_shot.py))
+> 5-shot math × 1k requests (64 concurrent) — tests prefill speed under load ([source](../../../../../../inference_bench/benchmarks/few_shot.py))
 
 | Metric                    |     vllm |    sglang | torchinferno |
 | :------------------------ | -------: | --------: | -----------: |
@@ -40,7 +40,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 | Correctness               |  **98%** |       98% |          98% |
 
 ### self_consistency
-> 10k concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching ([source](../../../../../../inference_bench/benchmarks/self_consistency.py))
+> 1k concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching ([source](../../../../../../inference_bench/benchmarks/self_consistency.py))
 
 | Metric                    |      vllm | sglang | torchinferno |
 | :------------------------ | --------: | -----: | -----------: |
@@ -51,7 +51,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 | Correctness               |  **100%** |   100% |         100% |
 
 ### multi_turn
-> 1250 concurrent 8-turn conversations (10k requests) — tests KV cache management under load ([source](../../../../../../inference_bench/benchmarks/multi_turn.py))
+> 125 concurrent 8-turn conversations (1k requests) — tests KV cache management under load ([source](../../../../../../inference_bench/benchmarks/multi_turn.py))
 
 | Metric                    |      vllm |    sglang | torchinferno |
 | :------------------------ | --------: | --------: | -----------: |
@@ -62,7 +62,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 | Correctness               |       98% |   **98%** |          98% |
 
 ### tree_of_thought
-> 323 tree searches (4-wide × 3-deep, ~10k requests) — tests bursty scheduling under load ([source](../../../../../../inference_bench/benchmarks/tree_of_thought.py))
+> 32 tree searches (4-wide × 3-deep, ~1k requests) — tests bursty scheduling under load ([source](../../../../../../inference_bench/benchmarks/tree_of_thought.py))
 
 | Metric                    |     vllm | sglang | torchinferno |
 | :------------------------ | -------: | -----: | -----------: |
@@ -73,7 +73,7 @@ Each cell = metric wins out of 5 (TTFT, TPOT, E2E, throughput, correctness). **B
 | Correctness               |  **97%** |    97% |          97% |
 
 ### long_output
-> 1 × <huge number> × 10k requests (64 concurrent) — tests decode throughput under load ([source](../../../../../../inference_bench/benchmarks/long_output.py))
+> 1 × <huge number> × 1k requests (64 concurrent) — tests decode throughput under load ([source](../../../../../../inference_bench/benchmarks/long_output.py))
 
 | Metric                    |      vllm |   sglang | torchinferno |
 | :------------------------ | --------: | -------: | -----------: |
