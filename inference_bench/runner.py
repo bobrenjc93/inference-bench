@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+import gc
 import time
 
 from .benchmarks import get_benchmark
 from .config import Config
 from .providers import get_provider
 from .results import ProviderResults, RunResults
+
+
+def _free_gpu_memory() -> None:
+    try:
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
+    except ImportError:
+        pass
+    gc.collect()
 
 
 def run_all(
@@ -65,6 +77,8 @@ def run_all(
             print(f"[{provider_name}] Server error: {exc}")
         finally:
             provider.stop_server()
+            _free_gpu_memory()
+            time.sleep(5)
 
         results.providers[provider_name] = pr
 

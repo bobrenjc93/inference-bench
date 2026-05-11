@@ -144,7 +144,8 @@ class Provider(ABC):
         except (ProcessLookupError, subprocess.TimeoutExpired):
             try:
                 os.killpg(os.getpgid(self._server_process.pid), signal.SIGKILL)
-            except ProcessLookupError:
+                self._server_process.wait(timeout=10)
+            except (ProcessLookupError, subprocess.TimeoutExpired):
                 pass
         self._server_process = None
         if hasattr(self, "_log_file") and self._log_file:
