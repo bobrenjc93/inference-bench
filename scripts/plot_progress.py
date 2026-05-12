@@ -160,6 +160,66 @@ def plot_build_times_over_time(plot_dir: Path, runs: list[dict]) -> Path | None:
     return path
 
 
+def plot_cross_benchmark_averages(
+    plot_dir: Path,
+    runs: list[dict],
+) -> int:
+    """Plot cross-benchmark average for each metric over time."""
+    avg_dir = plot_dir / "cross_benchmark_averages"
+    avg_dir.mkdir(parents=True, exist_ok=True)
+    generated = 0
+
+    for metric_key, metric_label in TRACKED_METRICS:
+        providers_data: dict[str, list[tuple[datetime, float]]] = {}
+
+        for run in runs:
+            ts = parse_run_time(run)
+            for pname, pdata in run["providers"].items():
+                vals = []
+                for bdata in pdata["benchmarks"].values():
+                    metrics = bdata.get("metrics", {})
+                    if metric_key in metrics:
+                        val = metrics[metric_key]
+                        if val == 0 and metric_key == "tpot_median_ms":
+                            continue
+                        vals.append(val)
+                if vals:
+                    avg = sum(vals) / len(vals)
+                    providers_data.setdefault(pname, []).append((ts, avg))
+
+        if not providers_data:
+            continue
+
+        fig, ax = plt.subplots(figsize=(9, 5))
+
+        for pname, points in sorted(providers_data.items()):
+            times, values = zip(*points)
+            color = PROVIDER_COLORS.get(pname)
+            marker = PROVIDER_MARKERS.get(pname, "o")
+            ax.plot(
+                times, values,
+                label=pname, color=color, marker=marker,
+                linewidth=2, markersize=7,
+            )
+
+        ax.set_title(f"Cross-Benchmark Avg — {metric_label}", fontsize=14)
+        ax.set_ylabel(metric_label, fontsize=12)
+        ax.set_xlabel("Run", fontsize=12)
+        ax.legend(fontsize=11)
+        ax.grid(True, alpha=0.3)
+
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M"))
+        fig.autofmt_xdate(rotation=30)
+        fig.tight_layout()
+
+        path = avg_dir / f"{metric_key}.png"
+        fig.savefig(path, dpi=150)
+        plt.close(fig)
+        generated += 1
+
+    return generated
+
+
 def main(model_dir: str) -> None:
     model_path = Path(model_dir)
     runs = load_all_runs(model_path)
@@ -186,6 +246,7 @@ def main(model_dir: str) -> None:
                 generated += 1
 
     plot_build_times_over_time(plot_dir, runs)
+    generated += plot_cross_benchmark_averages(plot_dir, runs)
 
     print(f"Generated {generated} progress charts from {len(runs)} runs")
     print(f"Progress plots saved to {plot_dir}/")
