@@ -64,8 +64,13 @@ def _pick_winner(metric: str, values: dict[str, float]) -> str | None:
     if len(values) < 2:
         return None
     if metric in HIGHER_IS_BETTER:
-        return max(values, key=lambda k: values[k])
-    return min(values, key=lambda k: values[k])
+        best = max(values.values())
+    else:
+        best = min(values.values())
+    tied = [k for k, v in values.items() if v == best]
+    if len(tied) > 1:
+        return None
+    return tied[0]
 
 
 def _fmt(metric: str, value: float) -> str:
