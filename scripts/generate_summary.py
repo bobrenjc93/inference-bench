@@ -180,21 +180,23 @@ def generate(results_json: str | Path) -> str:
     for bn in benchmark_names:
         row = [bn]
         best_count = max(wins_by_bench[bn].values())
+        num_with_best = sum(1 for v in wins_by_bench[bn].values() if v == best_count)
         for pn in provider_names:
             w = wins_by_bench[bn][pn]
             total_wins[pn] += w
             cell = f"{w}/{len(SCORABLE_METRICS)}"
-            if w == best_count and w > 0:
+            if w == best_count and w > 0 and num_with_best == 1:
                 cell = _bold(cell)
             row.append(cell)
         rows.append(row)
 
     best_total = max(total_wins.values())
+    num_with_best_total = sum(1 for v in total_wins.values() if v == best_total)
     total_row = ["**Total**"]
     for pn in provider_names:
         t = total_wins[pn]
         cell = f"{t}/{len(SCORABLE_METRICS) * len(benchmark_names)}"
-        if t == best_total:
+        if t == best_total and num_with_best_total == 1:
             cell = _bold(cell)
         total_row.append(cell)
     rows.append(total_row)
