@@ -18,6 +18,7 @@ class ProviderResults:
     build_time_s: float = 0.0
     commit_hash: str = ""
     benchmarks: dict[str, BenchmarkResult] = field(default_factory=dict)
+    errors: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -40,7 +41,7 @@ class RunResults:
             "providers": {},
         }
         for pname, pr in self.providers.items():
-            data["providers"][pname] = {
+            prov_data: dict = {
                 "build_time_s": pr.build_time_s,
                 "commit_hash": pr.commit_hash,
                 "benchmarks": {
@@ -63,6 +64,9 @@ class RunResults:
                     for bname, br in pr.benchmarks.items()
                 },
             }
+            if pr.errors:
+                prov_data["errors"] = pr.errors
+            data["providers"][pname] = prov_data
 
         with open(path, "w") as f:
             json.dump(data, f, indent=2)

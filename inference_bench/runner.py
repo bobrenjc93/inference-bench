@@ -71,9 +71,11 @@ def run_all(
                     bench_result = benchmark.run(provider.api_base, config.model)
                     pr.benchmarks[bench_name] = bench_result
                 except Exception as exc:
+                    pr.errors[bench_name] = str(exc)
                     print(f"--- {bench_name} FAILED: {exc} ---")
 
         except Exception as exc:
+            pr.errors["_server"] = str(exc)
             print(f"[{provider_name}] Server error: {exc}")
         finally:
             provider.stop_server()

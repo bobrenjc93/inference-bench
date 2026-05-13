@@ -276,6 +276,20 @@ def generate(results_json: str | Path) -> str:
         lines.append(_md_table(["Metric"] + provider_names, rows))
         lines.append("")
 
+        # Show errors for providers that failed this benchmark
+        for pn in provider_names:
+            errors = providers_data[pn].get("errors", {})
+            if bn in errors and bn not in providers_data[pn].get("benchmarks", {}):
+                lines.append(
+                    f"> **{pn} error:** `{errors[bn]}`"
+                )
+                lines.append("")
+            elif bn not in providers_data[pn].get("benchmarks", {}) and "_server" in errors:
+                lines.append(
+                    f"> **{pn} error:** `{errors['_server']}`"
+                )
+                lines.append("")
+
     # -- Cross-benchmark averages --
     lines.append("## Cross-Benchmark Averages")
     lines.append("")
