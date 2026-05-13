@@ -3,8 +3,8 @@ set -euo pipefail
 trap '' PIPE
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-HOURS=8
-TIMEOUT=28800
+HOURS=2
+TIMEOUT=7200
 mkdir -p "$PROJECT_DIR/logs"
 LOGFILE="$PROJECT_DIR/logs/benchmark_$(date +%Y%m%d_%H%M%S).log"
 
