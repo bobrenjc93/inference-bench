@@ -1,0 +1,12 @@
+model,meta-llama/Meta-Llama-3.1-70B-Instruct
+tensor_parallel_size,8
+timestamp,2026-05-23T14:03:02.397104
+
+Build Times
+provider,build_time_s
+torchinferno,103.9
+vllm,1179.6
+sglang,185.3
+
+Per-Request Raw Data
+provider,benchmark,request_idx,ttft_ms,tpot_ms,e2e_latency_ms,output_tokens,throughput_tps,correct
