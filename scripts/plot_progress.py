@@ -40,6 +40,9 @@ TRACKED_METRICS = [
 ]
 
 
+EXPECTED_PROVIDERS = {"torchinferno", "vllm", "sglang"}
+
+
 def load_all_runs(model_dir: Path) -> list[dict]:
     runs = []
     runs_dir = model_dir / "runs"
@@ -51,6 +54,10 @@ def load_all_runs(model_dir: Path) -> list[dict]:
             continue
         with open(json_path) as f:
             data = json.load(f)
+        # Skip incomplete runs where the reservation expired mid-build
+        # and only a subset of providers finished.
+        if set(data.get("providers", {}).keys()) < EXPECTED_PROVIDERS:
+            continue
         data["_run_dir"] = str(run_dir.name)
         runs.append(data)
     return runs
