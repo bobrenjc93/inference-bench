@@ -1,0 +1,16 @@
+{
+  "model": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+  "tensor_parallel_size": 8,
+  "hardware": "8xH100",
+  "timestamp": "2026-05-31T21:41:50.904286",
+  "providers": {
+    "torchinferno": {
+      "build_time_s": 7.58763575553894,
+      "commit_hash": "28e29830c32da0397d8c7b0675c6c8a43c4ec1f1",
+      "benchmarks": {},
+      "errors": {
+        "_server": "[torchinferno] Server did not become ready within 1800s"
+      }
+    }
+  }
+}
