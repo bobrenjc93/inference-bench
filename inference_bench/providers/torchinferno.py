@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 from . import register
 from .base import Provider
 
@@ -8,6 +11,18 @@ from .base import Provider
 class TorchInfernoProvider(Provider):
     name = "torchinferno"
     repo_url = "https://github.com/bobrenjc93/TorchInferno.git"
+
+    def __init__(self, build_dir: str = "./builds"):
+        super().__init__(build_dir=build_dir)
+        local = os.environ.get("TORCHINFERNO_LOCAL_REPO")
+        if local:
+            self.repo_dir = Path(local).resolve()
+            self.venv_dir = self.repo_dir / "venv"
+
+    def clone(self) -> None:
+        if os.environ.get("TORCHINFERNO_LOCAL_REPO"):
+            return
+        super().clone()
 
     def _create_venv(self) -> None:
         import subprocess, sys
