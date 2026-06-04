@@ -11,6 +11,11 @@ LOGFILE="$PROJECT_DIR/logs/benchmark_$(date +%Y%m%d_%H%M%S).log"
 echo "Logging to $LOGFILE"
 
 {
+echo "=== $(date) Upgrading gpu-dev ==="
+HTTPS_PROXY=http://fwdproxy:8080 \
+  "$(dirname "$(command -v gpu-dev)")"/pip3 install \
+  --quiet --upgrade gpu-dev 2>&1 || true
+
 echo "=== $(date) Cleaning builds/ ==="
 rm -rf "$PROJECT_DIR/builds"
 
@@ -22,14 +27,34 @@ trap 'rm -f "$PROJECT_DIR/.hf_token"' EXIT
 echo "=== $(date) Submitting benchmark job to 8xH100 (timeout=${TIMEOUT}s) ==="
 } >> "$LOGFILE" 2>&1
 
+# gpu-dev rsyncs the entire --runtime directory with no exclude support.
+# .git/ (1.4GB) and results/ (2GB+) were breaking the SSH tunnel during
+# upload. Stage only the files the remote needs (~600KB) in a temp dir.
+STAGE_DIR="$(mktemp -d)"
+trap 'rm -rf "$STAGE_DIR"; rm -f "$PROJECT_DIR/.hf_token"' EXIT
+rsync -a \
+  --exclude='.git' \
+  --exclude='results' \
+  --exclude='logs' \
+  --exclude='builds' \
+  --exclude='.venv' \
+  --exclude='__pycache__' \
+  "$PROJECT_DIR/" "$STAGE_DIR/"
+
+set +e
 timeout "$TIMEOUT" gpu-dev submit \
   --gpu-type h100 \
   --gpus 8 \
   --hours "$HOURS" \
-  --runtime "$PROJECT_DIR" \
+  --runtime "$STAGE_DIR" \
   -- bash _remote_benchmark.sh \
   >> "$LOGFILE" 2>&1
 GPU_EXIT=$?
+set -e
+
+if [ -d "$STAGE_DIR/results" ]; then
+    cp -a "$STAGE_DIR/results/." "$PROJECT_DIR/results/"
+fi
 
 {
 if [ "$GPU_EXIT" -eq 124 ]; then
@@ -44,7 +69,11 @@ fi
 
 echo "=== $(date) Job complete, results synced back ==="
 
+echo "=== $(date) Regenerating progress plots locally ==="
 cd "$PROJECT_DIR"
+PYTHONPATH=. python3 scripts/plot_progress.py \
+  results/v1/meta-llama--Meta-Llama-3.1-70B-Instruct/8xH100 2>&1 || true
+
 (
     flock -w 300 9 || { echo "=== $(date) Could not acquire git lock ==="; exit 1; }
     git add results/
