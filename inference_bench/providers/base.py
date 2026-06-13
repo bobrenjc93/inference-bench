@@ -107,14 +107,14 @@ class Provider(ABC):
     def _wait_for_health(self, timeout: int) -> None:
         self._log(f"[{self.name}] Waiting for server to be ready (timeout={timeout}s)...")
         start = time.time()
+        last_health_error = ""
         while time.time() - start < timeout:
-            try:
-                resp = httpx.get(f"http://localhost:{self._port}/v1/models", timeout=5)
-                if resp.status_code == 200:
-                    print(f"[{self.name}] Server ready in {time.time() - start:.1f}s")
-                    return
-            except (httpx.ConnectError, httpx.ReadTimeout, httpx.RemoteProtocolError):
-                pass
+            ready, health_error = self._check_health_once()
+            if ready:
+                print(f"[{self.name}] Server ready in {time.time() - start:.1f}s")
+                return
+            if health_error:
+                last_health_error = health_error
 
             if self._server_process and self._server_process.poll() is not None:
                 log_tail = self._server_log_tail()
@@ -123,10 +123,28 @@ class Provider(ABC):
                     f"{self._server_process.returncode}.\nLog tail:\n{log_tail}"
                 )
             time.sleep(5)
+        ready, health_error = self._check_health_once()
+        if ready:
+            print(f"[{self.name}] Server ready in {time.time() - start:.1f}s")
+            return
+        if health_error:
+            last_health_error = health_error
         log_tail = self._server_log_tail()
+        health_detail = f"Last health check: {last_health_error}\n" if last_health_error else ""
         raise TimeoutError(
-            f"[{self.name}] Server did not become ready within {timeout}s.\nLog tail:\n{log_tail}"
+            f"[{self.name}] Server did not become ready within {timeout}s.\n"
+            f"{health_detail}Log tail:\n{log_tail}"
         )
+
+    def _check_health_once(self) -> tuple[bool, str]:
+        try:
+            resp = httpx.get(f"http://localhost:{self._port}/v1/models", timeout=5)
+            if resp.status_code == 200:
+                return True, ""
+            body = resp.text.replace("\n", " ")[:300]
+            return False, f"HTTP {resp.status_code}: {body}"
+        except httpx.HTTPError as exc:
+            return False, f"{exc.__class__.__name__}: {exc}"
 
     def _server_log_tail(self, max_chars: int = 3000) -> str:
         try:
