@@ -117,21 +117,27 @@ class Provider(ABC):
                 pass
 
             if self._server_process and self._server_process.poll() is not None:
-                self._log_file.flush()
-                log_tail = ""
-                try:
-                    with open(self._log_path) as f:
-                        log_tail = f.read()[-3000:]
-                except Exception:
-                    pass
+                log_tail = self._server_log_tail()
                 raise RuntimeError(
                     f"[{self.name}] Server process exited with code "
                     f"{self._server_process.returncode}.\nLog tail:\n{log_tail}"
                 )
             time.sleep(5)
+        log_tail = self._server_log_tail()
         raise TimeoutError(
-            f"[{self.name}] Server did not become ready within {timeout}s"
+            f"[{self.name}] Server did not become ready within {timeout}s.\nLog tail:\n{log_tail}"
         )
+
+    def _server_log_tail(self, max_chars: int = 3000) -> str:
+        try:
+            self._log_file.flush()
+        except Exception:
+            pass
+        try:
+            with open(self._log_path) as f:
+                return f.read()[-max_chars:]
+        except Exception:
+            return ""
 
     def stop_server(self) -> None:
         if self._server_process is None:
