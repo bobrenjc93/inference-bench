@@ -90,6 +90,7 @@ class Provider(ABC):
         env["PATH"] = str(self.venv_dir / "bin") + ":" + env.get("PATH", "")
 
         self._log_path = self.build_dir / f"{self.name}_server.log"
+        self._log_path.parent.mkdir(parents=True, exist_ok=True)
         self._log_file = open(self._log_path, "w")
 
         self._log(f"[{self.name}] Starting server: {' '.join(cmd)}")
