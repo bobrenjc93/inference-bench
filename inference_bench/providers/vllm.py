@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 
 from . import register
-from .base import Provider
+from .base import Provider, _env_float
 
 
 @register("vllm")
@@ -53,10 +53,21 @@ class VllmProvider(Provider):
         metrics_py.write_text(text.replace(old, new))
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
-        return [
+        cmd = [
             self.venv_python, "-m", "vllm.entrypoints.openai.api_server",
             "--model", model,
             "--tensor-parallel-size", str(tp),
             "--port", str(port),
             "--trust-remote-code",
         ]
+        gpu_memory_utilization = os.environ.get("INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION")
+        if gpu_memory_utilization:
+            cmd.extend(["--gpu-memory-utilization", gpu_memory_utilization])
+        return cmd
+
+    def _gpu_memory_wait_fraction(self) -> float | None:
+        if "INFERENCE_BENCH_VLLM_MIN_GPU_FREE_FRACTION" in os.environ:
+            return _env_float("INFERENCE_BENCH_VLLM_MIN_GPU_FREE_FRACTION", 0.92, minimum=0.0)
+        if "INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION" in os.environ:
+            return _env_float("INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION", 0.92, minimum=0.0)
+        return _env_float("INFERENCE_BENCH_GPU_MEMORY_FREE_FRACTION", 0.92, minimum=0.0)

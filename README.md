@@ -147,6 +147,22 @@ python -m inference_bench \
   --hardware 8xH100
 ```
 
+### GPU memory preflight
+
+Before starting vLLM, inference-bench waits until the visible GPUs have enough
+free memory for vLLM's startup allocation. This prevents a provider from failing
+late because a previous server or unrelated process still owns GPU memory.
+
+Useful environment variables:
+
+```bash
+INFERENCE_BENCH_GPU_MEMORY_WAIT=0              # disable the preflight
+INFERENCE_BENCH_GPU_MEMORY_WAIT_TIMEOUT_S=900  # maximum wait
+INFERENCE_BENCH_GPU_MEMORY_WAIT_POLL_S=10      # poll interval
+INFERENCE_BENCH_VLLM_MIN_GPU_FREE_FRACTION=0.92
+INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION=0.90
+```
+
 ### Single provider
 
 ```bash

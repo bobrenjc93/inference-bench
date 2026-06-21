@@ -12,6 +12,34 @@ from pathlib import Path
 import httpx
 
 
+def _env_float(name: str, default: float, *, minimum: float | None = None) -> float:
+    raw = os.environ.get(name)
+    if raw is None or raw == "":
+        return default
+    try:
+        value = float(raw)
+    except ValueError:
+        return default
+    if minimum is not None:
+        value = max(minimum, value)
+    return value
+
+
+def _env_flag(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() not in {"0", "false", "no", "off"}
+
+
+def _visible_gpu_tokens() -> list[str] | None:
+    raw = os.environ.get("CUDA_VISIBLE_DEVICES")
+    if raw is None or raw.strip() == "":
+        return None
+    tokens = [part.strip() for part in raw.split(",") if part.strip()]
+    return tokens or None
+
+
 class Provider(ABC):
     name: str
     repo_url: str
@@ -83,8 +111,12 @@ class Provider(ABC):
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         ...
 
+    def _gpu_memory_wait_fraction(self) -> float | None:
+        return None
+
     def start_server(self, model: str, tp: int, port: int, timeout: int = 600) -> None:
         self._port = port
+        self._wait_for_gpu_memory_ready(tp)
         cmd = self._server_cmd(model, tp, port)
         env = os.environ.copy()
         env["PATH"] = str(self.venv_dir / "bin") + ":" + env.get("PATH", "")
@@ -104,6 +136,123 @@ class Provider(ABC):
         )
 
         self._wait_for_health(timeout)
+
+    def _wait_for_gpu_memory_ready(self, tp: int) -> None:
+        fraction = self._gpu_memory_wait_fraction()
+        if fraction is None or fraction <= 0.0:
+            return
+        if not _env_flag("INFERENCE_BENCH_GPU_MEMORY_WAIT", True):
+            return
+        timeout_s = _env_float("INFERENCE_BENCH_GPU_MEMORY_WAIT_TIMEOUT_S", 900.0, minimum=0.0)
+        poll_s = _env_float("INFERENCE_BENCH_GPU_MEMORY_WAIT_POLL_S", 10.0, minimum=1.0)
+        start = time.time()
+        last_detail = ""
+        printed_wait = False
+        while True:
+            ready, detail = self._gpu_memory_ready_once(tp=tp, required_fraction=fraction)
+            if ready:
+                if printed_wait:
+                    self._log(f"[{self.name}] GPU memory is ready")
+                return
+            last_detail = detail
+            elapsed = time.time() - start
+            if elapsed >= timeout_s:
+                raise TimeoutError(
+                    f"[{self.name}] GPUs did not reach required free memory "
+                    f"within {timeout_s:.0f}s.\n{last_detail}"
+                )
+            printed_wait = True
+            self._log(
+                f"[{self.name}] Waiting for GPU memory before server start "
+                f"({elapsed:.0f}/{timeout_s:.0f}s): {detail.splitlines()[0]}"
+            )
+            time.sleep(min(poll_s, max(0.0, timeout_s - elapsed)))
+
+    def _gpu_memory_ready_once(self, *, tp: int, required_fraction: float) -> tuple[bool, str]:
+        rows = self._query_gpu_memory()
+        if not rows:
+            return True, "nvidia-smi did not report GPUs; skipping GPU memory wait"
+        selected = self._select_gpu_rows(rows, tp)
+        if not selected:
+            return True, "no selected GPUs; skipping GPU memory wait"
+        apps = self._query_gpu_apps()
+        failures: list[str] = []
+        lines: list[str] = []
+        for row in selected:
+            required_mib = int(row["total_mib"] * required_fraction)
+            ok = row["free_mib"] >= required_mib
+            line = (
+                f"gpu={row['index']} free={row['free_mib'] / 1024:.1f}GiB "
+                f"required={required_mib / 1024:.1f}GiB "
+                f"total={row['total_mib'] / 1024:.1f}GiB"
+            )
+            lines.append(line)
+            if not ok:
+                failures.append(line)
+        if failures and apps:
+            lines.append("compute processes:")
+            lines.extend(f"  {app}" for app in apps)
+        return not failures, "\n".join(lines)
+
+    @staticmethod
+    def _query_gpu_memory() -> list[dict[str, int | str]]:
+        cmd = [
+            "nvidia-smi",
+            "--query-gpu=index,uuid,memory.total,memory.free",
+            "--format=csv,noheader,nounits",
+        ]
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        except FileNotFoundError:
+            return []
+        if result.returncode != 0:
+            return []
+        rows: list[dict[str, int | str]] = []
+        for line in result.stdout.splitlines():
+            parts = [part.strip() for part in line.split(",")]
+            if len(parts) != 4:
+                continue
+            try:
+                rows.append(
+                    {
+                        "index": int(parts[0]),
+                        "uuid": parts[1],
+                        "total_mib": int(parts[2]),
+                        "free_mib": int(parts[3]),
+                    }
+                )
+            except ValueError:
+                continue
+        return rows
+
+    @staticmethod
+    def _query_gpu_apps() -> list[str]:
+        cmd = [
+            "nvidia-smi",
+            "--query-compute-apps=pid,process_name,gpu_uuid,used_memory",
+            "--format=csv,noheader,nounits",
+        ]
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        except FileNotFoundError:
+            return []
+        if result.returncode != 0:
+            return []
+        return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+    @staticmethod
+    def _select_gpu_rows(rows: list[dict[str, int | str]], tp: int) -> list[dict[str, int | str]]:
+        visible = _visible_gpu_tokens()
+        if visible is None:
+            return rows[: max(1, int(tp))]
+        by_index = {str(row["index"]): row for row in rows}
+        by_uuid = {str(row["uuid"]): row for row in rows}
+        selected: list[dict[str, int | str]] = []
+        for token in visible:
+            row = by_index.get(token) or by_uuid.get(token)
+            if row is not None:
+                selected.append(row)
+        return selected[: max(1, int(tp))]
 
     def _wait_for_health(self, timeout: int) -> None:
         self._log(f"[{self.name}] Waiting for server to be ready (timeout={timeout}s)...")
