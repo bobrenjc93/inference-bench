@@ -29,6 +29,8 @@ class VllmProvider(Provider):
             os.environ.get("INFERENCE_BENCH_VLLM_MAX_JOBS", "8"),
         )
         self._configure_cuda_arch_list()
+        if not _env_flag("VLLM_USE_PRECOMPILED", True):
+            self._configure_source_build_env()
         try:
             self._pip_install("-e", ".", cwd=self.repo_dir)
         except subprocess.CalledProcessError:
@@ -40,11 +42,13 @@ class VllmProvider(Provider):
                     raise
                 self._log("[vllm] Precompiled wheel install failed; retrying with VLLM_USE_PRECOMPILED=0")
                 os.environ["VLLM_USE_PRECOMPILED"] = "0"
+                self._configure_source_build_env()
                 self._pip_install_source_with_retry()
                 return
             self._pip_install_source_with_retry()
 
     def _pip_install_source_with_retry(self) -> None:
+        self._configure_source_build_env()
         try:
             self._pip_install("-e", ".", cwd=self.repo_dir)
         except subprocess.CalledProcessError:
@@ -52,6 +56,13 @@ class VllmProvider(Provider):
                 raise
             self._configure_conservative_source_build_retry()
             self._pip_install("-e", ".", cwd=self.repo_dir)
+
+    def _configure_source_build_env(self) -> None:
+        if "CMAKE_BUILD_TYPE" not in os.environ:
+            os.environ["CMAKE_BUILD_TYPE"] = os.environ.get(
+                "INFERENCE_BENCH_VLLM_SOURCE_CMAKE_BUILD_TYPE",
+                "Release",
+            )
 
     def _configure_conservative_source_build_retry(self) -> None:
         max_jobs = os.environ.get("INFERENCE_BENCH_VLLM_SOURCE_RETRY_MAX_JOBS", "1")
