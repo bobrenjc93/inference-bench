@@ -233,7 +233,10 @@ class Provider(ABC):
         if failures and apps:
             lines.append("compute processes:")
             lines.extend(f"  {app}" for app in apps)
-        return not failures, "\n".join(lines)
+        if failures:
+            detail_lines = failures + [line for line in lines if line not in failures]
+            return False, "\n".join(detail_lines)
+        return True, "\n".join(lines)
 
     @staticmethod
     def _query_gpu_memory() -> list[dict[str, int | str]]:
