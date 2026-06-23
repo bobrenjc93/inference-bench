@@ -1,0 +1,107 @@
+from __future__ import annotations
+
+import os
+import subprocess
+import unittest
+from unittest import mock
+
+from inference_bench.providers.vllm import VllmProvider
+
+
+class VllmProviderTest(unittest.TestCase):
+    def test_precompiled_failure_retries_nightly_before_source(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        install_envs: list[dict[str, str]] = []
+
+        def fake_pip_install(*args, cwd=None):  # noqa: ANN001
+            del cwd
+            if args == ("--upgrade", "pip"):
+                return None
+            install_envs.append(
+                {
+                    "VLLM_USE_PRECOMPILED": os.environ.get("VLLM_USE_PRECOMPILED", ""),
+                    "VLLM_PRECOMPILED_WHEEL_COMMIT": os.environ.get(
+                        "VLLM_PRECOMPILED_WHEEL_COMMIT", ""
+                    ),
+                    "CMAKE_BUILD_TYPE": os.environ.get("CMAKE_BUILD_TYPE", ""),
+                }
+            )
+            if len(install_envs) == 1:
+                raise subprocess.CalledProcessError(1, ["pip", "install"])
+
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(provider, "_create_venv", return_value=None),
+            mock.patch.object(provider, "_disable_fastapi_metrics_middleware", return_value=None),
+            mock.patch.object(provider, "_configure_cuda_arch_list", return_value=None),
+            mock.patch.object(provider, "_pip_install", side_effect=fake_pip_install),
+        ):
+            provider.build()
+
+        self.assertEqual(
+            install_envs,
+            [
+                {
+                    "VLLM_USE_PRECOMPILED": "1",
+                    "VLLM_PRECOMPILED_WHEEL_COMMIT": "",
+                    "CMAKE_BUILD_TYPE": "",
+                },
+                {
+                    "VLLM_USE_PRECOMPILED": "1",
+                    "VLLM_PRECOMPILED_WHEEL_COMMIT": "nightly",
+                    "CMAKE_BUILD_TYPE": "",
+                },
+            ],
+        )
+
+    def test_explicit_precompiled_commit_skips_nightly_retry(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        install_envs: list[dict[str, str]] = []
+
+        def fake_pip_install(*args, cwd=None):  # noqa: ANN001
+            del cwd
+            if args == ("--upgrade", "pip"):
+                return None
+            install_envs.append(
+                {
+                    "VLLM_USE_PRECOMPILED": os.environ.get("VLLM_USE_PRECOMPILED", ""),
+                    "VLLM_PRECOMPILED_WHEEL_COMMIT": os.environ.get(
+                        "VLLM_PRECOMPILED_WHEEL_COMMIT", ""
+                    ),
+                }
+            )
+            if len(install_envs) == 1:
+                raise subprocess.CalledProcessError(1, ["pip", "install"])
+
+        with (
+            mock.patch.dict(
+                os.environ,
+                {"INFERENCE_BENCH_VLLM_PRECOMPILED_WHEEL_COMMIT": "abc123"},
+                clear=True,
+            ),
+            mock.patch.object(provider, "_create_venv", return_value=None),
+            mock.patch.object(provider, "_disable_fastapi_metrics_middleware", return_value=None),
+            mock.patch.object(provider, "_configure_cuda_arch_list", return_value=None),
+            mock.patch.object(provider, "_pip_install", side_effect=fake_pip_install),
+            mock.patch.object(provider, "_configure_source_build_env", return_value=None) as source_env,
+        ):
+            provider.build()
+
+        self.assertEqual(
+            install_envs,
+            [
+                {
+                    "VLLM_USE_PRECOMPILED": "1",
+                    "VLLM_PRECOMPILED_WHEEL_COMMIT": "abc123",
+                },
+                {
+                    "VLLM_USE_PRECOMPILED": "0",
+                    "VLLM_PRECOMPILED_WHEEL_COMMIT": "abc123",
+                },
+            ],
+        )
+        self.assertGreaterEqual(source_env.call_count, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

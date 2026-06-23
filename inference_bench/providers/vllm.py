@@ -20,10 +20,19 @@ class VllmProvider(Provider):
             "VLLM_USE_PRECOMPILED" in os.environ
             or "INFERENCE_BENCH_VLLM_USE_PRECOMPILED" in os.environ
         )
+        precompiled_commit_explicit = (
+            "VLLM_PRECOMPILED_WHEEL_COMMIT" in os.environ
+            or "INFERENCE_BENCH_VLLM_PRECOMPILED_WHEEL_COMMIT" in os.environ
+        )
         os.environ.setdefault(
             "VLLM_USE_PRECOMPILED",
             os.environ.get("INFERENCE_BENCH_VLLM_USE_PRECOMPILED", "1"),
         )
+        if "INFERENCE_BENCH_VLLM_PRECOMPILED_WHEEL_COMMIT" in os.environ:
+            os.environ.setdefault(
+                "VLLM_PRECOMPILED_WHEEL_COMMIT",
+                os.environ["INFERENCE_BENCH_VLLM_PRECOMPILED_WHEEL_COMMIT"],
+            )
         os.environ.setdefault(
             "MAX_JOBS",
             os.environ.get("INFERENCE_BENCH_VLLM_MAX_JOBS", "8"),
@@ -40,6 +49,10 @@ class VllmProvider(Provider):
                     or not _env_flag("INFERENCE_BENCH_VLLM_FALLBACK_SOURCE_BUILD", True)
                 ):
                     raise
+                if self._try_precompiled_nightly_retry(
+                    precompiled_commit_explicit=precompiled_commit_explicit
+                ):
+                    return
                 self._log("[vllm] Precompiled wheel install failed; retrying with VLLM_USE_PRECOMPILED=0")
                 os.environ["VLLM_USE_PRECOMPILED"] = "0"
                 self._configure_source_build_env()
@@ -63,6 +76,28 @@ class VllmProvider(Provider):
                 "INFERENCE_BENCH_VLLM_SOURCE_CMAKE_BUILD_TYPE",
                 "Release",
             )
+
+    def _try_precompiled_nightly_retry(self, *, precompiled_commit_explicit: bool) -> bool:
+        if precompiled_commit_explicit:
+            return False
+        if not _env_flag("INFERENCE_BENCH_VLLM_FALLBACK_PRECOMPILED_NIGHTLY", True):
+            return False
+        retry_commit = os.environ.get(
+            "INFERENCE_BENCH_VLLM_FALLBACK_PRECOMPILED_WHEEL_COMMIT",
+            "nightly",
+        )
+        self._log(
+            "[vllm] Precompiled wheel install failed; retrying with "
+            f"VLLM_PRECOMPILED_WHEEL_COMMIT={retry_commit}"
+        )
+        os.environ["VLLM_USE_PRECOMPILED"] = "1"
+        os.environ["VLLM_PRECOMPILED_WHEEL_COMMIT"] = retry_commit
+        try:
+            self._pip_install("-e", ".", cwd=self.repo_dir)
+        except subprocess.CalledProcessError:
+            self._log("[vllm] Precompiled nightly wheel install failed; falling back to source build")
+            return False
+        return True
 
     def _configure_conservative_source_build_retry(self) -> None:
         max_jobs = os.environ.get("INFERENCE_BENCH_VLLM_SOURCE_RETRY_MAX_JOBS", "1")
