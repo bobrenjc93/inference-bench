@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import os
+import subprocess
 
 from . import register
-from .base import Provider, _env_float
+from .base import Provider, _env_flag, _env_float
 
 
 @register("sglang")
@@ -18,7 +19,22 @@ class SglangProvider(Provider):
     def build(self) -> None:
         self._create_venv()
         self._pip_install("--upgrade", "pip")
-        self._pip_install("-e", ".", cwd=self._python_dir)
+        try:
+            self._pip_install("-e", ".", cwd=self._python_dir)
+        except subprocess.CalledProcessError:
+            if not _env_flag("INFERENCE_BENCH_SGLANG_FALLBACK_BINARY_WHEEL", True):
+                raise
+            self._pip_install_binary_wheel()
+
+    def _pip_install_binary_wheel(self) -> None:
+        spec = os.environ.get("INFERENCE_BENCH_SGLANG_BINARY_WHEEL_SPEC", "").strip()
+        if not spec:
+            package = os.environ.get("INFERENCE_BENCH_SGLANG_BINARY_WHEEL_PACKAGE", "sglang")
+            package = package.strip() or "sglang"
+            version = os.environ.get("INFERENCE_BENCH_SGLANG_BINARY_WHEEL_VERSION", "").strip()
+            spec = f"{package}=={version}" if version else package
+        self._log(f"[sglang] Editable install failed; retrying with binary wheel {spec}")
+        self._pip_install("--only-binary=:all:", spec)
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         cmd = [
