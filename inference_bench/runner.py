@@ -1,12 +1,33 @@
 from __future__ import annotations
 
 import gc
+import socket
 import time
 
 from .benchmarks import get_benchmark
 from .config import Config
 from .providers import get_provider
 from .results import ProviderResults, RunResults
+
+
+def _port_can_bind(port: int) -> bool:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind(("0.0.0.0", int(port)))
+        return True
+    except OSError:
+        return False
+    finally:
+        sock.close()
+
+
+def _next_provider_port(requested_port: int, used_ports: set[int]) -> int:
+    port = max(1, int(requested_port))
+    while port in used_ports or not _port_can_bind(port):
+        port += 1
+    used_ports.add(port)
+    return port
 
 
 def _free_gpu_memory() -> None:
@@ -33,6 +54,7 @@ def run_all(
         hardware=config.hardware,
     )
     build_times = build_times or {}
+    used_ports: set[int] = set()
 
     for provider_index, provider_name in enumerate(config.providers):
         print(f"\n[{provider_name}] Starting...")
@@ -40,7 +62,10 @@ def run_all(
         provider = get_provider(provider_name, build_dir=config.build_dir)
         provider.verbose = verbose
         pr = ProviderResults(provider=provider_name)
-        provider_port = config.server_port + provider_index
+        requested_port = config.server_port + provider_index
+        provider_port = _next_provider_port(requested_port, used_ports)
+        if provider_port != requested_port:
+            print(f"[{provider_name}] Port {requested_port} unavailable; using {provider_port}")
 
         if skip_build:
             pr.build_time_s = build_times.get(provider_name, 0.0)
