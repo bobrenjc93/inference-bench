@@ -32,15 +32,43 @@ class VllmProvider(Provider):
         try:
             self._pip_install("-e", ".", cwd=self.repo_dir)
         except subprocess.CalledProcessError:
-            if (
-                precompiled_explicit
-                or not _env_flag("INFERENCE_BENCH_VLLM_FALLBACK_SOURCE_BUILD", True)
-                or not _env_flag("VLLM_USE_PRECOMPILED", True)
-            ):
-                raise
-            self._log("[vllm] Precompiled wheel install failed; retrying with VLLM_USE_PRECOMPILED=0")
-            os.environ["VLLM_USE_PRECOMPILED"] = "0"
+            if _env_flag("VLLM_USE_PRECOMPILED", True):
+                if (
+                    precompiled_explicit
+                    or not _env_flag("INFERENCE_BENCH_VLLM_FALLBACK_SOURCE_BUILD", True)
+                ):
+                    raise
+                self._log("[vllm] Precompiled wheel install failed; retrying with VLLM_USE_PRECOMPILED=0")
+                os.environ["VLLM_USE_PRECOMPILED"] = "0"
+                self._pip_install_source_with_retry()
+                return
+            self._pip_install_source_with_retry()
+
+    def _pip_install_source_with_retry(self) -> None:
+        try:
             self._pip_install("-e", ".", cwd=self.repo_dir)
+        except subprocess.CalledProcessError:
+            if not _env_flag("INFERENCE_BENCH_VLLM_RETRY_CONSERVATIVE_SOURCE_BUILD", True):
+                raise
+            self._configure_conservative_source_build_retry()
+            self._pip_install("-e", ".", cwd=self.repo_dir)
+
+    def _configure_conservative_source_build_retry(self) -> None:
+        max_jobs = os.environ.get("INFERENCE_BENCH_VLLM_SOURCE_RETRY_MAX_JOBS", "1")
+        os.environ["MAX_JOBS"] = max_jobs
+        if "CMAKE_BUILD_TYPE" not in os.environ:
+            os.environ["CMAKE_BUILD_TYPE"] = os.environ.get(
+                "INFERENCE_BENCH_VLLM_SOURCE_RETRY_CMAKE_BUILD_TYPE",
+                "Release",
+            )
+        if _env_flag("INFERENCE_BENCH_VLLM_SOURCE_RETRY_DISABLE_SCCACHE", True):
+            os.environ.setdefault("VLLM_DISABLE_SCCACHE", "1")
+        self._log(
+            "[vllm] Source build failed; retrying with "
+            f"MAX_JOBS={os.environ.get('MAX_JOBS')} "
+            f"CMAKE_BUILD_TYPE={os.environ.get('CMAKE_BUILD_TYPE', '')} "
+            f"VLLM_DISABLE_SCCACHE={os.environ.get('VLLM_DISABLE_SCCACHE', '')}"
+        )
 
     def _configure_cuda_arch_list(self) -> None:
         if "TORCH_CUDA_ARCH_LIST" in os.environ:
