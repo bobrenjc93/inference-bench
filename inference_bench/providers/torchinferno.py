@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 from . import register
-from .base import Provider
+from .base import Provider, _env_float
 
 
 @register("torchinferno")
@@ -51,3 +51,12 @@ class TorchInfernoProvider(Provider):
             str(port),
             "--trust-remote-code",
         ]
+
+    def _gpu_memory_wait_fraction(self) -> float | None:
+        if "INFERENCE_BENCH_TORCHINFERNO_MIN_GPU_FREE_FRACTION" in os.environ:
+            return _env_float(
+                "INFERENCE_BENCH_TORCHINFERNO_MIN_GPU_FREE_FRACTION",
+                0.92,
+                minimum=0.0,
+            )
+        return _env_float("INFERENCE_BENCH_GPU_MEMORY_FREE_FRACTION", 0.92, minimum=0.0)
