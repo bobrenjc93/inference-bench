@@ -372,7 +372,45 @@ class Provider(ABC):
                 pids.add(int(line.strip()))
             except ValueError:
                 pass
+        pids.update(self._descendant_pids(pids))
         return pids
+
+    @staticmethod
+    def _descendant_pids(root_pids: set[int]) -> set[int]:
+        if not root_pids:
+            return set()
+        try:
+            result = subprocess.run(
+                ["ps", "-eo", "pid=,ppid="],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except FileNotFoundError:
+            return set()
+        if result.returncode != 0:
+            return set()
+        children_by_parent: dict[int, list[int]] = {}
+        for line in result.stdout.splitlines():
+            parts = line.split()
+            if len(parts) != 2:
+                continue
+            try:
+                pid = int(parts[0])
+                ppid = int(parts[1])
+            except ValueError:
+                continue
+            children_by_parent.setdefault(ppid, []).append(pid)
+        descendants: set[int] = set()
+        stack = list(root_pids)
+        while stack:
+            parent = stack.pop()
+            for child in children_by_parent.get(parent, []):
+                if child in root_pids or child in descendants:
+                    continue
+                descendants.add(child)
+                stack.append(child)
+        return descendants
 
     def _wait_for_health(self, timeout: int) -> None:
         self._log(f"[{self.name}] Waiting for server to be ready (timeout={timeout}s)...")

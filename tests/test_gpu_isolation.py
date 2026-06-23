@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
+import subprocess
 import time
+import types
 import unittest
 from unittest import mock
 
@@ -49,6 +51,29 @@ class GpuIsolationTest(unittest.TestCase):
             mock.patch.object(provider, "_server_process_group_pids", return_value={100, 101}),
         ):
             self.assertEqual(provider._external_gpu_apps(tp=2), ["202, external, gpu-1, 12000"])
+
+    def test_server_process_group_pids_includes_descendants(self) -> None:
+        provider = FakeProvider(build_dir="/tmp/inference-bench-test")
+        provider._server_process = types.SimpleNamespace(pid=100)
+
+        def fake_run(cmd, **kwargs):  # noqa: ANN001, ANN003
+            del kwargs
+            if cmd == ["pgrep", "-g", "999"]:
+                return subprocess.CompletedProcess(cmd, 0, stdout="100\n200\n", stderr="")
+            if cmd == ["ps", "-eo", "pid=,ppid="]:
+                return subprocess.CompletedProcess(
+                    cmd,
+                    0,
+                    stdout="100 1\n200 100\n201 200\n300 1\n",
+                    stderr="",
+                )
+            raise AssertionError(f"unexpected command: {cmd}")
+
+        with (
+            mock.patch("inference_bench.providers.base.os.getpgid", return_value=999),
+            mock.patch("inference_bench.providers.base.subprocess.run", side_effect=fake_run),
+        ):
+            self.assertEqual(provider._server_process_group_pids(), {100, 200, 201})
 
     def test_wait_for_gpu_isolation_returns_after_clean_poll(self) -> None:
         provider = FakeProvider(build_dir="/tmp/inference-bench-test")
