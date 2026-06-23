@@ -75,7 +75,7 @@ echo "=== Running full benchmark (clone + build + bench) ==="
 python -m inference_bench --port 8001 --hardware "$HARDWARE"
 
 echo "=== Preserving server logs, cleaning builds/ ==="
-LATEST_RUN_DIR="$(find results/v1 -path '*/runs/*' -type d 2>/dev/null | sort | tail -1)"
+LATEST_RUN_DIR="$(find results/v1 -name results.json -type f -printf '%h\n' 2>/dev/null | sort | tail -1)"
 if [ -n "$LATEST_RUN_DIR" ]; then
     mkdir -p "$LATEST_RUN_DIR/server_logs"
     cp builds/*_server.log "$LATEST_RUN_DIR/server_logs/" 2>/dev/null || true

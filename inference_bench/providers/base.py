@@ -454,7 +454,7 @@ class Provider(ABC):
         except httpx.HTTPError as exc:
             return False, f"{exc.__class__.__name__}: {exc}"
 
-    def _server_log_tail(self, max_chars: int = 3000) -> str:
+    def _server_log_tail(self, max_chars: int = 12000) -> str:
         try:
             self._log_file.flush()
         except Exception:
