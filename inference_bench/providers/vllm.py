@@ -4,7 +4,7 @@ import os
 import subprocess
 
 from . import register
-from .base import Provider, _env_flag, _env_float
+from .base import Provider, _env_flag, _env_float, _visible_gpu_tokens
 
 
 @register("vllm")
@@ -28,6 +28,7 @@ class VllmProvider(Provider):
             "MAX_JOBS",
             os.environ.get("INFERENCE_BENCH_VLLM_MAX_JOBS", "8"),
         )
+        self._configure_cuda_arch_list()
         try:
             self._pip_install("-e", ".", cwd=self.repo_dir)
         except subprocess.CalledProcessError:
@@ -40,6 +41,54 @@ class VllmProvider(Provider):
             self._log("[vllm] Precompiled wheel install failed; retrying with VLLM_USE_PRECOMPILED=0")
             os.environ["VLLM_USE_PRECOMPILED"] = "0"
             self._pip_install("-e", ".", cwd=self.repo_dir)
+
+    def _configure_cuda_arch_list(self) -> None:
+        if "TORCH_CUDA_ARCH_LIST" in os.environ:
+            return
+        configured = os.environ.get("INFERENCE_BENCH_VLLM_CUDA_ARCH_LIST") or os.environ.get(
+            "INFERENCE_BENCH_CUDA_ARCH_LIST"
+        )
+        if configured:
+            os.environ["TORCH_CUDA_ARCH_LIST"] = configured
+            return
+        detected = self._detect_cuda_arch_list()
+        if not detected:
+            return
+        os.environ["TORCH_CUDA_ARCH_LIST"] = detected
+        self._log(f"[vllm] Using TORCH_CUDA_ARCH_LIST={detected}")
+
+    def _detect_cuda_arch_list(self) -> str:
+        try:
+            result = subprocess.run(
+                [
+                    "nvidia-smi",
+                    "--query-gpu=index,uuid,compute_cap",
+                    "--format=csv,noheader,nounits",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except FileNotFoundError:
+            return ""
+        if result.returncode != 0:
+            return ""
+
+        visible = _visible_gpu_tokens()
+        rows: list[tuple[str, str, str]] = []
+        for line in result.stdout.splitlines():
+            parts = [part.strip() for part in line.split(",")]
+            if len(parts) != 3:
+                continue
+            index, uuid, compute_cap = parts
+            if visible is not None and index not in visible and uuid not in visible:
+                continue
+            if compute_cap:
+                rows.append((index, uuid, compute_cap))
+        if visible is not None and not rows:
+            return ""
+        archs = sorted({compute_cap for _index, _uuid, compute_cap in rows})
+        return ";".join(archs)
 
     def _disable_fastapi_metrics_middleware(self) -> None:
         metrics_py = self.repo_dir / "vllm" / "entrypoints" / "serve" / "instrumentator" / "metrics.py"
