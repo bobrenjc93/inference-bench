@@ -63,12 +63,25 @@ class VllmProvider(Provider):
             )
         if _env_flag("INFERENCE_BENCH_VLLM_SOURCE_RETRY_DISABLE_SCCACHE", True):
             os.environ.setdefault("VLLM_DISABLE_SCCACHE", "1")
+        if _env_flag("INFERENCE_BENCH_VLLM_SOURCE_RETRY_DISABLE_COMPILER_LAUNCHER", True):
+            self._append_cmake_args(
+                "-DCMAKE_C_COMPILER_LAUNCHER=",
+                "-DCMAKE_CXX_COMPILER_LAUNCHER=",
+                "-DCMAKE_CUDA_COMPILER_LAUNCHER=",
+                "-DCMAKE_HIP_COMPILER_LAUNCHER=",
+            )
         self._log(
             "[vllm] Source build failed; retrying with "
             f"MAX_JOBS={os.environ.get('MAX_JOBS')} "
             f"CMAKE_BUILD_TYPE={os.environ.get('CMAKE_BUILD_TYPE', '')} "
-            f"VLLM_DISABLE_SCCACHE={os.environ.get('VLLM_DISABLE_SCCACHE', '')}"
+            f"VLLM_DISABLE_SCCACHE={os.environ.get('VLLM_DISABLE_SCCACHE', '')} "
+            f"CMAKE_ARGS={os.environ.get('CMAKE_ARGS', '')}"
         )
+
+    def _append_cmake_args(self, *args: str) -> None:
+        existing = os.environ.get("CMAKE_ARGS", "").strip()
+        extra = " ".join(arg for arg in args if arg)
+        os.environ["CMAKE_ARGS"] = f"{existing} {extra}".strip() if existing else extra
 
     def _configure_cuda_arch_list(self) -> None:
         if "TORCH_CUDA_ARCH_LIST" in os.environ:
