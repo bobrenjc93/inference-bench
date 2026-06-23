@@ -65,10 +65,12 @@ def run_all(
 
             for bench_name in config.benchmarks:
                 try:
+                    provider.wait_for_gpu_isolation(config.tensor_parallel_size)
                     benchmark = get_benchmark(bench_name)
                     benchmark.debug = debug
                     benchmark.verbose = verbose
-                    bench_result = benchmark.run(provider.api_base, config.model)
+                    with provider.gpu_isolation_monitor(config.tensor_parallel_size):
+                        bench_result = benchmark.run(provider.api_base, config.model)
                     pr.benchmarks[bench_name] = bench_result
                 except Exception as exc:
                     pr.errors[bench_name] = str(exc)

@@ -5,6 +5,7 @@ import signal
 import socket
 import subprocess
 import sys
+import threading
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -113,6 +114,46 @@ class Provider(ABC):
 
     def _gpu_memory_wait_fraction(self) -> float | None:
         return None
+
+    def wait_for_gpu_isolation(self, tp: int) -> None:
+        if not _env_flag("INFERENCE_BENCH_GPU_ISOLATION_CHECK", True):
+            return
+        timeout_s = _env_float("INFERENCE_BENCH_GPU_ISOLATION_TIMEOUT_S", 900.0, minimum=0.0)
+        poll_s = _env_float("INFERENCE_BENCH_GPU_ISOLATION_POLL_S", 2.0, minimum=0.5)
+        clean_wait_s = _env_float("INFERENCE_BENCH_GPU_ISOLATION_CLEAN_WAIT_S", 5.0, minimum=0.0)
+        start = time.time()
+        clean_since: float | None = None
+        printed_wait = False
+        last_detail = ""
+        while True:
+            apps = self._external_gpu_apps(tp)
+            now = time.time()
+            if not apps:
+                if clean_since is None:
+                    clean_since = now
+                if now - clean_since >= clean_wait_s:
+                    if printed_wait:
+                        self._log(f"[{self.name}] GPU isolation is ready")
+                    return
+            else:
+                clean_since = None
+                last_detail = "\n".join(apps)
+            elapsed = now - start
+            if elapsed >= timeout_s:
+                raise TimeoutError(
+                    f"[{self.name}] External GPU processes did not clear "
+                    f"within {timeout_s:.0f}s.\n{last_detail}"
+                )
+            if apps:
+                printed_wait = True
+                self._log(
+                    f"[{self.name}] Waiting for GPU isolation "
+                    f"({elapsed:.0f}/{timeout_s:.0f}s): {apps[0]}"
+                )
+            time.sleep(min(poll_s, max(0.0, timeout_s - elapsed)))
+
+    def gpu_isolation_monitor(self, tp: int) -> "_GpuIsolationMonitor":
+        return _GpuIsolationMonitor(self, tp)
 
     def start_server(self, model: str, tp: int, port: int, timeout: int = 600) -> None:
         self._port = port
@@ -227,6 +268,10 @@ class Provider(ABC):
 
     @staticmethod
     def _query_gpu_apps() -> list[str]:
+        return [row["raw"] for row in Provider._query_gpu_app_rows()]
+
+    @staticmethod
+    def _query_gpu_app_rows() -> list[dict[str, int | str]]:
         cmd = [
             "nvidia-smi",
             "--query-compute-apps=pid,process_name,gpu_uuid,used_memory",
@@ -238,7 +283,33 @@ class Provider(ABC):
             return []
         if result.returncode != 0:
             return []
-        return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        rows: list[dict[str, int | str]] = []
+        for line in result.stdout.splitlines():
+            raw = line.strip()
+            if not raw:
+                continue
+            parts = [part.strip() for part in raw.split(",", 3)]
+            if len(parts) != 4:
+                rows.append({"raw": raw, "pid": -1, "process_name": "", "gpu_uuid": "", "used_memory_mib": -1})
+                continue
+            try:
+                pid = int(parts[0])
+            except ValueError:
+                pid = -1
+            try:
+                used_memory = int(parts[3])
+            except ValueError:
+                used_memory = -1
+            rows.append(
+                {
+                    "raw": raw,
+                    "pid": pid,
+                    "process_name": parts[1],
+                    "gpu_uuid": parts[2],
+                    "used_memory_mib": used_memory,
+                }
+            )
+        return rows
 
     @staticmethod
     def _select_gpu_rows(rows: list[dict[str, int | str]], tp: int) -> list[dict[str, int | str]]:
@@ -253,6 +324,52 @@ class Provider(ABC):
             if row is not None:
                 selected.append(row)
         return selected[: max(1, int(tp))]
+
+    def _external_gpu_apps(self, tp: int) -> list[str]:
+        rows = self._query_gpu_memory()
+        if not rows:
+            return []
+        selected = self._select_gpu_rows(rows, tp)
+        if not selected:
+            return []
+        selected_uuids = {str(row["uuid"]) for row in selected}
+        allowed_pids = self._server_process_group_pids()
+        external: list[str] = []
+        for app in self._query_gpu_app_rows():
+            if str(app.get("gpu_uuid", "")) not in selected_uuids:
+                continue
+            pid = int(app.get("pid", -1))
+            if pid in allowed_pids:
+                continue
+            external.append(str(app.get("raw", "")))
+        return external
+
+    def _server_process_group_pids(self) -> set[int]:
+        process = self._server_process
+        if process is None:
+            return set()
+        try:
+            pgid = os.getpgid(process.pid)
+        except ProcessLookupError:
+            return set()
+        pids = {int(process.pid)}
+        try:
+            result = subprocess.run(
+                ["pgrep", "-g", str(pgid)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except FileNotFoundError:
+            return pids
+        if result.returncode not in {0, 1}:
+            return pids
+        for line in result.stdout.splitlines():
+            try:
+                pids.add(int(line.strip()))
+            except ValueError:
+                pass
+        return pids
 
     def _wait_for_health(self, timeout: int) -> None:
         self._log(f"[{self.name}] Waiting for server to be ready (timeout={timeout}s)...")
@@ -351,3 +468,40 @@ class Provider(ABC):
             return False
         finally:
             sock.close()
+
+
+class _GpuIsolationMonitor:
+    def __init__(self, provider: Provider, tp: int):
+        self.provider = provider
+        self.tp = tp
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+        self._contaminating_apps: list[str] = []
+
+    def __enter__(self) -> "_GpuIsolationMonitor":
+        if not _env_flag("INFERENCE_BENCH_GPU_ISOLATION_CHECK", True):
+            return self
+        poll_s = _env_float("INFERENCE_BENCH_GPU_ISOLATION_MONITOR_POLL_S", 1.0, minimum=0.25)
+
+        def _run() -> None:
+            while not self._stop.wait(poll_s):
+                apps = self.provider._external_gpu_apps(self.tp)
+                if apps:
+                    self._contaminating_apps = apps
+                    self.provider._log(
+                        f"[{self.provider.name}] GPU isolation violation: {apps[0]}"
+                    )
+                    return
+
+        self._thread = threading.Thread(target=_run, daemon=True)
+        self._thread.start()
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> bool:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=2.0)
+        if exc_type is None and self._contaminating_apps:
+            detail = "\n".join(self._contaminating_apps)
+            raise RuntimeError(f"GPU isolation was violated during benchmark.\n{detail}")
+        return False

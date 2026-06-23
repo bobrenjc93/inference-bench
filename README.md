@@ -154,6 +154,10 @@ enough free memory for the provider's startup allocation. This prevents a
 provider from failing late because a previous server or unrelated process still
 owns GPU memory.
 
+After startup, inference-bench also waits for unrelated compute processes to
+leave the selected GPUs before each benchmark and marks a benchmark failed if a
+new unrelated GPU process appears while requests are running.
+
 Useful environment variables:
 
 ```bash
@@ -161,10 +165,15 @@ INFERENCE_BENCH_GPU_MEMORY_WAIT=0              # disable the preflight
 INFERENCE_BENCH_GPU_MEMORY_WAIT_TIMEOUT_S=900  # maximum wait
 INFERENCE_BENCH_GPU_MEMORY_WAIT_POLL_S=10      # poll interval
 INFERENCE_BENCH_GPU_MEMORY_FREE_FRACTION=0.90  # provider fallback threshold
+INFERENCE_BENCH_GPU_ISOLATION_CHECK=0          # disable pre-benchmark/monitor checks
+INFERENCE_BENCH_GPU_ISOLATION_TIMEOUT_S=900    # maximum isolation wait
+INFERENCE_BENCH_GPU_ISOLATION_POLL_S=2         # pre-benchmark poll interval
+INFERENCE_BENCH_GPU_ISOLATION_CLEAN_WAIT_S=5   # required clean window
 INFERENCE_BENCH_VLLM_MIN_GPU_FREE_FRACTION=0.92
 INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION=0.90
 INFERENCE_BENCH_SGLANG_MIN_GPU_FREE_FRACTION=0.85
 INFERENCE_BENCH_SGLANG_MEM_FRACTION_STATIC=0.85
+INFERENCE_BENCH_TORCHINFERNO_MIN_GPU_FREE_FRACTION=0.92
 ```
 
 ### Single provider
