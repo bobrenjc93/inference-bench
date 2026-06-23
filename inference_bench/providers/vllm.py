@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import json
 import os
+import platform
+import re
 import subprocess
+from urllib.parse import urljoin
+from urllib.request import urlopen
 
 from . import register
 from .base import Provider, _env_flag, _env_float, _visible_gpu_tokens
@@ -82,22 +87,111 @@ class VllmProvider(Provider):
             return False
         if not _env_flag("INFERENCE_BENCH_VLLM_FALLBACK_PRECOMPILED_NIGHTLY", True):
             return False
-        retry_commit = os.environ.get(
-            "INFERENCE_BENCH_VLLM_FALLBACK_PRECOMPILED_WHEEL_COMMIT",
-            "nightly",
-        )
+        wheel_location = os.environ.get(
+            "INFERENCE_BENCH_VLLM_FALLBACK_PRECOMPILED_WHEEL_LOCATION"
+        ) or self._resolve_precompiled_nightly_wheel_location()
+        if not wheel_location:
+            return False
         self._log(
             "[vllm] Precompiled wheel install failed; retrying with "
-            f"VLLM_PRECOMPILED_WHEEL_COMMIT={retry_commit}"
+            f"VLLM_PRECOMPILED_WHEEL_LOCATION={wheel_location}"
         )
         os.environ["VLLM_USE_PRECOMPILED"] = "1"
-        os.environ["VLLM_PRECOMPILED_WHEEL_COMMIT"] = retry_commit
+        os.environ.pop("VLLM_PRECOMPILED_WHEEL_COMMIT", None)
+        os.environ["VLLM_PRECOMPILED_WHEEL_LOCATION"] = wheel_location
         try:
             self._pip_install("-e", ".", cwd=self.repo_dir)
         except subprocess.CalledProcessError:
             self._log("[vllm] Precompiled nightly wheel install failed; falling back to source build")
             return False
         return True
+
+    def _resolve_precompiled_nightly_wheel_location(self) -> str:
+        package = "vllm"
+        variant = self._detect_precompiled_wheel_variant()
+        variants = [variant, None] if variant else [None]
+        for candidate in variants:
+            try:
+                wheels, repo_url = self._fetch_precompiled_wheel_metadata(
+                    commit="nightly",
+                    variant=candidate,
+                    package=package,
+                )
+            except Exception as exc:
+                label = candidate if candidate else "default"
+                self._log(f"[vllm] Could not fetch nightly wheel metadata for {label}: {exc}")
+                continue
+            location = self._select_precompiled_wheel_location(
+                wheels,
+                repo_url=repo_url,
+                package=package,
+            )
+            if location:
+                return location
+        return ""
+
+    def _fetch_precompiled_wheel_metadata(
+        self,
+        *,
+        commit: str,
+        variant: str | None,
+        package: str,
+    ) -> tuple[list[dict[str, object]], str]:
+        variant_dir = f"{variant}/" if variant else ""
+        repo_url = f"https://wheels.vllm.ai/{commit}/{variant_dir}{package}/"
+        meta_url = repo_url + "metadata.json"
+        with urlopen(meta_url, timeout=30) as response:
+            wheels = json.loads(response.read().decode("utf-8"))
+        if not isinstance(wheels, list):
+            raise ValueError(f"nightly wheel metadata is not a list: {meta_url}")
+        return wheels, repo_url
+
+    def _select_precompiled_wheel_location(
+        self,
+        wheels: list[dict[str, object]],
+        *,
+        repo_url: str,
+        package: str,
+    ) -> str:
+        arch = platform.machine()
+        for wheel in wheels:
+            if wheel.get("package_name") != package:
+                continue
+            platform_tag = str(wheel.get("platform_tag", ""))
+            if arch not in platform_tag:
+                continue
+            path = wheel.get("path")
+            if not isinstance(path, str) or not path:
+                continue
+            return urljoin(repo_url, path)
+        return ""
+
+    def _detect_precompiled_wheel_variant(self) -> str:
+        configured = os.environ.get(
+            "INFERENCE_BENCH_VLLM_FALLBACK_PRECOMPILED_WHEEL_VARIANT"
+        ) or os.environ.get("VLLM_PRECOMPILED_WHEEL_VARIANT")
+        if configured:
+            return configured
+        main_cuda = os.environ.get("VLLM_MAIN_CUDA_VERSION")
+        if main_cuda:
+            return "cu" + main_cuda.replace(".", "")[:3]
+        try:
+            result = subprocess.run(
+                ["nvidia-smi"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=10,
+            )
+        except (FileNotFoundError, subprocess.SubprocessError):
+            return "cu130"
+        match = re.search(r"CUDA Version:\s*(\d+)\.(\d+)", result.stdout)
+        if not match:
+            return "cu130"
+        major = int(match.group(1))
+        if major <= 12:
+            return "cu129"
+        return "cu130"
 
     def _configure_conservative_source_build_retry(self) -> None:
         max_jobs = os.environ.get("INFERENCE_BENCH_VLLM_SOURCE_RETRY_MAX_JOBS", "1")

@@ -23,6 +23,9 @@ class VllmProviderTest(unittest.TestCase):
                     "VLLM_PRECOMPILED_WHEEL_COMMIT": os.environ.get(
                         "VLLM_PRECOMPILED_WHEEL_COMMIT", ""
                     ),
+                    "VLLM_PRECOMPILED_WHEEL_LOCATION": os.environ.get(
+                        "VLLM_PRECOMPILED_WHEEL_LOCATION", ""
+                    ),
                     "CMAKE_BUILD_TYPE": os.environ.get("CMAKE_BUILD_TYPE", ""),
                 }
             )
@@ -34,6 +37,11 @@ class VllmProviderTest(unittest.TestCase):
             mock.patch.object(provider, "_create_venv", return_value=None),
             mock.patch.object(provider, "_disable_fastapi_metrics_middleware", return_value=None),
             mock.patch.object(provider, "_configure_cuda_arch_list", return_value=None),
+            mock.patch.object(
+                provider,
+                "_resolve_precompiled_nightly_wheel_location",
+                return_value="https://wheels.vllm.ai/nightly/cu130/vllm/vllm.whl",
+            ),
             mock.patch.object(provider, "_pip_install", side_effect=fake_pip_install),
         ):
             provider.build()
@@ -44,11 +52,13 @@ class VllmProviderTest(unittest.TestCase):
                 {
                     "VLLM_USE_PRECOMPILED": "1",
                     "VLLM_PRECOMPILED_WHEEL_COMMIT": "",
+                    "VLLM_PRECOMPILED_WHEEL_LOCATION": "",
                     "CMAKE_BUILD_TYPE": "",
                 },
                 {
                     "VLLM_USE_PRECOMPILED": "1",
-                    "VLLM_PRECOMPILED_WHEEL_COMMIT": "nightly",
+                    "VLLM_PRECOMPILED_WHEEL_COMMIT": "",
+                    "VLLM_PRECOMPILED_WHEEL_LOCATION": "https://wheels.vllm.ai/nightly/cu130/vllm/vllm.whl",
                     "CMAKE_BUILD_TYPE": "",
                 },
             ],
@@ -101,6 +111,33 @@ class VllmProviderTest(unittest.TestCase):
             ],
         )
         self.assertGreaterEqual(source_env.call_count, 1)
+
+    def test_select_precompiled_wheel_location_matches_platform(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        wheels = [
+            {
+                "package_name": "vllm",
+                "platform_tag": "manylinux1_aarch64",
+                "path": "../vllm-aarch64.whl",
+            },
+            {
+                "package_name": "vllm",
+                "platform_tag": "manylinux1_x86_64",
+                "path": "../vllm-x86_64.whl",
+            },
+        ]
+
+        with mock.patch("inference_bench.providers.vllm.platform.machine", return_value="x86_64"):
+            location = provider._select_precompiled_wheel_location(
+                wheels,
+                repo_url="https://wheels.vllm.ai/nightly/cu130/vllm/",
+                package="vllm",
+            )
+
+        self.assertEqual(
+            location,
+            "https://wheels.vllm.ai/nightly/cu130/vllm-x86_64.whl",
+        )
 
 
 if __name__ == "__main__":
