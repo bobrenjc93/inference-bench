@@ -56,6 +56,7 @@ def run_all(
             print(f"[{provider_name}] Commit: {pr.commit_hash[:12]}")
 
         try:
+            provider.wait_for_gpu_isolation(config.tensor_parallel_size)
             provider.start_server(
                 model=config.model,
                 tp=config.tensor_parallel_size,
