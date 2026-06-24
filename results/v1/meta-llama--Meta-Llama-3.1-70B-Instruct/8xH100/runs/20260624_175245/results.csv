@@ -1,6 +1,6 @@
 model,meta-llama/Meta-Llama-3.1-70B-Instruct
 tensor_parallel_size,8
-timestamp,2026-06-24T10:52:45.966998
+timestamp,2026-06-24T17:52:45.966998+00:00
 
 Build Times
 provider,build_time_s

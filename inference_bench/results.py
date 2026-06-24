@@ -5,12 +5,26 @@ import io
 import json
 import shutil
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from tabulate import tabulate
 
 from .benchmarks.base import BenchmarkResult
+
+
+def _utc_now_isoformat() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _utc_timestamp(timestamp: str) -> datetime:
+    try:
+        parsed = datetime.fromisoformat(timestamp)
+    except ValueError:
+        return datetime.now(timezone.utc)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 @dataclass
@@ -28,7 +42,7 @@ class RunResults:
     model: str
     tensor_parallel_size: int
     hardware: str = ""
-    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    timestamp: str = field(default_factory=_utc_now_isoformat)
     providers: dict[str, ProviderResults] = field(default_factory=dict)
 
     def save(self, results_dir: str | Path) -> Path:
@@ -186,7 +200,7 @@ class RunResults:
 
     def _run_dir(self, results_dir: str | Path) -> Path:
         if not hasattr(self, "_cached_run_dir"):
-            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+            ts = _utc_timestamp(self.timestamp).strftime("%Y%m%d_%H%M%S")
             model_slug = self.model.replace("/", "--")
             base = Path(results_dir) / model_slug
             if self.hardware:

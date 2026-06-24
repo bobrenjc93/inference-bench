@@ -1,8 +1,30 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 
 from inference_bench.results import ProviderResults, RunResults
+
+
+def test_default_timestamp_is_utc_aware() -> None:
+    results = RunResults(model="model", tensor_parallel_size=1)
+
+    timestamp = datetime.fromisoformat(results.timestamp)
+
+    assert timestamp.tzinfo is not None
+    assert timestamp.utcoffset() == timezone.utc.utcoffset(timestamp)
+
+
+def test_run_dir_uses_utc_timestamp(tmp_path) -> None:
+    results = RunResults(
+        model="org/model",
+        tensor_parallel_size=8,
+        timestamp="2026-06-24T17:52:45.966998+00:00",
+    )
+
+    results_path = results.save(tmp_path / "results")
+
+    assert results_path.parent.name == "20260624_175245"
 
 
 def test_save_copies_provider_logs(tmp_path) -> None:
