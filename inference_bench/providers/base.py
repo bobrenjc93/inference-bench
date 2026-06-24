@@ -112,6 +112,9 @@ class Provider(ABC):
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         ...
 
+    def _server_env(self) -> dict[str, str]:
+        return os.environ.copy()
+
     def _gpu_memory_wait_fraction(self) -> float | None:
         return None
 
@@ -159,7 +162,7 @@ class Provider(ABC):
         self._port = port
         self._wait_for_gpu_memory_ready(tp)
         cmd = self._server_cmd(model, tp, port)
-        env = os.environ.copy()
+        env = self._server_env()
         env["PATH"] = str(self.venv_dir / "bin") + ":" + env.get("PATH", "")
 
         self._log_path = self.build_dir / f"{self.name}_server.log"

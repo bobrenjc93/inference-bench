@@ -52,6 +52,14 @@ class TorchInfernoProvider(Provider):
             "--trust-remote-code",
         ]
 
+    def _server_env(self) -> dict[str, str]:
+        env = super()._server_env()
+        # Public TorchInferno runs have repeatedly stalled during NCCL startup
+        # broadcasts on P2P/CUMEM paths. Keep this provider on the validated
+        # non-CUMEM path unless the caller explicitly opts back in.
+        env.setdefault("NCCL_CUMEM_ENABLE", "0")
+        return env
+
     def _gpu_memory_wait_fraction(self) -> float | None:
         if "INFERENCE_BENCH_TORCHINFERNO_MIN_GPU_FREE_FRACTION" in os.environ:
             return _env_float(
