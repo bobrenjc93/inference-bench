@@ -3,7 +3,8 @@ from __future__ import annotations
 import csv
 import io
 import json
-from dataclasses import dataclass, field, asdict
+import shutil
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
@@ -19,6 +20,7 @@ class ProviderResults:
     commit_hash: str = ""
     benchmarks: dict[str, BenchmarkResult] = field(default_factory=dict)
     errors: dict[str, str] = field(default_factory=dict)
+    server_log_path: str = ""
 
 
 @dataclass
@@ -64,6 +66,9 @@ class RunResults:
                     for bname, br in pr.benchmarks.items()
                 },
             }
+            server_log = self._copy_provider_log(run_dir, pname, pr.server_log_path)
+            if server_log:
+                prov_data["server_log"] = server_log
             if pr.errors:
                 prov_data["errors"] = pr.errors
             data["providers"][pname] = prov_data
@@ -71,7 +76,19 @@ class RunResults:
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
         return path
-        return path
+
+    def _copy_provider_log(self, run_dir: Path, provider_name: str, source_path: str) -> str:
+        if not source_path:
+            return ""
+        source = Path(source_path)
+        if not source.exists():
+            return ""
+        safe_name = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in provider_name)
+        rel_path = Path("provider_logs") / f"{safe_name}.log"
+        dest = run_dir / rel_path
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, dest)
+        return rel_path.as_posix()
 
     def save_csv(self, results_dir: str | Path) -> Path:
         run_dir = self._run_dir(results_dir)

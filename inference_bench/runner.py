@@ -107,6 +107,9 @@ def run_all(
             print(f"[{provider_name}] Server error: {exc}")
         finally:
             provider.stop_server()
+            log_path = getattr(provider, "_log_path", None)
+            if log_path is not None:
+                pr.server_log_path = str(log_path)
             _free_gpu_memory()
             time.sleep(5)
 
