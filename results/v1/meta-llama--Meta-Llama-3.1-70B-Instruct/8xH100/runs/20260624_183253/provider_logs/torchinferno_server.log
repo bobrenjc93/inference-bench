@@ -1,0 +1,1003 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-7d5e8186/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model meta-llama/Meta-Llama-3.1-70B-Instruct --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[W624 17:11:55.564939858 Utils.hpp:137] Warning: Environment variable NCCL_ASYNC_ERROR_HANDLING is deprecated; use TORCH_NCCL_ASYNC_ERROR_HANDLING instead (function operator())
+[W624 17:11:55.592560459 Utils.hpp:137] Warning: Environment variable NCCL_ASYNC_ERROR_HANDLING is deprecated; use TORCH_NCCL_ASYNC_ERROR_HANDLING instead (function operator())
+[Llama3TP] resolving checkpoint meta-llama/Meta-Llama-3.1-70B-Instruct
+[W624 17:11:55.598357459 Utils.hpp:137] Warning: Environment variable NCCL_ASYNC_ERROR_HANDLING is deprecated; use TORCH_NCCL_ASYNC_ERROR_HANDLING instead (function operator())
+[W624 17:11:55.608000728 Utils.hpp:137] Warning: Environment variable NCCL_ASYNC_ERROR_HANDLING is deprecated; use TORCH_NCCL_ASYNC_ERROR_HANDLING instead (function operator())
+[W624 17:11:55.610089802 Utils.hpp:137] Warning: Environment variable NCCL_ASYNC_ERROR_HANDLING is deprecated; use TORCH_NCCL_ASYNC_ERROR_HANDLING instead (function operator())
+[W624 17:11:55.612562493 Utils.hpp:137] Warning: Environment variable NCCL_ASYNC_ERROR_HANDLING is deprecated; use TORCH_NCCL_ASYNC_ERROR_HANDLING instead (function operator())
+[W624 17:11:55.612763937 Utils.hpp:137] Warning: Environment variable NCCL_ASYNC_ERROR_HANDLING is deprecated; use TORCH_NCCL_ASYNC_ERROR_HANDLING instead (function operator())
+[W624 17:11:55.616622977 Utils.hpp:137] Warning: Environment variable NCCL_ASYNC_ERROR_HANDLING is deprecated; use TORCH_NCCL_ASYNC_ERROR_HANDLING instead (function operator())
+Fetching 36 files:   0%|          | 0/36 [00:00<?, ?it/s]Fetching 36 files:   8%|▊         | 3/36 [00:00<00:01, 26.90it/s]Fetching 36 files: 100%|██████████| 36/36 [00:00<00:00, 171.69it/s]
+[Llama3TP] resolved checkpoint /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Bootstrap: Using eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO cudaDriverVersion 13020
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL version 2.29.7+cuda13.2
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL git version stable b81d6a5a3
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO cudaDriverVersion 13020
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO cudaDriverVersion 13020
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO cudaDriverVersion 13020
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO cudaDriverVersion 13020
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO cudaDriverVersion 13020
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO cudaDriverVersion 13020
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO ENV/Plugin: Could not find: libnccl-env.so
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO cudaDriverVersion 13020
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Bootstrap: Using eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL version 2.29.7+cuda13.2
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL git version stable b81d6a5a3
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Bootstrap: Using eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL version 2.29.7+cuda13.2
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL git version stable b81d6a5a3
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Bootstrap: Using eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL version 2.29.7+cuda13.2
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL git version stable b81d6a5a3
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Bootstrap: Using eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL version 2.29.7+cuda13.2
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL git version stable b81d6a5a3
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Comm config Blocking set to 1
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Bootstrap: Using eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL version 2.29.7+cuda13.2
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL git version stable b81d6a5a3
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Bootstrap: Using eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL version 2.29.7+cuda13.2
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL git version stable b81d6a5a3
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Bootstrap: Using eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL version 2.29.7+cuda13.2
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL git version stable b81d6a5a3
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Comm config Blocking set to 1
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Comm config Blocking set to 1
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Comm config Blocking set to 1
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Comm config Blocking set to 1
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Comm config Blocking set to 1
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Comm config Blocking set to 1
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Comm config Blocking set to 1
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/Plugin: Loaded net plugin Libfabric (v11)
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/Plugin: Loaded net plugin Libfabric (v11)
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/Plugin: Loaded net plugin Libfabric (v11)
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/Plugin: Loaded net plugin Libfabric (v11)
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Successfully loaded external network plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/Plugin: Loaded net plugin Libfabric (v11)
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Successfully loaded external network plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Successfully loaded external network plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.18.0
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Successfully loaded external network plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.18.0
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Successfully loaded external network plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Using Libfabric version 2.4
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.18.0
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.18.0
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Using Libfabric version 2.4
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Using Libfabric version 2.4
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.18.0
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Using Libfabric version 2.4
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Using Libfabric version 2.4
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/Plugin: Loaded net plugin Libfabric (v11)
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Successfully loaded external network plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.18.0
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Using Libfabric version 2.4
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Using CUDA driver version 13020 with runtime 12080
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Using CUDA driver version 13020 with runtime 12080
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Using CUDA driver version 13020 with runtime 12080
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Using CUDA driver version 13020 with runtime 12080
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Using CUDA driver version 13020 with runtime 12080
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Using CUDA driver version 13020 with runtime 12080
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/Plugin: Loaded net plugin Libfabric (v11)
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/Plugin: Loaded net plugin Libfabric (v11)
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Successfully loaded external network plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Successfully loaded external network plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.18.0
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Initializing aws-ofi-nccl 1.18.0
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Using Libfabric version 2.4
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Using Libfabric version 2.4
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Using CUDA driver version 13020 with runtime 12080
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Using CUDA driver version 13020 with runtime 12080
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Plugin selected platform: AWS
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Configuring AWS-specific options
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Internode latency set at 75.0 us
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Using transport protocol RDMA (platform set)
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Plugin selected platform: AWS
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Configuring AWS-specific options
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Internode latency set at 75.0 us
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Using transport protocol RDMA (platform set)
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Plugin selected platform: AWS
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Configuring AWS-specific options
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Internode latency set at 75.0 us
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Using transport protocol RDMA (platform set)
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Plugin selected platform: AWS
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Configuring AWS-specific options
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Internode latency set at 75.0 us
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Using transport protocol RDMA (platform set)
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Plugin selected platform: AWS
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Configuring AWS-specific options
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Internode latency set at 75.0 us
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Using transport protocol RDMA (platform set)
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Plugin selected platform: AWS
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Configuring AWS-specific options
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Internode latency set at 75.0 us
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Using transport protocol RDMA (platform set)
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Plugin selected platform: AWS
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Configuring AWS-specific options
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Internode latency set at 75.0 us
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Using transport protocol RDMA (platform set)
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Plugin selected platform: AWS
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Configuring AWS-specific options
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Internode latency set at 75.0 us
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Using transport protocol RDMA (platform set)
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI No eligible providers were found
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1795:1795 [0] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):227 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1795:1795 [0] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):366 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1795:1795 [0] ncclResult_t nccl_net_ofi_init_v6(ncclDebugLogger_t):114 NCCL WARN NET/OFI Initializing plugin failed
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Failed to initialize NET plugin Libfabric
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL_IB_HCA set to ^mlx
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/IB : No device found.
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL_IB_PCI_RELAXED_ORDERING set by environment to 1.
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/IB : Using [RO]; OOB eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Failed to initialize NET plugin IB
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/Socket : Using [0]eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Initialized NET plugin Socket
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Assigned NET plugin Socket to comm
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Successfully loaded external gin plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Failed to initialize any GIN plugin
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Using network Socket
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI No eligible providers were found
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1797:1797 [2] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):227 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1797:1797 [2] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):366 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1797:1797 [2] ncclResult_t nccl_net_ofi_init_v6(ncclDebugLogger_t):114 NCCL WARN NET/OFI Initializing plugin failed
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Failed to initialize NET plugin Libfabric
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL_IB_HCA set to ^mlx
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/IB : No device found.
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL_IB_PCI_RELAXED_ORDERING set by environment to 1.
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/IB : Using [RO]; OOB eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Failed to initialize NET plugin IB
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/Socket : Using [0]eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Initialized NET plugin Socket
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Assigned NET plugin Socket to comm
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Successfully loaded external gin plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Failed to initialize any GIN plugin
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Using network Socket
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI No eligible providers were found
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1796:1796 [1] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):227 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1796:1796 [1] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):366 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1796:1796 [1] ncclResult_t nccl_net_ofi_init_v6(ncclDebugLogger_t):114 NCCL WARN NET/OFI Initializing plugin failed
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Failed to initialize NET plugin Libfabric
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL_IB_HCA set to ^mlx
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/IB : No device found.
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL_IB_PCI_RELAXED_ORDERING set by environment to 1.
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/IB : Using [RO]; OOB eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Failed to initialize NET plugin IB
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/Socket : Using [0]eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Initialized NET plugin Socket
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Assigned NET plugin Socket to comm
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Successfully loaded external gin plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Failed to initialize any GIN plugin
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Using network Socket
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI No eligible providers were found
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1799:1799 [4] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):227 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1799:1799 [4] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):366 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1799:1799 [4] ncclResult_t nccl_net_ofi_init_v6(ncclDebugLogger_t):114 NCCL WARN NET/OFI Initializing plugin failed
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Failed to initialize NET plugin Libfabric
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL_IB_HCA set to ^mlx
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/IB : No device found.
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL_IB_PCI_RELAXED_ORDERING set by environment to 1.
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/IB : Using [RO]; OOB eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Failed to initialize NET plugin IB
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/Socket : Using [0]eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Initialized NET plugin Socket
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Assigned NET plugin Socket to comm
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Successfully loaded external gin plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Failed to initialize any GIN plugin
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Using network Socket
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI No eligible providers were found
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1802:1802 [7] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):227 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1802:1802 [7] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):366 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1802:1802 [7] ncclResult_t nccl_net_ofi_init_v6(ncclDebugLogger_t):114 NCCL WARN NET/OFI Initializing plugin failed
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Failed to initialize NET plugin Libfabric
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL_IB_HCA set to ^mlx
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/IB : No device found.
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL_IB_PCI_RELAXED_ORDERING set by environment to 1.
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/IB : Using [RO]; OOB eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Failed to initialize NET plugin IB
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/Socket : Using [0]eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Initialized NET plugin Socket
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Assigned NET plugin Socket to comm
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Successfully loaded external gin plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Failed to initialize any GIN plugin
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Using network Socket
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI No eligible providers were found
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1798:1798 [3] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):227 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1798:1798 [3] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):366 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1798:1798 [3] ncclResult_t nccl_net_ofi_init_v6(ncclDebugLogger_t):114 NCCL WARN NET/OFI Initializing plugin failed
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Failed to initialize NET plugin Libfabric
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL_IB_HCA set to ^mlx
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/IB : No device found.
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL_IB_PCI_RELAXED_ORDERING set by environment to 1.
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/IB : Using [RO]; OOB eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Failed to initialize NET plugin IB
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/Socket : Using [0]eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Initialized NET plugin Socket
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Assigned NET plugin Socket to comm
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Successfully loaded external gin plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Failed to initialize any GIN plugin
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Using network Socket
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI No eligible providers were found
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1801:1801 [6] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):227 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1801:1801 [6] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):366 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1801:1801 [6] ncclResult_t nccl_net_ofi_init_v6(ncclDebugLogger_t):114 NCCL WARN NET/OFI Initializing plugin failed
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Failed to initialize NET plugin Libfabric
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL_IB_HCA set to ^mlx
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/IB : No device found.
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL_IB_PCI_RELAXED_ORDERING set by environment to 1.
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/IB : Using [RO]; OOB eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Failed to initialize NET plugin IB
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/Socket : Using [0]eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Initialized NET plugin Socket
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Assigned NET plugin Socket to comm
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Successfully loaded external gin plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Failed to initialize any GIN plugin
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Using network Socket
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI No eligible providers were found
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1800:1800 [5] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):227 NCCL WARN NET/OFI Failed to initialize rdma protocol
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1800:1800 [5] int nccl_net_ofi_create_plugin(nccl_net_ofi_plugin_t**):366 NCCL WARN NET/OFI aws-ofi-nccl initialization failed
+
+[2026-06-24 17:11:57] gpu-dev-7d5e8186:1800:1800 [5] ncclResult_t nccl_net_ofi_init_v6(ncclDebugLogger_t):114 NCCL WARN NET/OFI Initializing plugin failed
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Failed to initialize NET plugin Libfabric
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL_IB_HCA set to ^mlx
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/IB : No device found.
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL_IB_PCI_RELAXED_ORDERING set by environment to 1.
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/IB : Using [RO]; OOB eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Failed to initialize NET plugin IB
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL_SOCKET_IFNAME set by environment to eth0
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/Socket : Using [0]eth0:10.0.52.123<0>
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Initialized NET plugin Socket
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Assigned NET plugin Socket to comm
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO GIN/Plugin: Could not find: libnccl-gin.so
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Successfully loaded external gin plugin /opt/amazon/ofi-nccl/lib/libnccl-net.so
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Failed to initialize any GIN plugin
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Using network Socket
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO [Rank 0] ncclCommInitRankConfig comm 0x55cb64daf560 rank 0 nranks 8 cudaDev 0 nvmlDev 0 busId 53000 commId 0xd5d1c00bcbb9dc1d - Init START
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO [Rank 2] ncclCommInitRankConfig comm 0x55a1975c0bd0 rank 2 nranks 8 cudaDev 2 nvmlDev 2 busId 75000 commId 0xd5d1c00bcbb9dc1d - Init START
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO [Rank 1] ncclCommInitRankConfig comm 0x55c1508d4310 rank 1 nranks 8 cudaDev 1 nvmlDev 1 busId 64000 commId 0xd5d1c00bcbb9dc1d - Init START
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO RAS client listening socket at ::1<28028>
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO [Rank 7] ncclCommInitRankConfig comm 0x56041de2ba00 rank 7 nranks 8 cudaDev 7 nvmlDev 7 busId ca000 commId 0xd5d1c00bcbb9dc1d - Init START
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO RAS client listening socket at ::1<28028>
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO [Rank 4] ncclCommInitRankConfig comm 0x560a1709db70 rank 4 nranks 8 cudaDev 4 nvmlDev 4 busId 97000 commId 0xd5d1c00bcbb9dc1d - Init START
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO [Rank 5] ncclCommInitRankConfig comm 0x55b7ede6e730 rank 5 nranks 8 cudaDev 5 nvmlDev 5 busId a8000 commId 0xd5d1c00bcbb9dc1d - Init START
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO [Rank 6] ncclCommInitRankConfig comm 0x55d96402b010 rank 6 nranks 8 cudaDev 6 nvmlDev 6 busId b9000 commId 0xd5d1c00bcbb9dc1d - Init START
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO RAS client listening socket at ::1<28028>
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO RAS client listening socket at ::1<28028>
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO RAS client listening socket at ::1<28028>
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO [Rank 3] ncclCommInitRankConfig comm 0x563759d5ae50 rank 3 nranks 8 cudaDev 3 nvmlDev 3 busId 86000 commId 0xd5d1c00bcbb9dc1d - Init START
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO RAS client listening socket at ::1<28028>
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO RAS client listening socket at ::1<28028>
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO RAS client listening socket at ::1<28028>
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Bootstrap timings total 0.003772 (create 0.000043, send 0.000132, recv 0.000195, ring 0gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Bootstrap timings total 0.062659 (create 0.000043, send 0.000098, recv 0.000120, ring 0gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Bootstrap timings total 0.008304 (create 0.000047, send 0.000110, recv 0.004652, ring 0gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Bootstrap timings total 0.001430 (create 0.000040, send 0.000093, recv 0.000249, ring 0.002969, delay 0.000001)
+.002903, delay 0.000001)
+.002962, delay 0.000001)
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Bootstrap timings total 0.054463 (create 0.000045, send 0.000105, recv 0.046319, ring 0.000623, delay 0.000001)
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Bootstrap timings total 0.480482 (create 0.000048, send 0.000100, recv 0.479216, ring 0.000143, delay 0.000001)
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Bootstrap timings total 0.577908 (create 0.000084, send 0.000291, recv 0.470196, ring 0.000416, delay 0.000001)
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL_CUMEM_ENABLE set by environment to 0.
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL_CUMEM_ENABLE set by environment to 0.
+.061850, delay 0.000002)
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL_CUMEM_ENABLE set by environment to 0.
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL_CUMEM_ENABLE set by environment to 0.
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL_CUMEM_ENABLE set by environment to 0.
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL_CUMEM_ENABLE set by environment to 0.
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Bootstrap timings total 0.107814 (create 0.000067, send 0.000138, recv 0.000307, ring 0.106750, delay 0.000001)
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL_CUMEM_ENABLE set by environment to 0.
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL_CUMEM_ENABLE set by environment to 0.
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO MNNVL busId 0xca000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO MNNVL busId 0x86000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL_CROSS_NIC set by environment to 0.
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO MNNVL busId 0xa8000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL_CROSS_NIC set by environment to 0.
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL_CROSS_NIC set by environment to 0.
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO MNNVL busId 0xb9000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO MNNVL busId 0x97000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO MNNVL busId 0x53000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL_CROSS_NIC set by environment to 0.
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL_CROSS_NIC set by environment to 0.
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL_CROSS_NIC set by environment to 0.
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO MNNVL busId 0x75000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL_CROSS_NIC set by environment to 0.
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO MNNVL busId 0x64000 fabric UUID 0.0 cliqueId 0x0 state 3 healthMask 0x0
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL_CROSS_NIC set by environment to 0.
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 0 is 0-47,96-143. (GPU affinity = 0-47,96-143 ; CPU affinity = 0-191).
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NVLS multicast support is available on dev 0 (NVLS_NCHANNELS 16)
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 5 is 48-95,144-191. (GPU affinity = 48-95,144-191 ; CPU affinity = 0-191).
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NVLS multicast support is available on dev 5 (NVLS_NCHANNELS 16)
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 7 is 48-95,144-191. (GPU affinity = 48-95,144-191 ; CPU affinity = 0-191).
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NVLS multicast support is available on dev 7 (NVLS_NCHANNELS 16)
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 2 is 0-47,96-143. (GPU affinity = 0-47,96-143 ; CPU affinity = 0-191).
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NVLS multicast support is available on dev 2 (NVLS_NCHANNELS 16)
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 6 is 48-95,144-191. (GPU affinity = 48-95,144-191 ; CPU affinity = 0-191).
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NVLS multicast support is available on dev 6 (NVLS_NCHANNELS 16)
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 4 is 48-95,144-191. (GPU affinity = 48-95,144-191 ; CPU affinity = 0-191).
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NVLS multicast support is available on dev 4 (NVLS_NCHANNELS 16)
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 1 is 0-47,96-143. (GPU affinity = 0-47,96-143 ; CPU affinity = 0-191).
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NVLS multicast support is available on dev 1 (NVLS_NCHANNELS 16)
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO ncclTopoGetCpuAffinity: Affinity for GPU 3 is 0-47,96-143. (GPU affinity = 0-47,96-143 ; CPU affinity = 0-191).
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NVLS multicast support is available on dev 3 (NVLS_NCHANNELS 16)
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO comm 0x55d96402b010 rank 6 nRanks 8 nNodes 1 localRanks 8 localRank 6 MNNVL 0
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO comm 0x560a1709db70 rank 4 nRanks 8 nNodes 1 localRanks 8 localRank 4 MNNVL 0
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO comm 0x55b7ede6e730 rank 5 nRanks 8 nNodes 1 localRanks 8 localRank 5 MNNVL 0
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO comm 0x563759d5ae50 rank 3 nRanks 8 nNodes 1 localRanks 8 localRank 3 MNNVL 0
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO comm 0x55a1975c0bd0 rank 2 nRanks 8 nNodes 1 localRanks 8 localRank 2 MNNVL 0
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO comm 0x56041de2ba00 rank 7 nRanks 8 nNodes 1 localRanks 8 localRank 7 MNNVL 0
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO comm 0x55c1508d4310 rank 1 nRanks 8 nNodes 1 localRanks 8 localRank 1 MNNVL 0
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO comm 0x55cb64daf560 rank 0 nRanks 8 nNodes 1 localRanks 8 localRank 0 MNNVL 0
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Trees [0] 7/-1/-1->6->5 [1] 7/-1/-1->6->5 [2] 7/-1/-1->6->5 [3] 7/-1/-1->6->5 [4] 7/-1/gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Trees [0] 5/-1/-1->4->3 [1] 5/-1/-1->4->3 [2] 5/-1/-1->4->3 [3] 5/-1/-1->4->3 [4] 5/-1/gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Trees [0] 6/-1/-1->5->4 [1] 6/-1/-1->5->4 [2] 6/-1/-1->5->4 [3] 6/-1/-1->5->4 [4] 6/-1/-1->6->5 [5] 7/-1/-1->6->5 [6] 7/-1/-1->6->5 [7] 7/-1/-1->6->5 [8] 7/-1/-1->6->5 [9] 7/-1/-1->6->5 [10] 7/-1/-1->6->5 [11] 7/-1/-1->4->3 [5] 5/-1/-1->4->3 [6] 5/-1/-1->4->3 [7] 5/-1/-1->4->3 [8] 5/-1/-1->4->3 [9] 5/-1/-1->4->3 [10] 5/-1/-1->4->3 [11] 5/-1/-1->5->4 [5] 6/-1/-1->5->4 [6] 6/-1/-1->5->4 [7] 6/-1/-1->5->4 [8] 6/-1/-1->5->4 [9] 6/-1/-1->5->4 [10] 6/-1/-1->5->4 [11] 6/-1/-1->6->5 [12] 7/-1/-1->6->5 [13] 7/-1/-1->6->5 [14] 7/-1/-1->6->5 [15] 7/-1/-1->6->5 [16] 7/-1/-1->6->5 [17] 7/-1/-1->6->5 [18] -1->4->3 [12] 5/-1/-1->4->3 [13] 5/-1/-1->4->3 [14] 5/-1/-1->4->3 [15] 5/-1/-1->4->3 [16] 5/-1/-1->4->3 [17] 5/-1/-1->4->3 [18] -1->5->4 [12] 6/-1/-1->5->4 [13] 6/-1/-1->5->4 [14] 6/-1/-1->5->4 [15] 6/-1/-1->5->4 [16] 6/-1/-1->5->4 [17] 6/-1/-1->5->4 [18] gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Trees [0] 4/-1/-1->3->2 [1] 4/-1/-1->3->2 [2] 4/-1/-1->3->2 [3] 4/-1/-1->3->2 [4] 4/-1/gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Trees [0] 3/-1/-1->2->1 [1] 3/-1/-1->2->1 [2] 3/-1/-1->2->1 [3] 3/-1/-1->2->1 [4] 3/-1/gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Trees [0] -1/-1/-1->7->6 [1] -1/-1/-1->7->6 [2] -1/-1/-1->7->6 [3] -1/-1/-1->7->6 [4] -7/-1/-1->6->5 [19] 7/-1/-1->6->5 [20] 7/-1/-1->6->5 [21] 7/-1/-1->6->5 [22] 7/-1/-1->6->5 [23] 7/-1/-1->6->5
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 00/24 : 0 1 2 3 4 5 6 7
+5/-1/-1->4->3 [19] 5/-1/-1->4->3 [20] 5/-1/-1->4->3 [21] 5/-1/-1->4->3 [22] 5/-1/-1->4->3 [23] 5/-1/-1->4->3
+6/-1/-1->5->4 [19] 6/-1/-1->5->4 [20] 6/-1/-1->5->4 [21] 6/-1/-1->5->4 [22] 6/-1/-1->5->4 [23] 6/-1/-1->5->4
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Trees [0] 2/-1/-1->1->0 [1] 2/-1/-1->1->0 [2] 2/-1/-1->1->0 [3] 2/-1/-1->1->0 [4] 2/-1/-1->3->2 [5] 4/-1/-1->3->2 [6] 4/-1/-1->3->2 [7] 4/-1/-1->3->2 [8] 4/-1/-1->3->2 [9] 4/-1/-1->3->2 [10] 4/-1/-1->3->2 [11] 4/-1/-1->2->1 [5] 3/-1/-1->2->1 [6] 3/-1/-1->2->1 [7] 3/-1/-1->2->1 [8] 3/-1/-1->2->1 [9] 3/-1/-1->2->1 [10] 3/-1/-1->2->1 [11] 3/-1/1/-1/-1->7->6 [5] -1/-1/-1->7->6 [6] -1/-1/-1->7->6 [7] -1/-1/-1->7->6 [8] -1/-1/-1->7->6 [9] -1/-1/-1->7->6 [10] -1/-1/-1->7->6gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO P2P Chunksize set to 524288
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 01/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO P2P Chunksize set to 524288
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO P2P Chunksize set to 524288
+-1->1->0 [5] 2/-1/-1->1->0 [6] 2/-1/-1->1->0 [7] 2/-1/-1->1->0 [8] 2/-1/-1->1->0 [9] 2/-1/-1->1->0 [10] 2/-1/-1->1->0 [11] 2/-1/-1->3->2 [12] 4/-1/-1->3->2 [13] 4/-1/-1->3->2 [14] 4/-1/-1->3->2 [15] 4/-1/-1->3->2 [16] 4/-1/-1->3->2 [17] 4/-1/-1->3->2 [18] -1->2->1 [12] 3/-1/-1->2->1 [13] 3/-1/-1->2->1 [14] 3/-1/-1->2->1 [15] 3/-1/-1->2->1 [16] 3/-1/-1->2->1 [17] 3/-1/-1->2->1 [18]  [11] -1/-1/-1->7->6 [12] -1/-1/-1->7->6 [13] -1/-1/-1->7->6 [14] -1/-1/-1->7->6 [15] -1/-1/-1->7->6 [16] -1/-1/-1->7->6 [17] -1gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 02/24 : 0 1 2 3 4 5 6 7
+-1->1->0 [12] 2/-1/-1->1->0 [13] 2/-1/-1->1->0 [14] 2/-1/-1->1->0 [15] 2/-1/-1->1->0 [16] 2/-1/-1->1->0 [17] 2/-1/-1->1->0 [18] 4/-1/-1->3->2 [19] 4/-1/-1->3->2 [20] 4/-1/-1->3->2 [21] 4/-1/-1->3->2 [22] 4/-1/-1->3->2 [23] 4/-1/-1->3->2
+3/-1/-1->2->1 [19] 3/-1/-1->2->1 [20] 3/-1/-1->2->1 [21] 3/-1/-1->2->1 [22] 3/-1/-1->2->1 [23] 3/-1/-1->2->1
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO P2P Chunksize set to 524288
+/-1/-1->7->6 [18] -1/-1/-1->7->6 [19] -1/-1/-1->7->6 [20] -1/-1/-1->7->6 [21] -1/-1/-1->7->6 [22] -1/-1/-1->7->6 [23] -1/-1/-1->2/-1/-1->1->0 [19] 2/-1/-1->1->0 [20] 2/-1/-1->1->0 [21] 2/-1/-1->1->0 [22] 2/-1/-1->1->0 [23] 2/-1/-1->1->0
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 03/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO P2P Chunksize set to 524288
+7->6
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO P2P Chunksize set to 524288
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 04/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO P2P Chunksize set to 524288
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 05/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 06/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 07/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 08/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 09/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 10/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 11/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 12/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 13/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 14/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 15/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 16/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 17/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 18/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 19/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 20/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 21/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 22/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 23/24 : 0 1 2 3 4 5 6 7
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1 [2] 1/-1/-1->0->-1 [3] 1/-1/-1->0->-1 [4] 1/-1/-1->0->-1 [5] 1/-1/-1->0->-1 [6] 1/-1/-1->0->-1 [7] 1/-1/-1->0->-1 [8] 1/-1/-1->0->-1 [9] 1/-1/-1->0->-1 [10] 1/-1/-1->0->-1 [11] 1/-1/-1->0->-1 [12] 1/-1/-1->0->-1 [13] 1/-1/-1->0->-1 [14] 1/-1/-1->0->-1 [15] 1/-1/-1->0->-1 [16] 1/-1/-1->0->-1 [17] 1/-1/-1->0->-1 [18] 1/-1/-1->0->-1 [19] 1/-1/-1->0->-1 [20] 1/-1/-1->0->-1 [21] 1/-1/-1->0->-1 [22] 1/-1/-1->0->-1 [23] 1/-1/-1->0->-1
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO P2P Chunksize set to 524288
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+gpu-dev-7d5e8186:1801:2373 [0] NCCL INFO [Proxy Service] Device 6 CPU core 59
+gpu-dev-7d5e8186:1800:2375 [0] NCCL INFO [Proxy Service] Device 5 CPU core 81
+gpu-dev-7d5e8186:1800:2378 [0] NCCL INFO [Proxy Service UDS] Device 5 CPU core 145
+gpu-dev-7d5e8186:1799:2377 [0] NCCL INFO [Proxy Service UDS] Device 4 CPU core 64
+gpu-dev-7d5e8186:1801:2376 [0] NCCL INFO [Proxy Service UDS] Device 6 CPU core 64
+gpu-dev-7d5e8186:1799:2374 [0] NCCL INFO [Proxy Service] Device 4 CPU core 59
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+gpu-dev-7d5e8186:1802:2379 [0] NCCL INFO [Proxy Service] Device 7 CPU core 168
+gpu-dev-7d5e8186:1802:2380 [0] NCCL INFO [Proxy Service UDS] Device 7 CPU core 81
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO PROFILER/Plugin: Could not find: libnccl-profiler.so
+gpu-dev-7d5e8186:1798:2381 [0] NCCL INFO [Proxy Service] Device 3 CPU core 12
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Check P2P Type isAllDirectP2p 1 directMode 0 isAllCudaP2p 1
+gpu-dev-7d5e8186:1797:2382 [0] NCCL INFO [Proxy Service] Device 2 CPU core 17
+gpu-dev-7d5e8186:1798:2383 [0] NCCL INFO [Proxy Service UDS] Device 3 CPU core 32
+gpu-dev-7d5e8186:1797:2384 [0] NCCL INFO [Proxy Service UDS] Device 2 CPU core 140
+gpu-dev-7d5e8186:1796:2385 [0] NCCL INFO [Proxy Service] Device 1 CPU core 29
+gpu-dev-7d5e8186:1795:2387 [0] NCCL INFO [Proxy Service] Device 0 CPU core 21
+gpu-dev-7d5e8186:1796:2386 [0] NCCL INFO [Proxy Service UDS] Device 1 CPU core 11
+gpu-dev-7d5e8186:1795:2388 [0] NCCL INFO [Proxy Service UDS] Device 0 CPU core 135
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 00/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 01/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 02/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 03/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 00/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 01/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 04/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 02/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 05/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 00/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 00/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 03/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 01/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 01/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 06/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 07/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 02/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 00/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 02/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 04/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 03/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 01/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 08/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 03/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 09/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 04/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 05/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 00/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 02/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 00/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 04/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 05/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 06/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 10/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 00/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 07/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 01/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 03/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 01/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 06/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 02/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 05/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 02/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 08/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 11/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 04/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 12/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 03/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 07/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 03/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 01/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 09/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 06/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 13/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 04/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 08/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 04/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 10/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 05/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 07/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 14/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 05/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 02/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 09/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 05/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 06/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 10/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 11/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 08/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 06/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 15/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 09/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 03/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 11/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 07/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 12/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 08/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 07/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 12/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 16/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 08/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 06/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 10/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 13/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 13/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 04/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 09/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 14/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 11/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 09/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 17/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 14/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 15/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 12/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 05/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 07/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 10/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 06/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 16/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 13/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 10/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 18/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 14/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 17/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 07/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 11/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 08/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 15/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 08/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 12/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 15/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 11/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 18/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 09/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 09/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 16/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 19/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 13/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 16/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 20/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 19/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 12/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 17/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 10/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 18/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 10/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 20/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 13/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 14/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 21/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 14/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 17/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 11/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 11/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 15/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 19/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 21/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 16/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 12/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 22/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 12/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 15/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 18/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 20/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 23/0 : 6[6] -> 7[7] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 22/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 17/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 13/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 13/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 21/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 23/0 : 5[5] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 16/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 19/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 18/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 20/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 14/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 14/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 22/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 17/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 19/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 15/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 15/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 21/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 23/0 : 4[4] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 18/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 20/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 19/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 16/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 21/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 22/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 16/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 20/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 17/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 18/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 23/0 : 2[2] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 22/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 21/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 17/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 22/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 23/0 : 1[1] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 19/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 18/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 23/0 : 3[3] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 19/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 20/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 21/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 20/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 21/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 22/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 23/0 : 7[7] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 22/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Channel 23/0 : 0[0] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Connected all rings, use ring PXN 0 GDR 1
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 00/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 01/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 02/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 03/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 04/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 05/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 06/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 07/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 08/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 09/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 10/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 11/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 12/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 13/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 14/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 15/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 16/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 17/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 18/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 19/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 20/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 00/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 01/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 21/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 02/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 22/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Channel 23/0 : 7[7] -> 6[6] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 03/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 04/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 00/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 01/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 00/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 05/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 02/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 06/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 03/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 00/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 00/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 01/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 01/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 07/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 01/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 04/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 02/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 02/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 05/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 02/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 08/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 03/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 03/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 06/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 03/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 04/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 04/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 09/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 00/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 07/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 04/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 10/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 05/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 05/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 06/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 01/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 05/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 11/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 08/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 07/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 02/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 03/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 12/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 08/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 06/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 09/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 06/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 04/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 07/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 05/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 07/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 09/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 13/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 10/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 08/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 06/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 08/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 07/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 09/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 10/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 09/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 11/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 14/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 10/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 08/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 11/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 11/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 09/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 15/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 10/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 12/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 16/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 13/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 11/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 12/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 10/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 12/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 17/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 13/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 12/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 13/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 18/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 14/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 11/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 14/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 13/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 14/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 14/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 15/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 15/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 19/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 12/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 15/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 16/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 15/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 13/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 17/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 16/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 20/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 16/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 18/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 14/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 16/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 19/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 15/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 21/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 17/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 17/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 17/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 16/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 18/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 18/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 17/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 20/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 18/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 22/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 19/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 18/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 19/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 21/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 19/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 19/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Channel 23/0 : 4[4] -> 3[3] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 20/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 20/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 20/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 20/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 22/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 21/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 21/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 22/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 21/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Channel 23/0 : 3[3] -> 2[2] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 21/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 22/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Channel 23/0 : 5[5] -> 4[4] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 22/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Channel 23/0 : 1[1] -> 0[0] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 22/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Channel 23/0 : 2[2] -> 1[1] via P2P/IPC
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Channel 23/0 : 6[6] -> 5[5] via P2P/IPC
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Connected all trees
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Connected all trees
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Connected all trees
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Connected all trees
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Connected all trees
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Connected all trees
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Connected all trees
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Connected all trees
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NVLS comm 0x55c1508d4310 headRank 1 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 33554432 nvlsTotalSize 268435456
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NVLS comm 0x55a1975c0bd0 headRank 2 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 33554432 nvlsTotalSize 268435456
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NVLS comm 0x560a1709db70 headRank 4 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 33554432 nvlsTotalSize 268435456
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NVLS comm 0x55cb64daf560 headRank 0 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 33554432 nvlsTotalSize 268435456
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NVLS comm 0x56041de2ba00 headRank 7 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 33554432 nvlsTotalSize 268435456
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NVLS comm 0x55d96402b010 headRank 6 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 33554432 nvlsTotalSize 268435456
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NVLS comm 0x55b7ede6e730 headRank 5 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 33554432 nvlsTotalSize 268435456
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NVLS comm 0x563759d5ae50 headRank 3 nHeads 8 nvlsRanks 8 buffSize 1048576 nvlsPerRankSize 33554432 nvlsTotalSize 268435456
+gpu-dev-7d5e8186:1799:2389 [0] NCCL INFO [Proxy Progress] Device 4 CPU core 65
+gpu-dev-7d5e8186:1801:2390 [0] NCCL INFO [Proxy Progress] Device 6 CPU core 50
+gpu-dev-7d5e8186:1800:2391 [0] NCCL INFO [Proxy Progress] Device 5 CPU core 63
+gpu-dev-7d5e8186:1802:2392 [0] NCCL INFO [Proxy Progress] Device 7 CPU core 65
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO TUNER/Plugin: Using nccl_ofi_tuner (v3)
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO TUNER/Plugin: Using nccl_ofi_tuner (v3)
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO TUNER/Plugin: Using nccl_ofi_tuner (v3)
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO TUNER/Plugin: Using nccl_ofi_tuner (v3)
+gpu-dev-7d5e8186:1795:2393 [0] NCCL INFO [Proxy Progress] Device 0 CPU core 11
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO TUNER/Plugin: Using nccl_ofi_tuner (v3)
+gpu-dev-7d5e8186:1797:2394 [0] NCCL INFO [Proxy Progress] Device 2 CPU core 119
+gpu-dev-7d5e8186:1796:2395 [0] NCCL INFO [Proxy Progress] Device 1 CPU core 46
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO TUNER/Plugin: Using nccl_ofi_tuner (v3)
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO TUNER/Plugin: Using nccl_ofi_tuner (v3)
+gpu-dev-7d5e8186:1798:2396 [0] NCCL INFO [Proxy Progress] Device 3 CPU core 30
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO TUNER/Plugin: Could not find: libnccl-tuner.so
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO TUNER/Plugin: Using nccl_ofi_tuner (v3)
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Tuner selected platform: AWS
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Region base Tuner is chosen for platform: p5.48xlarge
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Region Tuner init (platform 0): comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NET/OFI Tuner init: comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO NCCL_ALGO set by environment to ring,tree
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Enabled NCCL Func/Proto/Algo Matrix:
+     Function |       LL     LL128    Simple   |          Tree           Ring  CollNetDirect   CollNetChain           NVLS       NVLSTree            PAT  
+    Broadcast |        1         2         1   |             1              1              0              0              0              0              0  
+       Reduce |        1         2         1   |             1              1              0              0              0              0              0  
+    AllGather |        1         2         1   |             1              1              0              0              0              0              0  
+ReduceScatter |        1         2         1   |             1              1              0              0              0              0              0  
+    AllReduce |        1         2         1   |             1              1              0              0              0              0              0  
+
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Symmetric memory is not supported. cuMemEnable 0, globalGinSupport 0, globalNicFused 0 cuMemGdrSupport 1
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO CC Off, workFifoBytes 1048576
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Tuner selected platform: AWS
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Region base Tuner is chosen for platform: p5.48xlarge
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Region Tuner init (platform 0): comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NET/OFI Tuner init: comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO NCCL_ALGO set by environment to ring,tree
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Symmetric memory is not supported. cuMemEnable 0, globalGinSupport 0, globalNicFused 0 cuMemGdrSupport 1
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Tuner selected platform: AWS
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Region base Tuner is chosen for platform: p5.48xlarge
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Region Tuner init (platform 0): comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NET/OFI Tuner init: comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO NCCL_ALGO set by environment to ring,tree
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Symmetric memory is not supported. cuMemEnable 0, globalGinSupport 0, globalNicFused 0 cuMemGdrSupport 1
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Tuner selected platform: AWS
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Region base Tuner is chosen for platform: p5.48xlarge
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Region Tuner init (platform 0): comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NET/OFI Tuner init: comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO NCCL_ALGO set by environment to ring,tree
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Symmetric memory is not supported. cuMemEnable 0, globalGinSupport 0, globalNicFused 0 cuMemGdrSupport 1
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Tuner selected platform: AWS
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Region base Tuner is chosen for platform: p5.48xlarge
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Region Tuner init (platform 0): comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NET/OFI Tuner init: comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO NCCL_ALGO set by environment to ring,tree
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Symmetric memory is not supported. cuMemEnable 0, globalGinSupport 0, globalNicFused 0 cuMemGdrSupport 1
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Tuner selected platform: AWS
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Region base Tuner is chosen for platform: p5.48xlarge
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Region Tuner init (platform 0): comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NET/OFI Tuner init: comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO NCCL_ALGO set by environment to ring,tree
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Symmetric memory is not supported. cuMemEnable 0, globalGinSupport 0, globalNicFused 0 cuMemGdrSupport 1
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Tuner selected platform: AWS
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Region base Tuner is chosen for platform: p5.48xlarge
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Region Tuner init (platform 0): comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NET/OFI Tuner init: comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO NCCL_ALGO set by environment to ring,tree
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Symmetric memory is not supported. cuMemEnable 0, globalGinSupport 0, globalNicFused 0 cuMemGdrSupport 1
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Tuner selected platform: AWS
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Region base Tuner is chosen for platform: p5.48xlarge
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Region Tuner init (platform 0): comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NET/OFI Tuner init: comm with 8 ranks and 1 nodes.
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO NCCL_ALGO set by environment to ring,tree
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO threadThresholds 8/8/64 | 64/8/64 | 512 | 512
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO 24 coll channels, 24 collnet channels, 16 nvls channels, 32 p2p channels, 32 p2p channels per peer
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Symmetric memory is not supported. cuMemEnable 0, globalGinSupport 0, globalNicFused 0 cuMemGdrSupport 1
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO ncclCommInitRankConfig comm 0x55cb64daf560 rank 0 nranks 8 cudaDev 0 nvmlDev 0 busId 53000 commId 0xd5d1c00bcbb9dc1d - Init COMPLETE
+gpu-dev-7d5e8186:1795:1795 [0] NCCL INFO Init timings - ncclCommInitRankConfig: rank 0 nranks 8 total 3.56 (kernels 0.35, alloc 1.53, bootstrap 0.58, allgathers 0.00, topo 0.08, graphs 0.01, connections 0.96, rest 0.04)
+gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO ncclCommInitRankConfig comm 0x560a1709db70 rank 4 nranks 8 cudaDev 4 nvmlDev 4 busId 97gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO ncclCommInitRankConfig comm 0x56041de2ba00 rank 7 nranks 8 cudaDev 7 nvmlDev 7 busId cagpu-dev-7d5e8186:1800:1800 [5] NCCL INFO ncclCommInitRankConfig comm 0x55b7ede6e730 rank 5 nranks 8 cudaDev 5 nvmlDev 5 busId a8000 commId 0xd5d1c00bcbb9dc1d - Init COMPLETE
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO ncclCommInitRankConfig comm 0x563759d5ae50 rank 3 nranks 8 cudaDev 3 nvmlDev 3 busId 86gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO ncclCommInitRankConfig comm 0x55a1975c0bd0 rank 2 nranks 8 cudaDev 2 nvmlDev 2 busId 75000 commId 0xd5d1c00bcbb9dc1d - Init COMPLETE
+000 commId 0xd5d1c00bcbb9dc1d - Init COMPLETE
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO ncclCommInitRankConfig comm 0x55c1508d4310 rank 1 nranks 8 cudaDev 1 nvmlDev 1 busId 64gpu-dev-7d5e8186:1799:1799 [4] NCCL INFO Init timings - ncclCommInitRankConfig: rank 4 nranks 8 total 3.56 (kernels 0.35, alloc 000 commId 0xd5d1c00bcbb9dc1d - Init COMPLETE
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO ncclCommInitRankConfig comm 0x55d96402b010 rank 6 nranks 8 cudaDev 6 nvmlDev 6 busId b9000 commId 0xd5d1c00bcbb9dc1d - Init COMPLETE
+gpu-dev-7d5e8186:1802:1802 [7] NCCL INFO Init timings - ncclCommInitRankConfig: rank 7 nranks 8 total 3.56 (kernels 0.35, alloc gpu-dev-7d5e8186:1800:1800 [5] NCCL INFO Init timings - ncclCommInitRankConfig: rank 5 nranks 8 total 3.56 (kernels 0.35, alloc 2.04, bootstrap 0.06, allgathers 0.01, topo 0.08, graphs 0.01, connections 0.98, rest 0.02)
+000 commId 0xd5d1c00bcbb9dc1d - Init COMPLETE
+2.05, bootstrap 0.05, allgathers 0.01, topo 0.08, graphs 0.01, connections 1.00, rest 0.01)
+gpu-dev-7d5e8186:1798:1798 [3] NCCL INFO Init timings - ncclCommInitRankConfig: rank 3 nranks 8 total 3.56 (kernels 0.39, alloc 000 commId 0xd5d1c00bcbb9dc1d - Init COMPLETE
+gpu-dev-7d5e8186:1797:1797 [2] NCCL INFO Init timings - ncclCommInitRankConfig: rank 2 nranks 8 total 3.56 (kernels 0.35, alloc 2.10, bootstrap 0.01, allgathers 0.01, topo 0.08, graphs 0.01, connections 1.00, rest 0.01)
+gpu-dev-7d5e8186:1796:1796 [1] NCCL INFO Init timings - ncclCommInitRankConfig: rank 1 nranks 8 total 3.56 (kernels 0.35, alloc 2.06, bootstrap 0.00, allgathers 0.00, topo 0.09, graphs 0.01, connections 0.98, rest 0.03)
+2.00, bootstrap 0.11, allgathers 0.01, topo 0.08, graphs 0.01, connections 1.00, rest 0.00)
+1.63, bootstrap 0.48, allgathers 0.00, topo 0.08, graphs 0.02, connections 1.00, rest 0.00)
+gpu-dev-7d5e8186:1801:1801 [6] NCCL INFO Init timings - ncclCommInitRankConfig: rank 6 nranks 8 total 3.55 (kernels 0.39, alloc 2.06, bootstrap 0.00, allgathers 0.01, topo 0.08, graphs 0.01, connections 0.97, rest 0.04)
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=1
+W0624 17:41:19.095000 999 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/agent/server/api.py:753] Received 15 death signal, shutting down workers
+W0624 17:41:19.096000 999 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1795 closing signal SIGTERM
+W0624 17:41:19.096000 999 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1796 closing signal SIGTERM
+W0624 17:41:19.098000 999 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1797 closing signal SIGTERM
+W0624 17:41:19.099000 999 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1798 closing signal SIGTERM
+W0624 17:41:19.101000 999 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1799 closing signal SIGTERM
+W0624 17:41:19.101000 999 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1800 closing signal SIGTERM
+W0624 17:41:19.101000 999 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1801 closing signal SIGTERM
+W0624 17:41:19.106000 999 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1802 closing signal SIGTERM
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 1020, in <module>
+    main()
+    ~~~~^^
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 1016, in main
+    run(args)
+    ~~~^^^^^^
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 191, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 362, in launch_agent
+    result = agent.run()
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/metrics/api.py", line 134, in wrapper
+    result = f(*args, **kwargs)
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/agent/server/api.py", line 745, in run
+    result = self._invoke_run(role)
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/agent/server/api.py", line 923, in _invoke_run
+    time.sleep(monitor_interval)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/workspace/submit-7d5e8186/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 86, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 999 got signal: 15
