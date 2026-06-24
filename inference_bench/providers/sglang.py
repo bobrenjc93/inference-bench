@@ -37,13 +37,16 @@ class SglangProvider(Provider):
         self._pip_install("--only-binary=:all:", spec)
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
+        server_model = self._server_model(model)
         cmd = [
             self.venv_python, "-m", "sglang.launch_server",
-            "--model-path", model,
+            "--model-path", server_model,
             "--tp", str(tp),
             "--port", str(port),
             "--trust-remote-code",
         ]
+        if server_model != model:
+            cmd.extend(["--served-model-name", model])
         mem_fraction = os.environ.get("INFERENCE_BENCH_SGLANG_MEM_FRACTION_STATIC")
         if mem_fraction:
             cmd.extend(["--mem-fraction-static", mem_fraction])

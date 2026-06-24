@@ -40,12 +40,13 @@ class TorchInfernoProvider(Provider):
         self._pip_install("-e", ".[serve]", cwd=self.repo_dir)
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
+        server_model = self._server_model(model)
         cmd = [
             self.venv_python,
             "-m",
             "torchinferno.openai_server",
             "--model",
-            model,
+            server_model,
             "--tensor-parallel-size",
             str(tp),
             "--port",

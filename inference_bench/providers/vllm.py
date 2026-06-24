@@ -299,13 +299,16 @@ class VllmProvider(Provider):
         metrics_py.write_text(text.replace(old, new))
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
+        server_model = self._server_model(model)
         cmd = [
             self.venv_python, "-m", "vllm.entrypoints.openai.api_server",
-            "--model", model,
+            "--model", server_model,
             "--tensor-parallel-size", str(tp),
             "--port", str(port),
             "--trust-remote-code",
         ]
+        if server_model != model:
+            cmd.extend(["--served-model-name", model])
         gpu_memory_utilization = os.environ.get("INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION")
         if gpu_memory_utilization:
             cmd.extend(["--gpu-memory-utilization", gpu_memory_utilization])

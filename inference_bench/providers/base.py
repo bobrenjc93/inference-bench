@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import signal
 import socket
@@ -114,6 +115,9 @@ class Provider(ABC):
 
     def _server_env(self) -> dict[str, str]:
         return os.environ.copy()
+
+    def _server_model(self, model: str) -> str:
+        return _server_model_path(model)
 
     def _gpu_memory_wait_fraction(self) -> float | None:
         return None
@@ -512,6 +516,86 @@ class Provider(ABC):
             return False
         finally:
             sock.close()
+
+
+def _server_model_path(model: str) -> str:
+    override = os.environ.get("INFERENCE_BENCH_SERVER_MODEL", "").strip()
+    if override:
+        return override
+    if not _env_flag("INFERENCE_BENCH_USE_CACHED_HF_SNAPSHOT", True):
+        return model
+    cached = _cached_hf_snapshot(model)
+    return str(cached) if cached is not None else model
+
+
+def _cached_hf_snapshot(model: str) -> Path | None:
+    candidate = Path(model).expanduser()
+    if candidate.exists():
+        return None
+    repo_cache_name = f"models--{model.replace('/', '--')}"
+    for cache_root in _hf_cache_roots():
+        repo_cache = cache_root / repo_cache_name
+        snapshots = repo_cache / "snapshots"
+        if not snapshots.exists():
+            continue
+        for snapshot in _snapshot_candidates(repo_cache):
+            if _snapshot_has_model_files(snapshot):
+                return snapshot
+    return None
+
+
+def _hf_cache_roots() -> list[Path]:
+    roots: list[Path] = []
+    for name in ("HUGGINGFACE_HUB_CACHE", "HF_HUB_CACHE"):
+        raw = os.environ.get(name, "").strip()
+        if raw:
+            roots.append(Path(raw).expanduser())
+    hf_home = os.environ.get("HF_HOME", "").strip()
+    if hf_home:
+        roots.append(Path(hf_home).expanduser() / "hub")
+    roots.append(Path.home() / ".cache" / "huggingface" / "hub")
+
+    deduped: list[Path] = []
+    seen: set[Path] = set()
+    for root in roots:
+        key = root.resolve() if root.exists() else root
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(root)
+    return deduped
+
+
+def _snapshot_candidates(repo_cache: Path) -> list[Path]:
+    snapshots = repo_cache / "snapshots"
+    refs_main = repo_cache / "refs" / "main"
+    if refs_main.is_file():
+        snapshot = snapshots / refs_main.read_text().strip()
+        if snapshot.exists():
+            return [snapshot]
+    return sorted(
+        (path for path in snapshots.iterdir() if path.is_dir()),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+
+
+def _snapshot_has_model_files(snapshot: Path) -> bool:
+    if not (snapshot / "config.json").exists():
+        return False
+    for index_name in ("model.safetensors.index.json", "pytorch_model.bin.index.json"):
+        index_path = snapshot / index_name
+        if index_path.exists():
+            try:
+                index = json.loads(index_path.read_text())
+            except json.JSONDecodeError:
+                return False
+            weight_map = index.get("weight_map", {})
+            if not isinstance(weight_map, dict):
+                return False
+            files = {str(filename) for filename in weight_map.values()}
+            return bool(files) and all((snapshot / filename).exists() for filename in files)
+    return (snapshot / "model.safetensors").exists() or (snapshot / "pytorch_model.bin").exists()
 
 
 class _GpuIsolationMonitor:
