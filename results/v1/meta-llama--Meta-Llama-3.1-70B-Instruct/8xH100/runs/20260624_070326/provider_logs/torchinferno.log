@@ -1,0 +1,147 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /tmp/inference-bench-codex.1782211356/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model meta-llama/Meta-Llama-3.1-70B-Instruct --tensor-parallel-size 8 --port 8018 --trust-remote-code
+
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+*****************************************
+[Llama3TP] resolving checkpoint meta-llama/Meta-Llama-3.1-70B-Instruct
+Fetching 36 files:   0%|          | 0/36 [00:00<?, ?it/s]Fetching 36 files: 100%|██████████| 36/36 [00:00<00:00, 5976.68it/s]
+[Llama3TP] resolved checkpoint /home/bobren/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+NCCL version 2.29.7+cuda12.6
+
+[2026-06-24 06:45:52] devgpu006:3177347:3177347 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-24 06:45:52] devgpu006:3177352:3177352 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-24 06:45:52] devgpu006:3177354:3177354 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-24 06:45:52] devgpu006:3177343:3177343 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-24 06:45:52] devgpu006:3177356:3177356 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-24 06:45:52] devgpu006:3177348:3177348 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-24 06:45:52] devgpu006:3177351:3177351 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-24 06:45:52] devgpu006:3177355:3177355 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0
+[Llama3TP] loaded 10/80 layers in 3.2s
+[Llama3TP] loaded 20/80 layers in 6.0s
+[Llama3TP] loaded 30/80 layers in 9.1s
+[Llama3TP] loaded 40/80 layers in 11.8s
+[Llama3TP] loaded 50/80 layers in 14.5s
+[Llama3TP] loaded 60/80 layers in 17.3s
+[Llama3TP] loaded 70/80 layers in 20.0s
+[Llama3TP] loaded 80/80 layers in 22.8s
+[Llama3TP] checkpoint load complete in 22.8s
+[WARMUP] FlashInfer decode graphs: 8 captured[WARMUP] FlashInfer decode graphs: 8 captured
+
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+TorchInferno OpenAI server listening on http://0.0.0.0:8018/v1 model=meta-llama/Meta-Llama-3.1-70B-Instruct
+W0624 06:51:01.834000 3125325 /data/users/bobren/d/pytorch/torch/distributed/elastic/agent/server/api.py:753] Received Signals.SIGTERM death signal, shutting down workers
+W0624 06:51:01.834000 3125325 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3177343 closing signal SIGTERM
+W0624 06:51:01.836000 3125325 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3177347 closing signal SIGTERM
+W0624 06:51:01.836000 3125325 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3177348 closing signal SIGTERM
+W0624 06:51:01.837000 3125325 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3177351 closing signal SIGTERM
+W0624 06:51:01.843000 3125325 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3177352 closing signal SIGTERM
+[rank6]: Traceback (most recent call last):
+[rank6]:   File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank6]:     return _run_code(code, main_globals, None,
+[rank6]:   File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 86, in _run_code
+[rank6]:     exec(code, run_globals)
+[rank6]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 14608, in <module>
+[rank6]:     raise SystemExit(main())
+[rank6]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 14603, in main
+[rank6]:     serve(config)
+[rank6]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 10079, in serve
+[rank6]:     _tensor_parallel_worker_loop(engine)
+[rank6]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 11510, in _tensor_parallel_worker_loop
+[rank6]:     payload = _receive_tensor_parallel_tensor_payload(engine)
+[rank6]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 10688, in _receive_tensor_parallel_tensor_payload
+[rank6]:     _broadcast_tensor_command(meta, src=0, group=command_group)
+[rank6]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 10634, in _broadcast_tensor_command
+[rank6]:     dist.broadcast(tensor, src=src, group=group)
+[rank6]:   File "/data/users/bobren/d/pytorch/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank6]:     return func(*args, **kwargs)
+[rank6]:   File "/data/users/bobren/d/pytorch/torch/distributed/distributed_c10d.py", line 3136, in broadcast
+[rank6]:     work.wait()
+[rank6]: RuntimeError: [/data/users/bobren/d/pytorch/third_party/gloo/gloo/transport/tcp/pair.cc:547] Connection closed by peer [2401:db00:126c:c23:face:0:286:0]:37573
+[rank5]: Traceback (most recent call last):
+[rank5]:   File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank5]:     return _run_code(code, main_globals, None,
+[rank5]:   File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 86, in _run_code
+[rank5]:     exec(code, run_globals)
+[rank5]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 14608, in <module>
+[rank5]:     raise SystemExit(main())
+[rank5]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 14603, in main
+[rank5]:     serve(config)
+[rank5]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 10079, in serve
+[rank5]:     _tensor_parallel_worker_loop(engine)
+[rank5]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 11510, in _tensor_parallel_worker_loop
+[rank5]:     payload = _receive_tensor_parallel_tensor_payload(engine)
+[rank5]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 10688, in _receive_tensor_parallel_tensor_payload
+[rank5]:     _broadcast_tensor_command(meta, src=0, group=command_group)
+[rank5]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 10634, in _broadcast_tensor_command
+[rank5]:     dist.broadcast(tensor, src=src, group=group)
+[rank5]:   File "/data/users/bobren/d/pytorch/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank5]:     return func(*args, **kwargs)
+[rank5]:   File "/data/users/bobren/d/pytorch/torch/distributed/distributed_c10d.py", line 3136, in broadcast
+[rank5]:     work.wait()
+[rank5]: RuntimeError: [/data/users/bobren/d/pytorch/third_party/gloo/gloo/transport/tcp/pair.cc:547] Connection closed by peer [2401:db00:126c:c23:face:0:286:0]:44685
+[rank7]: Traceback (most recent call last):
+[rank7]:   File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank7]:     return _run_code(code, main_globals, None,
+[rank7]:   File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 86, in _run_code
+[rank7]:     exec(code, run_globals)
+[rank7]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 14608, in <module>
+[rank7]:     raise SystemExit(main())
+[rank7]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 14603, in main
+[rank7]:     serve(config)
+[rank7]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 10079, in serve
+[rank7]:     _tensor_parallel_worker_loop(engine)
+[rank7]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 11510, in _tensor_parallel_worker_loop
+[rank7]:     payload = _receive_tensor_parallel_tensor_payload(engine)
+[rank7]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 10688, in _receive_tensor_parallel_tensor_payload
+[rank7]:     _broadcast_tensor_command(meta, src=0, group=command_group)
+[rank7]:   File "/tmp/inference-bench-codex.1782211356/builds/torchinferno/src/torchinferno/openai_server.py", line 10634, in _broadcast_tensor_command
+[rank7]:     dist.broadcast(tensor, src=src, group=group)
+[rank7]:   File "/data/users/bobren/d/pytorch/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank7]:     return func(*args, **kwargs)
+[rank7]:   File "/data/users/bobren/d/pytorch/torch/distributed/distributed_c10d.py", line 3136, in broadcast
+[rank7]:     work.wait()
+[rank7]: RuntimeError: [/data/users/bobren/d/pytorch/third_party/gloo/gloo/transport/tcp/pair.cc:547] Connection closed by peer [2401:db00:126c:c23:face:0:286:0]:4014
+W0624 06:51:01.862000 3125325 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3177354 closing signal SIGTERM
+W0624 06:51:01.868000 3125325 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3177355 closing signal SIGTERM
+W0624 06:51:01.874000 3125325 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3177356 closing signal SIGTERM
+Traceback (most recent call last):
+  File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/data/users/bobren/d/pytorch/torch/distributed/run.py", line 1020, in <module>
+    main()
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+  File "/data/users/bobren/d/pytorch/torch/distributed/run.py", line 1016, in main
+    run(args)
+  File "/data/users/bobren/d/pytorch/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+  File "/data/users/bobren/d/pytorch/torch/distributed/launcher/api.py", line 194, in __call__
+    return launch_agent(
+  File "/data/users/bobren/d/pytorch/torch/distributed/launcher/api.py", line 374, in launch_agent
+    result = agent.run()
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/metrics/api.py", line 134, in wrapper
+    result = f(*args, **kwargs)
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/agent/server/api.py", line 745, in run
+    result = self._invoke_run(role)
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/agent/server/api.py", line 923, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py", line 86, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 3125325 got signal: 15
