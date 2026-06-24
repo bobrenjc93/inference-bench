@@ -8,14 +8,14 @@ from inference_bench.providers.torchinferno import TorchInfernoProvider
 
 
 class TorchInfernoProviderTest(unittest.TestCase):
-    def test_server_env_disables_nccl_cumem_by_default(self) -> None:
+    def test_server_env_disables_nccl_cumem_and_enables_rank0_checkpoint_broadcast_by_default(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
 
         with mock.patch.dict(os.environ, {}, clear=True):
             env = provider._server_env()
 
         self.assertEqual(env["NCCL_CUMEM_ENABLE"], "0")
-        self.assertEqual(env["TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST"], "0")
+        self.assertEqual(env["TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST"], "1")
 
     def test_server_env_preserves_explicit_nccl_cumem_override(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
@@ -30,12 +30,12 @@ class TorchInfernoProviderTest(unittest.TestCase):
 
         with mock.patch.dict(
             os.environ,
-            {"TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST": "1"},
+            {"TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST": "0"},
             clear=True,
         ):
             env = provider._server_env()
 
-        self.assertEqual(env["TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST"], "1")
+        self.assertEqual(env["TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST"], "0")
 
     def test_server_cmd_appends_env_extra_args(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
