@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shlex
 from pathlib import Path
 
 from . import register
@@ -39,7 +40,7 @@ class TorchInfernoProvider(Provider):
         self._pip_install("-e", ".[serve]", cwd=self.repo_dir)
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
-        return [
+        cmd = [
             self.venv_python,
             "-m",
             "torchinferno.openai_server",
@@ -51,6 +52,10 @@ class TorchInfernoProvider(Provider):
             str(port),
             "--trust-remote-code",
         ]
+        extra_args = os.environ.get("TORCHINFERNO_SERVER_ARGS", "").strip()
+        if extra_args:
+            cmd.extend(shlex.split(extra_args))
+        return cmd
 
     def _server_env(self) -> dict[str, str]:
         env = super()._server_env()

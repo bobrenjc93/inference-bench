@@ -24,6 +24,14 @@ class TorchInfernoProviderTest(unittest.TestCase):
 
         self.assertEqual(env["NCCL_CUMEM_ENABLE"], "1")
 
+    def test_server_cmd_appends_env_extra_args(self) -> None:
+        provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
+
+        with mock.patch.dict(os.environ, {"TORCHINFERNO_SERVER_ARGS": "--max-batch-size 256"}, clear=True):
+            cmd = provider._server_cmd("model", tp=8, port=9000)
+
+        self.assertEqual(cmd[-2:], ["--max-batch-size", "256"])
+
 
 if __name__ == "__main__":
     unittest.main()
