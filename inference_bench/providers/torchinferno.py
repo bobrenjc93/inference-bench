@@ -61,11 +61,10 @@ class TorchInfernoProvider(Provider):
     def _server_env(self) -> dict[str, str]:
         env = super()._server_env()
         # Public TorchInferno runs have repeatedly stalled during NCCL startup
-        # broadcasts on P2P/CUMEM paths. Keep CUMEM disabled by default, but use
-        # rank-0 checkpoint tensor broadcast to avoid all TP ranks independently
-        # streaming the same checkpoint from slow shared storage.
+        # broadcasts on P2P/CUMEM paths. Keep CUMEM disabled by default and let
+        # TorchInferno use its portable checkpoint loading default unless a run
+        # explicitly opts into rank-0 checkpoint tensor broadcast.
         env.setdefault("NCCL_CUMEM_ENABLE", "0")
-        env.setdefault("TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST", "1")
         return env
 
     def _gpu_memory_wait_fraction(self) -> float | None:

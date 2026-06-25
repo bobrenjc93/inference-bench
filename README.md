@@ -176,7 +176,7 @@ INFERENCE_BENCH_SGLANG_MEM_FRACTION_STATIC=0.85
 INFERENCE_BENCH_TORCHINFERNO_MIN_GPU_FREE_FRACTION=0.92
 INFERENCE_BENCH_USE_CACHED_HF_SNAPSHOT=0      # opt out of local HF cache launch
 INFERENCE_BENCH_SERVER_MODEL=/models/llama    # server path override; keeps result model id
-TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST=0  # opt out of rank-0 checkpoint tensor broadcast
+TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST=1  # opt into rank-0 checkpoint tensor broadcast
 TORCHINFERNO_SERVER_ARGS="--max-batch-size 256"  # append TorchInferno server args
 ```
 
