@@ -71,6 +71,14 @@ class TorchInfernoProvider(Provider):
         env.setdefault("NCCL_NET", "Socket")
         env.setdefault("NCCL_NET_PLUGIN", "none")
         env.setdefault("NCCL_IB_DISABLE", "1")
+        # TorchInferno launches eight worker processes before it can bind /health.
+        # Inherited NCCL INFO logging can dominate startup logs on public runners
+        # and obscure readiness failures. Keep the default quiet; set
+        # INFERENCE_BENCH_TORCHINFERNO_NCCL_DEBUG=INFO for transport debugging.
+        env["NCCL_DEBUG"] = os.environ.get("INFERENCE_BENCH_TORCHINFERNO_NCCL_DEBUG", "WARN")
+        if "TORCH_NCCL_ASYNC_ERROR_HANDLING" not in env and "NCCL_ASYNC_ERROR_HANDLING" in env:
+            env["TORCH_NCCL_ASYNC_ERROR_HANDLING"] = env["NCCL_ASYNC_ERROR_HANDLING"]
+        env.pop("NCCL_ASYNC_ERROR_HANDLING", None)
         return env
 
     def _gpu_memory_wait_fraction(self) -> float | None:
