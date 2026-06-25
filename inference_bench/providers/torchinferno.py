@@ -65,6 +65,12 @@ class TorchInfernoProvider(Provider):
         # TorchInferno use its portable checkpoint loading default unless a run
         # explicitly opts into rank-0 checkpoint tensor broadcast.
         env.setdefault("NCCL_CUMEM_ENABLE", "0")
+        # Public 8xH100 runs are single-node. Avoid cloud RDMA/OFI plugin probes
+        # for TorchInferno's auto-launched tensor-parallel workers unless the
+        # caller explicitly requests a different NCCL transport.
+        env.setdefault("NCCL_NET", "Socket")
+        env.setdefault("NCCL_NET_PLUGIN", "none")
+        env.setdefault("NCCL_IB_DISABLE", "1")
         return env
 
     def _gpu_memory_wait_fraction(self) -> float | None:
