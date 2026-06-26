@@ -1,15 +1,27 @@
 from __future__ import annotations
 
+import os
 import re
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
+import httpx
 import openai
 
 
 def check_answer(response: str, expected: int) -> bool:
     return bool(re.search(r'\b' + re.escape(str(expected)) + r'\b', response))
+
+
+def _env_int(name: str, default: int, *, minimum: int = 1) -> int:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        return max(minimum, int(raw))
+    except ValueError:
+        return default
 
 
 @dataclass
@@ -84,10 +96,24 @@ class Benchmark(ABC):
         ...
 
     def _make_client(self, api_base: str) -> openai.OpenAI:
+        max_connections = _env_int("INFERENCE_BENCH_HTTP_MAX_CONNECTIONS", 512, minimum=1)
+        max_keepalive = _env_int(
+            "INFERENCE_BENCH_HTTP_MAX_KEEPALIVE_CONNECTIONS",
+            max_connections,
+            minimum=0,
+        )
+        http_client = httpx.Client(
+            timeout=300.0,
+            limits=httpx.Limits(
+                max_connections=max_connections,
+                max_keepalive_connections=min(max_keepalive, max_connections),
+            ),
+        )
         return openai.OpenAI(
             base_url=api_base,
             api_key="not-needed",
             timeout=300.0,
+            http_client=http_client,
         )
 
     def _stream_request(
