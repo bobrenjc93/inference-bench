@@ -115,4 +115,5 @@ class TreeOfThoughtBenchmark(Benchmark):
             f"{correct} correct"
         )
         result.summarize()
+        self._close_client(client)
         return result

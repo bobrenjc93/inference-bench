@@ -57,4 +57,5 @@ class SelfConsistencyBenchmark(Benchmark):
             f"  [{self.name}] {unique_answers} unique final answers across {NUM_SAMPLES} samples, "
             f"{correct_count}/{NUM_SAMPLES} correct"
         )
+        self._close_client(client)
         return result

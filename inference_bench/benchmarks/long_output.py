@@ -91,4 +91,5 @@ class LongOutputBenchmark(Benchmark):
         correct = sum(1 for r in result.raw_requests if r.correct)
         print(f"  [{self.name}] Done: {correct}/{NUM_REQUESTS} correct")
         result.summarize()
+        self._close_client(client)
         return result

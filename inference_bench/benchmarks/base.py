@@ -116,6 +116,16 @@ class Benchmark(ABC):
             http_client=http_client,
         )
 
+    def _close_client(self, client: openai.OpenAI) -> None:
+        close = getattr(client, "close", None)
+        if not callable(close):
+            return
+        try:
+            close()
+        except Exception:
+            if self.debug:
+                raise
+
     def _stream_request(
         self,
         client: openai.OpenAI,

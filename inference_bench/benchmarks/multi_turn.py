@@ -97,4 +97,5 @@ class MultiTurnBenchmark(Benchmark):
 
         correct = sum(1 for r in result.raw_requests if r.correct)
         print(f"  [{self.name}] Done: {correct}/{total_requests} correct")
+        self._close_client(client)
         return result
