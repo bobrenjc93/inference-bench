@@ -109,14 +109,26 @@ class Benchmark(ABC):
                 max_keepalive_connections=min(max_keepalive, max_connections),
             ),
         )
-        return openai.OpenAI(
+        client = openai.OpenAI(
             base_url=api_base,
             api_key="not-needed",
             timeout=300.0,
             http_client=http_client,
         )
+        open_clients = getattr(self, "_open_clients", None)
+        if open_clients is None:
+            open_clients = []
+            self._open_clients = open_clients
+        open_clients.append(client)
+        return client
 
     def _close_client(self, client: openai.OpenAI) -> None:
+        open_clients = getattr(self, "_open_clients", None)
+        if open_clients is not None:
+            try:
+                open_clients.remove(client)
+            except ValueError:
+                pass
         close = getattr(client, "close", None)
         if not callable(close):
             return
@@ -125,6 +137,11 @@ class Benchmark(ABC):
         except Exception:
             if self.debug:
                 raise
+
+    def _close_open_clients(self) -> None:
+        open_clients = list(getattr(self, "_open_clients", []) or [])
+        for client in open_clients:
+            self._close_client(client)
 
     def _stream_request(
         self,

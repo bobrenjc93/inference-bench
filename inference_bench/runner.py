@@ -90,6 +90,7 @@ def run_all(
             )
 
             for bench_name in config.benchmarks:
+                benchmark = None
                 try:
                     provider.wait_for_gpu_isolation(config.tensor_parallel_size)
                     benchmark = get_benchmark(bench_name)
@@ -101,6 +102,11 @@ def run_all(
                 except Exception as exc:
                     pr.errors[bench_name] = str(exc)
                     print(f"--- {bench_name} FAILED: {exc} ---")
+                finally:
+                    if benchmark is not None:
+                        close_clients = getattr(benchmark, "_close_open_clients", None)
+                        if callable(close_clients):
+                            close_clients()
 
         except Exception as exc:
             pr.errors["_server"] = str(exc)
