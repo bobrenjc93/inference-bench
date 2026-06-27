@@ -7,6 +7,8 @@ import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+from inference_bench.results import SUMMARY_SCORABLE_METRICS
+
 
 BENCHMARK_INFO = {
     "few_shot": {
@@ -32,12 +34,7 @@ BENCHMARK_INFO = {
 }
 
 
-SCORABLE_METRICS = [
-    "ttft_median_ms",
-    "tpot_median_ms",
-    "e2e_median_ms",
-    "throughput_median_tps",
-]
+SCORABLE_METRICS = list(SUMMARY_SCORABLE_METRICS)
 
 DISPLAY_METRICS = SCORABLE_METRICS + ["correctness_rate"]
 
