@@ -13,6 +13,14 @@ from tabulate import tabulate
 from .benchmarks.base import BenchmarkResult
 
 
+SUMMARY_SCORABLE_METRICS = (
+    "ttft_median_ms",
+    "tpot_median_ms",
+    "e2e_median_ms",
+    "throughput_median_tps",
+)
+
+
 def _utc_now_isoformat() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -316,17 +324,8 @@ class RunResults:
         print("=" * 80)
         wins: dict[str, int] = {p: 0 for p in provider_names}
 
-        for pr in self.providers.values():
-            for br in pr.benchmarks.values():
-                pass
-
-        scorable = [
-            "ttft_median_ms", "tpot_median_ms", "e2e_median_ms",
-            "throughput_median_tps", "correctness_rate",
-        ]
-
         for bname in set().union(*(pr.benchmarks.keys() for pr in self.providers.values())):
-            for mk in scorable:
+            for mk in SUMMARY_SCORABLE_METRICS:
                 values = {}
                 for pname in provider_names:
                     pr = self.providers[pname]
