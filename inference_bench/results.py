@@ -311,12 +311,13 @@ class RunResults:
             return ""
         higher_is_better = {"throughput_median_tps", "total_output_tokens", "correctness_rate"}
         if metric_key in higher_is_better:
-            best = max(values, key=lambda k: values[k])
+            best_value = max(values.values())
         elif metric_key == "num_requests":
             return ""
         else:
-            best = min(values, key=lambda k: values[k])
-        return best
+            best_value = min(values.values())
+        tied = [provider for provider, value in values.items() if value == best_value]
+        return tied[0] if len(tied) == 1 else ""
 
     def _print_summary(self, provider_names: list[str]) -> None:
         print("\n" + "=" * 80)

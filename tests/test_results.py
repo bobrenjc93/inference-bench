@@ -91,3 +91,42 @@ def test_console_summary_scores_latency_and_throughput_only(capsys) -> None:
     assert re.search(r"^correctness_rate\s+0\.5\s+1\s+accurate$", output, re.MULTILINE)
     assert re.search(r"^fast\s+4$", output, re.MULTILINE)
     assert re.search(r"^accurate\s+0$", output, re.MULTILINE)
+
+
+def test_console_summary_does_not_score_tied_metrics(capsys) -> None:
+    results = RunResults(model="model", tensor_parallel_size=1)
+    results.providers["fast"] = ProviderResults(
+        provider="fast",
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={
+                    "ttft_median_ms": 1.0,
+                    "tpot_median_ms": 0.0,
+                    "e2e_median_ms": 1.0,
+                    "throughput_median_tps": 100.0,
+                },
+            )
+        },
+    )
+    results.providers["same_tpot"] = ProviderResults(
+        provider="same_tpot",
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={
+                    "ttft_median_ms": 2.0,
+                    "tpot_median_ms": 0.0,
+                    "e2e_median_ms": 2.0,
+                    "throughput_median_tps": 50.0,
+                },
+            )
+        },
+    )
+
+    results.print_comparison()
+
+    output = capsys.readouterr().out
+    assert re.search(r"^tpot_median_ms\s+0\s+0\s*$", output, re.MULTILINE)
+    assert re.search(r"^fast\s+3$", output, re.MULTILINE)
+    assert re.search(r"^same_tpot\s+0$", output, re.MULTILINE)
