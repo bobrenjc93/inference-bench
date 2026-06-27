@@ -1,0 +1,114 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-28a45ccd/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_shard_scatter=0
+[Llama3TP] loading initial embedding/norm/head tensors
+[Llama3TP] loaded initial embedding/norm/head tensors in 253.8s
+[Llama3TP] loaded 10/80 layers in 401.0s
+[Llama3TP] loaded 20/80 layers in 552.1s
+[Llama3TP] loaded 30/80 layers in 715.6s
+[Llama3TP] loaded 40/80 layers in 897.3s
+[Llama3TP] loaded 50/80 layers in 1063.0s
+[Llama3TP] loaded 60/80 layers in 1178.4s
+[Llama3TP] loaded 70/80 layers in 1323.4s
+[Llama3TP] loaded 80/80 layers in 1483.3s
+[Llama3TP] checkpoint load complete in 1483.3s
+NCCL version 2.29.7+cuda13.2
+
+[2026-06-27 19:33:44] gpu-dev-28a45ccd:1799:1799 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-27 19:33:44] gpu-dev-28a45ccd:1798:1798 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-27 19:33:44] gpu-dev-28a45ccd:1803:1803 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-27 19:33:44] gpu-dev-28a45ccd:1801:1801 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-27 19:33:44] gpu-dev-28a45ccd:1797:1797 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-27 19:33:44] gpu-dev-28a45ccd:1802:1802 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-27 19:33:44] gpu-dev-28a45ccd:1796:1796 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-27 19:33:44] gpu-dev-28a45ccd:1800:1800 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+[WARMUP] FlashInfer unavailable: No module named 'flashinfer'
+[WARMUP] FlashInfer unavailable: No module named 'flashinfer'
+[WARMUP] FlashInfer unavailable: No module named 'flashinfer'
+[WARMUP] FlashInfer unavailable: No module named 'flashinfer'
+[WARMUP] FlashInfer unavailable: No module named 'flashinfer'
+[WARMUP] FlashInfer unavailable: No module named 'flashinfer'
+[WARMUP] FlashInfer unavailable: No module named 'flashinfer'
+[WARMUP] FlashInfer unavailable: No module named 'flashinfer'
+TorchInferno OpenAI server listening on http://0.0.0.0:8001/v1 model=/home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+W0627 19:35:30.246000 1000 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/agent/server/api.py:753] Received 15 death signal, shutting down workers
+W0627 19:35:30.248000 1000 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1796 closing signal SIGTERM
+W0627 19:35:30.252000 1000 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1797 closing signal SIGTERM
+W0627 19:35:30.257000 1000 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1798 closing signal SIGTERM
+W0627 19:35:30.258000 1000 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1799 closing signal SIGTERM
+W0627 19:35:30.261000 1000 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1800 closing signal SIGTERM
+W0627 19:35:30.262000 1000 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1801 closing signal SIGTERM
+W0627 19:35:30.263000 1000 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1802 closing signal SIGTERM
+[rank7]: Traceback (most recent call last):
+[rank7]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank7]:   File "<frozen runpy>", line 88, in _run_code
+[rank7]:   File "/workspace/submit-28a45ccd/builds/torchinferno/src/torchinferno/openai_server.py", line 15183, in <module>
+[rank7]:     raise SystemExit(main())
+[rank7]:                      ~~~~^^
+[rank7]:   File "/workspace/submit-28a45ccd/builds/torchinferno/src/torchinferno/openai_server.py", line 15178, in main
+[rank7]:     serve(config)
+[rank7]:     ~~~~~^^^^^^^^
+[rank7]:   File "/workspace/submit-28a45ccd/builds/torchinferno/src/torchinferno/openai_server.py", line 10556, in serve
+[rank7]:     _tensor_parallel_worker_loop(engine)
+[rank7]:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+[rank7]:   File "/workspace/submit-28a45ccd/builds/torchinferno/src/torchinferno/openai_server.py", line 12497, in _tensor_parallel_worker_loop
+[rank7]:     _sync_tensor_parallel_command(getattr(engine, "model", None), engine.device, cuda_sync=cuda_sync)
+[rank7]:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank7]:   File "/workspace/submit-28a45ccd/builds/torchinferno/src/torchinferno/openai_server.py", line 11058, in _sync_tensor_parallel_command
+[rank7]:     dist.barrier(group=control_group)
+[rank7]:     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+[rank7]:   File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank7]:     return func(*args, **kwargs)
+[rank7]:   File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank7]:     work.wait()
+[rank7]:     ~~~~~~~~~^^
+[rank7]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/pair.cc:547] Connection closed by peer [10.0.62.221]:18834
+W0627 19:35:30.267000 1000 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1803 closing signal SIGTERM
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 1020, in <module>
+    main()
+    ~~~~^^
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 1016, in main
+    run(args)
+    ~~~^^^^^^
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 191, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 362, in launch_agent
+    result = agent.run()
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/metrics/api.py", line 134, in wrapper
+    result = f(*args, **kwargs)
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/agent/server/api.py", line 745, in run
+    result = self._invoke_run(role)
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/agent/server/api.py", line 923, in _invoke_run
+    time.sleep(monitor_interval)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/workspace/submit-28a45ccd/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 86, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 1000 got signal: 15
