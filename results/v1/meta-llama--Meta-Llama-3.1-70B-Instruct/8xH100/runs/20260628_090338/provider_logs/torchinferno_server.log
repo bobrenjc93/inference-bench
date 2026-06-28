@@ -1,0 +1,475 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-12542fe0/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_replicated_page_cache_warm=1 rank0_direct_scatter=1 rank0_shard_scatter=1
+[Llama3TP] loading initial embedding/norm/head tensors
+NCCL version 2.29.7+cuda13.2
+
+[2026-06-28 09:15:37] gpu-dev-12542fe0:1800:1800 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-28 09:15:37] gpu-dev-12542fe0:1805:1805 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-28 09:15:37] gpu-dev-12542fe0:1799:1799 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-28 09:15:37] gpu-dev-12542fe0:1804:1804 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-28 09:15:37] gpu-dev-12542fe0:1801:1801 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-28 09:15:37] gpu-dev-12542fe0:1798:1798 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-28 09:15:37] gpu-dev-12542fe0:1802:1802 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-06-28 09:15:37] gpu-dev-12542fe0:1803:1803 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+[Llama3TP] loaded initial embedding/norm/head tensors in 515.8s
+[Llama3TP] loaded 10/80 layers in 2447.0s
+[rank1]:[E628 09:53:13.943060126 ProcessGroupNCCL.cpp:757] [Rank 1] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800009 milliseconds before timing out.
+[rank1]:[E628 09:53:13.943242096 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 1]  failure detected by watchdog at work sequence id: 78 PG status: last enqueued work: 249, last completed work: 77
+[rank4]:[E628 09:53:13.958468771 ProcessGroupNCCL.cpp:757] [Rank 4] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800024 milliseconds before timing out.
+[rank4]:[E628 09:53:13.958576297 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 4]  failure detected by watchdog at work sequence id: 78 PG status: last enqueued work: 249, last completed work: 77
+[rank7]:[E628 09:53:13.976855126 ProcessGroupNCCL.cpp:757] [Rank 7] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800043 milliseconds before timing out.
+[rank7]:[E628 09:53:13.976967713 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 7]  failure detected by watchdog at work sequence id: 78 PG status: last enqueued work: 249, last completed work: 77
+[rank6]:[E628 09:53:13.977842572 ProcessGroupNCCL.cpp:757] [Rank 6] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800043 milliseconds before timing out.
+[rank6]:[E628 09:53:13.977929477 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 6]  failure detected by watchdog at work sequence id: 78 PG status: last enqueued work: 249, last completed work: 77
+[rank5]:[E628 09:53:13.983119113 ProcessGroupNCCL.cpp:757] [Rank 5] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800048 milliseconds before timing out.
+[rank2]:[E628 09:53:13.983165225 ProcessGroupNCCL.cpp:757] [Rank 2] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800049 milliseconds before timing out.
+[rank5]:[E628 09:53:13.983217358 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 5]  failure detected by watchdog at work sequence id: 78 PG status: last enqueued work: 249, last completed work: 77
+[rank2]:[E628 09:53:13.983248800 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 2]  failure detected by watchdog at work sequence id: 78 PG status: last enqueued work: 249, last completed work: 77
+[rank3]:[E628 09:53:13.018220338 ProcessGroupNCCL.cpp:757] [Rank 3] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800085 milliseconds before timing out.
+[rank3]:[E628 09:53:13.018414689 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 3]  failure detected by watchdog at work sequence id: 78 PG status: last enqueued work: 249, last completed work: 77
+[rank5]:[E628 09:53:15.245719053 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 scatter from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/distributed_c10d.py:4677
+#1 wrapper from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/c10d_logger.py:83
+#2 _load_checkpoint_tensor_shard_scatter from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5856
+#3 _load_checkpoint_tensor_shard from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5802
+#4 from_pretrained from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2818
+#5 load_model_for_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/engine/loader.py:42
+#6 _load_model from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10954
+#7 build_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10913
+#8 serve from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10935
+#9 main from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15794
+#10 <module> from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15799
+#11 _run_code from <frozen runpy>:88
+#12 _run_module_as_main from <frozen runpy>:198
+
+[rank2]:[E628 09:53:15.245715203 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 scatter from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/distributed_c10d.py:4677
+#1 wrapper from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/c10d_logger.py:83
+#2 _load_checkpoint_tensor_shard_scatter from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5856
+#3 _load_checkpoint_tensor_shard from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5802
+#4 from_pretrained from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2818
+#5 load_model_for_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/engine/loader.py:42
+#6 _load_model from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10954
+#7 build_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10913
+#8 serve from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10935
+#9 main from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15794
+#10 <module> from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15799
+#11 _run_code from <frozen runpy>:88
+#12 _run_module_as_main from <frozen runpy>:198
+
+[rank2]:[E628 09:53:15.245834080 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 2] First PG on this rank to signal dumping.
+[rank5]:[E628 09:53:15.245834190 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 5] First PG on this rank to signal dumping.
+[rank4]:[E628 09:53:15.252705391 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 scatter from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/distributed_c10d.py:4677
+#1 wrapper from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/c10d_logger.py:83
+#2 _load_checkpoint_tensor_shard_scatter from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5856
+#3 _load_checkpoint_tensor_shard from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5802
+#4 from_pretrained from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2818
+#5 load_model_for_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/engine/loader.py:42
+#6 _load_model from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10954
+#7 build_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10913
+#8 serve from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10935
+#9 main from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15794
+#10 <module> from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15799
+#11 _run_code from <frozen runpy>:88
+#12 _run_module_as_main from <frozen runpy>:198
+
+[rank4]:[E628 09:53:15.252792666 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 4] First PG on this rank to signal dumping.
+[rank7]:[E628 09:53:15.254047677 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 scatter from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/distributed_c10d.py:4677
+#1 wrapper from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/c10d_logger.py:83
+#2 _load_checkpoint_tensor_shard_scatter from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5856
+#3 _load_checkpoint_tensor_shard from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5802
+#4 from_pretrained from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2818
+#5 load_model_for_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/engine/loader.py:42
+#6 _load_model from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10954
+#7 build_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10913
+#8 serve from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10935
+#9 main from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15794
+#10 <module> from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15799
+#11 _run_code from <frozen runpy>:88
+#12 _run_module_as_main from <frozen runpy>:198
+
+[rank7]:[E628 09:53:15.254151573 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 7] First PG on this rank to signal dumping.
+[rank3]:[E628 09:53:15.267180064 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 scatter from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/distributed_c10d.py:4677
+#1 wrapper from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/c10d_logger.py:83
+#2 _load_checkpoint_tensor_shard_scatter from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5856
+#3 _load_checkpoint_tensor_shard from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5802
+#4 from_pretrained from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2818
+#5 load_model_for_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/engine/loader.py:42
+#6 _load_model from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10954
+#7 build_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10913
+#8 serve from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10935
+#9 main from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15794
+#10 <module> from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15799
+#11 _run_code from <frozen runpy>:88
+#12 _run_module_as_main from <frozen runpy>:198
+
+[rank3]:[E628 09:53:15.267321042 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 3] First PG on this rank to signal dumping.
+[rank1]:[E628 09:53:15.285986192 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 scatter from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/distributed_c10d.py:4677
+#1 wrapper from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/c10d_logger.py:83
+#2 _load_checkpoint_tensor_shard_scatter from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5856
+#3 _load_checkpoint_tensor_shard from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5802
+#4 from_pretrained from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2818
+#5 load_model_for_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/engine/loader.py:42
+#6 _load_model from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10954
+#7 build_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10913
+#8 serve from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10935
+#9 main from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15794
+#10 <module> from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15799
+#11 _run_code from <frozen runpy>:88
+#12 _run_module_as_main from <frozen runpy>:198
+
+[rank1]:[E628 09:53:15.286190204 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 1] First PG on this rank to signal dumping.
+[rank6]:[E628 09:53:15.294818954 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 scatter from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/distributed_c10d.py:4677
+#1 wrapper from /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/c10d_logger.py:83
+#2 _load_checkpoint_tensor_shard_scatter from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5856
+#3 _load_checkpoint_tensor_shard from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5802
+#4 from_pretrained from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2818
+#5 load_model_for_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/engine/loader.py:42
+#6 _load_model from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10954
+#7 build_engine from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10913
+#8 serve from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:10935
+#9 main from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15794
+#10 <module> from /workspace/submit-12542fe0/builds/torchinferno/src/torchinferno/openai_server.py:15799
+#11 _run_code from <frozen runpy>:88
+#12 _run_module_as_main from <frozen runpy>:198
+
+[rank6]:[E628 09:53:15.294954752 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 6] First PG on this rank to signal dumping.
+[rank2]:[E628 09:53:15.302475630 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 2] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 249, last completed NCCL work: 77.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank6]:[E628 09:53:15.302567545 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 6] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 249, last completed NCCL work: 77.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank4]:[E628 09:53:15.302579556 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 4] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 249, last completed NCCL work: 77.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank7]:[E628 09:53:15.302580356 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 7] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 249, last completed NCCL work: 77.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank5]:[E628 09:53:15.302614988 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 5] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 249, last completed NCCL work: 77.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank2]:[E628 09:53:15.302678501 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 2] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank5]:[E628 09:53:15.302791088 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 5] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank6]:[E628 09:53:15.302761476 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 6] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank4]:[E628 09:53:15.303231323 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 4] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank7]:[E628 09:53:15.305462680 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 7] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank3]:[E628 09:53:15.367244240 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 3] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 249, last completed NCCL work: 77.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank1]:[E628 09:53:15.367296833 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 1] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 249, last completed NCCL work: 77.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank1]:[E628 09:53:15.367537697 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 1] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank3]:[E628 09:53:15.367545268 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 3] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank0]:[E628 09:53:15.485052106 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 0] Observed flight recorder dump signal from another rank via TCPStore.
+[rank0]:[E628 09:53:15.485287319 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 0] Received a dump signal due to a collective timeout from  rank 6 and we will try our best to dump the debug info. Last enqueued NCCL work: 77, last completed NCCL work: 77.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank0]:[E628 09:53:15.485627869 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 0] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank2]:[E628 09:54:15.806165184 ProcessGroupNCCL.cpp:818] [Rank 2] Some NCCL operations have failed or timed out. Due to the asynchronous nature of CUDA kernels, subsequent GPU operations might run on corrupted/incomplete data.
+[rank2]:[E628 09:54:15.806211187 ProcessGroupNCCL.cpp:832] [Rank 2] To avoid data inconsistency, we are taking the entire process down.
+[rank2]:[E628 09:54:15.806795670 ProcessGroupNCCL.cpp:2197] [PG ID 0 PG GUID 0(default_pg) Rank 2] Process group watchdog thread terminated with exception: [Rank 2] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800049 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f948ab6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f93d4b09611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f93d4b153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f93d4b16847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f945a06edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f948ba5eaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f948baebc6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+terminate called after throwing an instance of 'c10::DistBackendError'
+  what():  [PG ID 0 PG GUID 0(default_pg) Rank 2] Process group watchdog thread terminated with exception: [Rank 2] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800049 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f948ab6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f93d4b09611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f93d4b153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f93d4b16847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f945a06edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f948ba5eaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f948baebc6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+Exception raised from run at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:2203 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f948ab6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x6915eb (0x7f93d42915eb in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: <unknown function> + 0xecdb4 (0x7f945a06edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #3: <unknown function> + 0x9caa4 (0x7f948ba5eaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #4: <unknown function> + 0x129c6c (0x7f948baebc6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+[rank7]:[E628 09:54:15.818147666 ProcessGroupNCCL.cpp:818] [Rank 7] Some NCCL operations have failed or timed out. Due to the asynchronous nature of CUDA kernels, subsequent GPU operations might run on corrupted/incomplete data.
+[rank7]:[E628 09:54:15.818181377 ProcessGroupNCCL.cpp:832] [Rank 7] To avoid data inconsistency, we are taking the entire process down.
+[rank7]:[E628 09:54:15.818769531 ProcessGroupNCCL.cpp:2197] [PG ID 0 PG GUID 0(default_pg) Rank 7] Process group watchdog thread terminated with exception: [Rank 7] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800043 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f4143b6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f408db09611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f408db153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f408db16847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f411306edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f4144aa9aa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f4144b36c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+terminate called after throwing an instance of 'c10::DistBackendError'
+  what():  [PG ID 0 PG GUID 0(default_pg) Rank 7] Process group watchdog thread terminated with exception: [Rank 7] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800043 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f4143b6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f408db09611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f408db153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f408db16847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f411306edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f4144aa9aa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f4144b36c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+Exception raised from run at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:2203 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f4143b6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x6915eb (0x7f408d2915eb in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: <unknown function> + 0xecdb4 (0x7f411306edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #3: <unknown function> + 0x9caa4 (0x7f4144aa9aa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #4: <unknown function> + 0x129c6c (0x7f4144b36c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+[rank5]:[E628 09:54:15.843908061 ProcessGroupNCCL.cpp:818] [Rank 5] Some NCCL operations have failed or timed out. Due to the asynchronous nature of CUDA kernels, subsequent GPU operations might run on corrupted/incomplete data.
+[rank5]:[E628 09:54:15.843933772 ProcessGroupNCCL.cpp:832] [Rank 5] To avoid data inconsistency, we are taking the entire process down.
+[rank5]:[E628 09:54:15.844566448 ProcessGroupNCCL.cpp:2197] [PG ID 0 PG GUID 0(default_pg) Rank 5] Process group watchdog thread terminated with exception: [Rank 5] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800048 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f6fc296afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f6f0c909611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f6f0c9153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f6f0c916847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f6f91e6edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f6fc37fcaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f6fc3889c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+terminate called after throwing an instance of 'c10::DistBackendError'
+  what():  [PG ID 0 PG GUID 0(default_pg) Rank 5] Process group watchdog thread terminated with exception: [Rank 5] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800048 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f6fc296afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f6f0c909611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f6f0c9153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f6f0c916847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f6f91e6edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f6fc37fcaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f6fc3889c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+Exception raised from run at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:2203 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f6fc296afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x6915eb (0x7f6f0c0915eb in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: <unknown function> + 0xecdb4 (0x7f6f91e6edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #3: <unknown function> + 0x9caa4 (0x7f6fc37fcaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #4: <unknown function> + 0x129c6c (0x7f6fc3889c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+[rank4]:[E628 09:54:15.853062031 ProcessGroupNCCL.cpp:818] [Rank 4] Some NCCL operations have failed or timed out. Due to the asynchronous nature of CUDA kernels, subsequent GPU operations might run on corrupted/incomplete data.
+[rank4]:[E628 09:54:15.853097963 ProcessGroupNCCL.cpp:832] [Rank 4] To avoid data inconsistency, we are taking the entire process down.
+[rank4]:[E628 09:54:15.853672066 ProcessGroupNCCL.cpp:2197] [PG ID 0 PG GUID 0(default_pg) Rank 4] Process group watchdog thread terminated with exception: [Rank 4] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800024 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fb594b6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7fb4deb09611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7fb4deb153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7fb4deb16847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7fb56406edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7fb5959fbaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7fb595a88c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+terminate called after throwing an instance of 'c10::DistBackendError'
+  what():  [PG ID 0 PG GUID 0(default_pg) Rank 4] Process group watchdog thread terminated with exception: [Rank 4] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800024 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fb594b6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7fb4deb09611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7fb4deb153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7fb4deb16847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7fb56406edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7fb5959fbaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7fb595a88c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+Exception raised from run at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:2203 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fb594b6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x6915eb (0x7fb4de2915eb in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: <unknown function> + 0xecdb4 (0x7fb56406edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #3: <unknown function> + 0x9caa4 (0x7fb5959fbaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #4: <unknown function> + 0x129c6c (0x7fb595a88c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+[rank3]:[E628 09:54:15.870755388 ProcessGroupNCCL.cpp:818] [Rank 3] Some NCCL operations have failed or timed out. Due to the asynchronous nature of CUDA kernels, subsequent GPU operations might run on corrupted/incomplete data.
+[rank3]:[E628 09:54:15.870795710 ProcessGroupNCCL.cpp:832] [Rank 3] To avoid data inconsistency, we are taking the entire process down.
+[rank3]:[E628 09:54:15.871470488 ProcessGroupNCCL.cpp:2197] [PG ID 0 PG GUID 0(default_pg) Rank 3] Process group watchdog thread terminated with exception: [Rank 3] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800085 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f2067f6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f1fb2309611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f1fb23153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f1fb2316847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f203786edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f2069103aa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f2069190c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+terminate called after throwing an instance of 'c10::DistBackendError'
+  what():  [PG ID 0 PG GUID 0(default_pg) Rank 3] Process group watchdog thread terminated with exception: [Rank 3] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800085 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f2067f6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f1fb2309611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f1fb23153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f1fb2316847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f203786edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f2069103aa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f2069190c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+Exception raised from run at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:2203 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f2067f6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x6915eb (0x7f1fb1a915eb in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: <unknown function> + 0xecdb4 (0x7f203786edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #3: <unknown function> + 0x9caa4 (0x7f2069103aa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #4: <unknown function> + 0x129c6c (0x7f2069190c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+[rank1]:[E628 09:54:15.883223958 ProcessGroupNCCL.cpp:818] [Rank 1] Some NCCL operations have failed or timed out. Due to the asynchronous nature of CUDA kernels, subsequent GPU operations might run on corrupted/incomplete data.
+[rank1]:[E628 09:54:15.883268361 ProcessGroupNCCL.cpp:832] [Rank 1] To avoid data inconsistency, we are taking the entire process down.
+[rank1]:[E628 09:54:15.883947370 ProcessGroupNCCL.cpp:2197] [PG ID 0 PG GUID 0(default_pg) Rank 1] Process group watchdog thread terminated with exception: [Rank 1] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800009 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fc805b6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7fc74ff09611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7fc74ff153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7fc74ff16847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7fc7d546edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7fc806dbbaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7fc806e48c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+terminate called after throwing an instance of 'c10::DistBackendError'
+  what():  [PG ID 0 PG GUID 0(default_pg) Rank 1] Process group watchdog thread terminated with exception: [Rank 1] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800009 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fc805b6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7fc74ff09611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7fc74ff153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7fc74ff16847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7fc7d546edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7fc806dbbaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7fc806e48c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+Exception raised from run at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:2203 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fc805b6afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x6915eb (0x7fc74f6915eb in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: <unknown function> + 0xecdb4 (0x7fc7d546edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #3: <unknown function> + 0x9caa4 (0x7fc806dbbaa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #4: <unknown function> + 0x129c6c (0x7fc806e48c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+[rank6]:[E628 09:54:15.885613614 ProcessGroupNCCL.cpp:818] [Rank 6] Some NCCL operations have failed or timed out. Due to the asynchronous nature of CUDA kernels, subsequent GPU operations might run on corrupted/incomplete data.
+[rank6]:[E628 09:54:15.885638456 ProcessGroupNCCL.cpp:832] [Rank 6] To avoid data inconsistency, we are taking the entire process down.
+[rank6]:[E628 09:54:15.886208728 ProcessGroupNCCL.cpp:2197] [PG ID 0 PG GUID 0(default_pg) Rank 6] Process group watchdog thread terminated with exception: [Rank 6] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800043 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f0abe36afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f0a08309611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f0a083153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f0a08316847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f0a8d86edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f0abf236aa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f0abf2c3c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+terminate called after throwing an instance of 'c10::DistBackendError'
+  what():  [PG ID 0 PG GUID 0(default_pg) Rank 6] Process group watchdog thread terminated with exception: [Rank 6] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=78, OpType=SCATTER, NumelIn=29360128, NumelOut=0, Timeout(ms)=1800000) ran for 1800043 milliseconds before timing out.
+Exception raised from checkTimeout at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:760 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f0abe36afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: c10d::ProcessGroupNCCL::WorkNCCL::checkTimeout(std::optional<std::chrono::duration<long, std::ratio<1l, 1000l> > >) + 0x2b1 (0x7f0a08309611 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0x14f1 (0x7f0a083153b1 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7f0a08316847 in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #4: <unknown function> + 0xecdb4 (0x7f0a8d86edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #5: <unknown function> + 0x9caa4 (0x7f0abf236aa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #6: <unknown function> + 0x129c6c (0x7f0abf2c3c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+Exception raised from run at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:2203 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f0abe36afad in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x6915eb (0x7f0a07a915eb in /workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/lib/libtorch_cuda.so)
+frame #2: <unknown function> + 0xecdb4 (0x7f0a8d86edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #3: <unknown function> + 0x9caa4 (0x7f0abf236aa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #4: <unknown function> + 0x129c6c (0x7f0abf2c3c6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+W0628 09:59:16.486000 1002 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1798 closing signal SIGTERM
+W0628 09:59:16.488000 1002 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1799 closing signal SIGTERM
+W0628 09:59:16.488000 1002 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1800 closing signal SIGTERM
+W0628 09:59:16.488000 1002 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1802 closing signal SIGTERM
+W0628 09:59:16.488000 1002 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1803 closing signal SIGTERM
+W0628 09:59:16.489000 1002 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1804 closing signal SIGTERM
+W0628 09:59:16.489000 1002 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1805 closing signal SIGTERM
+E0628 09:59:18.010000 1002 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:988] failed (exitcode: -6) local_rank: 3 (pid: 1801) of binary: /workspace/submit-12542fe0/builds/torchinferno/venv/bin/python
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 1020, in <module>
+    main()
+    ~~~~^^
+  File "/workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+  File "/workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 1016, in main
+    run(args)
+    ~~~^^^^^^
+  File "/workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 191, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/workspace/submit-12542fe0/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 371, in launch_agent
+    raise ChildFailedError(
+    ...<2 lines>...
+    )
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+======================================================
+torchinferno.openai_server FAILED
+------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-06-28_09:59:18
+  host      : gpu-dev-12542fe0
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 1798)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1798
+[2]:
+  time      : 2026-06-28_09:59:18
+  host      : gpu-dev-12542fe0
+  rank      : 1 (local_rank: 1)
+  exitcode  : -6 (pid: 1799)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1799
+[3]:
+  time      : 2026-06-28_09:59:18
+  host      : gpu-dev-12542fe0
+  rank      : 2 (local_rank: 2)
+  exitcode  : -6 (pid: 1800)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1800
+[4]:
+  time      : 2026-06-28_09:59:18
+  host      : gpu-dev-12542fe0
+  rank      : 4 (local_rank: 4)
+  exitcode  : -6 (pid: 1802)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1802
+[5]:
+  time      : 2026-06-28_09:59:18
+  host      : gpu-dev-12542fe0
+  rank      : 5 (local_rank: 5)
+  exitcode  : -6 (pid: 1803)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1803
+[6]:
+  time      : 2026-06-28_09:59:18
+  host      : gpu-dev-12542fe0
+  rank      : 6 (local_rank: 6)
+  exitcode  : -6 (pid: 1804)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1804
+[7]:
+  time      : 2026-06-28_09:59:18
+  host      : gpu-dev-12542fe0
+  rank      : 7 (local_rank: 7)
+  exitcode  : -6 (pid: 1805)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1805
+------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-06-28_09:59:16
+  host      : gpu-dev-12542fe0
+  rank      : 3 (local_rank: 3)
+  exitcode  : -6 (pid: 1801)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1801
+======================================================
