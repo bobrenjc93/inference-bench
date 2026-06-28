@@ -2,10 +2,23 @@ from __future__ import annotations
 
 import os
 import shlex
+import subprocess
 from pathlib import Path
 
 from . import register
 from .base import Provider, _env_float
+
+
+def _env_flag(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() not in {"0", "false", "no", "off"}
+
+
+def _editable_install_spec(extras: str) -> str:
+    extras = extras.strip()
+    return f".[{extras}]" if extras else "."
 
 
 @register("torchinferno")
@@ -37,7 +50,24 @@ class TorchInfernoProvider(Provider):
     def build(self) -> None:
         self._create_venv()
         self._pip_install("--upgrade", "pip")
-        self._pip_install("-e", ".[serve]", cwd=self.repo_dir)
+        explicit_extras = os.environ.get("INFERENCE_BENCH_TORCHINFERNO_EXTRAS")
+        default_flashinfer = (
+            explicit_extras is None
+            and _env_flag("INFERENCE_BENCH_TORCHINFERNO_FLASHINFER", True)
+        )
+        extras = explicit_extras if explicit_extras is not None else (
+            "serve,flashinfer" if default_flashinfer else "serve"
+        )
+        try:
+            self._pip_install("-e", _editable_install_spec(extras), cwd=self.repo_dir)
+        except subprocess.CalledProcessError:
+            if not default_flashinfer:
+                raise
+            self._log(
+                "[torchinferno] FlashInfer extra install failed; "
+                "retrying with the plain serve extra"
+            )
+            self._pip_install("-e", ".[serve]", cwd=self.repo_dir)
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         server_model = self._server_model(model)

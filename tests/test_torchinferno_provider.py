@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 import unittest
 from unittest import mock
 
@@ -8,14 +9,77 @@ from inference_bench.providers.torchinferno import TorchInfernoProvider
 
 
 class TorchInfernoProviderTest(unittest.TestCase):
-    def test_server_env_disables_nccl_cumem_and_enables_rank0_checkpoint_broadcast_by_default(self) -> None:
+    def test_server_env_disables_nccl_cumem_and_leaves_checkpoint_broadcast_default(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
 
         with mock.patch.dict(os.environ, {}, clear=True):
             env = provider._server_env()
 
         self.assertEqual(env["NCCL_CUMEM_ENABLE"], "0")
-        self.assertEqual(env["TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST"], "1")
+        self.assertNotIn("TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST", env)
+
+    def test_build_installs_flashinfer_extra_by_default(self) -> None:
+        provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
+
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(provider, "_create_venv"),
+            mock.patch.object(provider, "_pip_install") as pip_install,
+        ):
+            provider.build()
+
+        pip_install.assert_has_calls(
+            [
+                mock.call("--upgrade", "pip"),
+                mock.call("-e", ".[serve,flashinfer]", cwd=provider.repo_dir),
+            ]
+        )
+
+    def test_build_can_disable_flashinfer_extra(self) -> None:
+        provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
+
+        with (
+            mock.patch.dict(
+                os.environ,
+                {"INFERENCE_BENCH_TORCHINFERNO_FLASHINFER": "0"},
+                clear=True,
+            ),
+            mock.patch.object(provider, "_create_venv"),
+            mock.patch.object(provider, "_pip_install") as pip_install,
+        ):
+            provider.build()
+
+        pip_install.assert_has_calls(
+            [
+                mock.call("--upgrade", "pip"),
+                mock.call("-e", ".[serve]", cwd=provider.repo_dir),
+            ]
+        )
+
+    def test_build_falls_back_to_serve_when_default_flashinfer_extra_fails(self) -> None:
+        provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
+        calls: list[tuple[tuple[str, ...], object]] = []
+
+        def fake_pip_install(*args: str, cwd=None) -> None:  # noqa: ANN001
+            calls.append((args, cwd))
+            if args == ("-e", ".[serve,flashinfer]"):
+                raise subprocess.CalledProcessError(1, "pip")
+
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(provider, "_create_venv"),
+            mock.patch.object(provider, "_pip_install", side_effect=fake_pip_install),
+        ):
+            provider.build()
+
+        self.assertEqual(
+            calls,
+            [
+                (("--upgrade", "pip"), None),
+                (("-e", ".[serve,flashinfer]"), provider.repo_dir),
+                (("-e", ".[serve]"), provider.repo_dir),
+            ],
+        )
 
     def test_server_env_preserves_explicit_nccl_cumem_override(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
