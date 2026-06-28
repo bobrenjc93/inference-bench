@@ -48,6 +48,7 @@ class Config:
         build_dir: str | None = None,
         results_dir: str | None = None,
         port: int | None = None,
+        server_startup_timeout: int | None = None,
     ) -> Config:
         if model is not None:
             self.model = model
@@ -65,4 +66,6 @@ class Config:
             self.results_dir = results_dir
         if port is not None:
             self.server_port = port
+        if server_startup_timeout is not None:
+            self.server_startup_timeout = server_startup_timeout
         return self

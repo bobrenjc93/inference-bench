@@ -37,6 +37,10 @@ def parse_args() -> argparse.Namespace:
         help="Server port (default: 8000)",
     )
     p.add_argument(
+        "--server-startup-timeout", type=int, default=None,
+        help="Maximum seconds to wait for each provider server to become ready",
+    )
+    p.add_argument(
         "--hardware", type=str, default=None,
         help="Hardware description (e.g. 8xH100, 4xA100). Included in results path.",
     )
@@ -79,6 +83,7 @@ def main() -> None:
         build_dir=args.build_dir,
         results_dir=args.results_dir,
         port=args.port,
+        server_startup_timeout=args.server_startup_timeout,
     )
 
     print(

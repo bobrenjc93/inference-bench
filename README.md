@@ -182,6 +182,11 @@ TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST=1  # opt into rank-0 checkpoint tenso
 TORCHINFERNO_SERVER_ARGS="--max-batch-size 256"  # append TorchInferno server args
 ```
 
+Large 70B checkpoints can take a long time to initialize on remote workers with
+slow shared storage. The default `config.yaml` waits up to 3600 seconds for each
+server to become ready; override it with `--server-startup-timeout` when running
+smaller models or faster local checkouts.
+
 ### Single provider
 
 ```bash
@@ -209,6 +214,7 @@ All flags override the corresponding value in [`config.yaml`](config.yaml).
 | `--hardware` | _(none)_ | Hardware label (e.g. `8xH100`); used in results directory path |
 | `--build-dir` | `./builds` | Directory for cloned repos and virtualenvs |
 | `--results-dir` | `./results/v1` | Base directory for result files |
+| `--server-startup-timeout` | config value | Maximum seconds to wait for each provider server to become ready |
 | `--skip-build` | `false` | Skip clone + build; assumes builds already exist |
 | `--build-times` | _(none)_ | Pre-recorded build times, e.g. `vllm:808,sglang:88,torchinferno:38` |
 | `--debug` | `false` | Save full response text in results for correctness auditing |
