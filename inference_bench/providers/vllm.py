@@ -5,6 +5,8 @@ import os
 import platform
 import re
 import subprocess
+import sys
+from pathlib import Path
 from urllib.parse import urljoin
 from urllib.request import urlopen
 
@@ -313,6 +315,68 @@ class VllmProvider(Provider):
         if gpu_memory_utilization:
             cmd.extend(["--gpu-memory-utilization", gpu_memory_utilization])
         return cmd
+
+    def _server_env(self) -> dict[str, str]:
+        env = super()._server_env()
+        libstdcxx_dir = self._find_compatible_libstdcxx_dir(env)
+        if libstdcxx_dir:
+            self._prepend_env_path(env, "LD_LIBRARY_PATH", libstdcxx_dir)
+        return env
+
+    def _find_compatible_libstdcxx_dir(self, env: dict[str, str]) -> str:
+        if not _env_flag("INFERENCE_BENCH_VLLM_LIBSTDCXX_FIXUP", True):
+            return ""
+        required_symbol = env.get("INFERENCE_BENCH_VLLM_LIBSTDCXX_REQUIRED_SYMBOL", "CXXABI_1.3.15")
+        for directory in self._candidate_libstdcxx_dirs(env):
+            library = directory / "libstdc++.so.6"
+            if self._libstdcxx_has_symbol(library, required_symbol):
+                return str(directory)
+        return ""
+
+    def _candidate_libstdcxx_dirs(self, env: dict[str, str]) -> list[Path]:
+        candidates: list[Path] = []
+        explicit = env.get("INFERENCE_BENCH_VLLM_LIBSTDCXX_DIR") or env.get(
+            "INFERENCE_BENCH_VLLM_LIBSTDCPP_DIR",
+            "",
+        )
+        for raw in explicit.split(os.pathsep):
+            if raw:
+                candidates.append(Path(raw).expanduser())
+        conda_prefix = env.get("CONDA_PREFIX", "")
+        if conda_prefix:
+            candidates.append(Path(conda_prefix).expanduser() / "lib")
+        conda_python = env.get("CONDA_PYTHON_EXE", "")
+        if conda_python:
+            candidates.append(Path(conda_python).expanduser().resolve().parent.parent / "lib")
+        candidates.append(Path(self.venv_python).expanduser().resolve().parent.parent / "lib")
+        candidates.append(Path(sys.executable).expanduser().resolve().parent.parent / "lib")
+        home = Path.home()
+        candidates.extend(sorted((home / ".conda" / "envs").glob("*/lib")))
+        candidates.append(Path("/opt/miniconda3/lib"))
+
+        deduped: list[Path] = []
+        seen: set[str] = set()
+        for candidate in candidates:
+            key = str(candidate)
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(candidate)
+        return deduped
+
+    def _libstdcxx_has_symbol(self, library: Path, symbol: str) -> bool:
+        if not symbol:
+            return library.exists()
+        try:
+            return symbol.encode("utf-8") in library.read_bytes()
+        except OSError:
+            return False
+
+    def _prepend_env_path(self, env: dict[str, str], name: str, directory: str) -> None:
+        existing = [part for part in env.get(name, "").split(os.pathsep) if part]
+        if directory in existing:
+            existing.remove(directory)
+        env[name] = os.pathsep.join([directory, *existing])
 
     def _gpu_memory_wait_fraction(self) -> float | None:
         if "INFERENCE_BENCH_VLLM_MIN_GPU_FREE_FRACTION" in os.environ:

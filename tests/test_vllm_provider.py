@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import tempfile
 import unittest
 from unittest import mock
 
@@ -138,6 +139,50 @@ class VllmProviderTest(unittest.TestCase):
             location,
             "https://wheels.vllm.ai/nightly/cu130/vllm-x86_64.whl",
         )
+
+    def test_server_env_prepends_configured_libstdcxx_dir(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lib_dir = os.path.join(tmpdir, "lib")
+            os.makedirs(lib_dir)
+            with open(os.path.join(lib_dir, "libstdc++.so.6"), "wb") as handle:
+                handle.write(b"CXXABI_1.3.15")
+
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "INFERENCE_BENCH_VLLM_LIBSTDCXX_DIR": lib_dir,
+                    "LD_LIBRARY_PATH": "/old/lib",
+                },
+                clear=True,
+            ):
+                env = provider._server_env()
+
+        self.assertEqual(
+            env["LD_LIBRARY_PATH"].split(os.pathsep),
+            [lib_dir, "/old/lib"],
+        )
+
+    def test_server_env_can_disable_libstdcxx_fixup(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lib_dir = os.path.join(tmpdir, "lib")
+            os.makedirs(lib_dir)
+            with open(os.path.join(lib_dir, "libstdc++.so.6"), "wb") as handle:
+                handle.write(b"CXXABI_1.3.15")
+
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "INFERENCE_BENCH_VLLM_LIBSTDCXX_DIR": lib_dir,
+                    "INFERENCE_BENCH_VLLM_LIBSTDCXX_FIXUP": "0",
+                    "LD_LIBRARY_PATH": "/old/lib",
+                },
+                clear=True,
+            ):
+                env = provider._server_env()
+
+        self.assertEqual(env["LD_LIBRARY_PATH"], "/old/lib")
 
 
 if __name__ == "__main__":
