@@ -35,6 +35,17 @@ def _utc_timestamp(timestamp: str) -> datetime:
     return parsed.astimezone(timezone.utc)
 
 
+def _request_idx(completion_idx: int, metadata: dict[str, int | float | str | bool]) -> int:
+    raw = metadata.get("request_idx")
+    if isinstance(raw, bool):
+        return completion_idx
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, float) and raw.is_integer():
+        return int(raw)
+    return completion_idx
+
+
 @dataclass
 class ProviderResults:
     provider: str
@@ -73,7 +84,8 @@ class RunResults:
                         "metrics": br.metrics,
                         "raw_requests": [
                             {
-                                "request_idx": i,
+                                "request_idx": _request_idx(i, rm.metadata),
+                                "completion_idx": i,
                                 "ttft_ms": rm.ttft_ms,
                                 "tpot_ms": rm.tpot_ms,
                                 "e2e_latency_ms": rm.e2e_latency_ms,
@@ -186,7 +198,7 @@ class RunResults:
 
         w.writerow(["Per-Request Raw Data"])
         header = [
-            "provider", "benchmark", "request_idx",
+            "provider", "benchmark", "request_idx", "completion_idx",
             "ttft_ms", "tpot_ms", "e2e_latency_ms",
             "output_tokens", "throughput_tps", "correct",
         ]
@@ -201,7 +213,7 @@ class RunResults:
                     continue
                 for i, rm in enumerate(pr.benchmarks[bname].raw_requests):
                     row = [
-                        pname, bname, i,
+                        pname, bname, _request_idx(i, rm.metadata), i,
                         f"{rm.ttft_ms:.2f}",
                         f"{rm.tpot_ms:.2f}",
                         f"{rm.e2e_latency_ms:.2f}",

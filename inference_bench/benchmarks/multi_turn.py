@@ -3,8 +3,6 @@ from __future__ import annotations
 import concurrent.futures
 import random
 
-import openai
-
 from . import register
 from .base import Benchmark, BenchmarkResult, RequestMetrics, check_answer
 
@@ -60,6 +58,7 @@ class MultiTurnBenchmark(Benchmark):
                     client, model, messages, temperature=0.0, max_tokens=512
                 )
                 metrics.correct = check_answer(response_text, expected)
+                metrics.metadata["request_idx"] = conv_idx * TURNS_PER_CONVERSATION + turn
                 metrics.metadata["conversation_idx"] = conv_idx
                 metrics.metadata["turn_idx"] = turn
                 conv_metrics.append(metrics)

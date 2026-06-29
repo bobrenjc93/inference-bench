@@ -76,6 +76,29 @@ def test_save_preserves_raw_request_metadata(tmp_path) -> None:
     assert raw[0]["metadata"] == {"conversation_idx": 7, "turn_idx": 3}
 
 
+def test_save_uses_stable_request_idx_and_completion_idx(tmp_path) -> None:
+    results = RunResults(model="model", tensor_parallel_size=1)
+    results.providers["torchinferno"] = ProviderResults(
+        provider="torchinferno",
+        benchmarks={
+            "few_shot": BenchmarkResult(
+                name="few_shot",
+                raw_requests=[
+                    RequestMetrics(ttft_ms=1.0, metadata={"request_idx": 9}),
+                    RequestMetrics(ttft_ms=2.0, metadata={"request_idx": 3}),
+                ],
+            )
+        },
+    )
+
+    results_path = results.save(tmp_path / "results")
+    data = json.loads(results_path.read_text())
+
+    raw = data["providers"]["torchinferno"]["benchmarks"]["few_shot"]["raw_requests"]
+    assert [item["request_idx"] for item in raw] == [9, 3]
+    assert [item["completion_idx"] for item in raw] == [0, 1]
+
+
 def test_console_summary_scores_latency_and_throughput_only(capsys) -> None:
     results = RunResults(model="model", tensor_parallel_size=1)
     results.providers["fast"] = ProviderResults(

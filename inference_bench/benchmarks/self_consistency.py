@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import concurrent.futures
-import openai
 
 from . import register
 from .base import Benchmark, BenchmarkResult, RequestMetrics, check_answer
@@ -35,6 +34,7 @@ class SelfConsistencyBenchmark(Benchmark):
             text, metrics = self._stream_request(
                 client, model, messages, temperature=0.7, max_tokens=256
             )
+            metrics.metadata["request_idx"] = idx
             metrics.correct = check_answer(text, EXPECTED_ANSWER)
             completed[0] += 1
             if self.verbose and completed[0] % 1000 == 0:

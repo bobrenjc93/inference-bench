@@ -3,8 +3,6 @@ from __future__ import annotations
 import concurrent.futures
 import random
 
-import openai
-
 from . import register
 from .base import Benchmark, BenchmarkResult, check_answer
 
@@ -76,6 +74,7 @@ class FewShotBenchmark(Benchmark):
             response_text, metrics = self._stream_request(
                 client, model, messages, temperature=0.0, max_tokens=256
             )
+            metrics.metadata["request_idx"] = idx
             metrics.correct = check_answer(response_text, expected)
             return metrics
 

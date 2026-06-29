@@ -3,8 +3,6 @@ from __future__ import annotations
 import concurrent.futures
 import hashlib
 
-import openai
-
 from . import register
 from .base import Benchmark, BenchmarkResult
 
@@ -75,6 +73,7 @@ class LongOutputBenchmark(Benchmark):
                 client, model, messages, temperature=0.0,
                 max_tokens=len(big_num) // 3 + 16,
             )
+            metrics.metadata["request_idx"] = idx
             metrics.correct = _check_prefix(response_text, big_num)
             completed[0] += 1
             if self.verbose and completed[0] % 1000 == 0:
