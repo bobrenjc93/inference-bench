@@ -74,6 +74,8 @@ def test_save_preserves_raw_request_metadata(tmp_path) -> None:
 
     raw = data["providers"]["torchinferno"]["benchmarks"]["multi_turn"]["raw_requests"]
     assert raw[0]["metadata"] == {"conversation_idx": 7, "turn_idx": 3}
+    assert raw[0]["metadata_conversation_idx"] == 7
+    assert raw[0]["metadata_turn_idx"] == 3
 
 
 def test_save_uses_stable_request_idx_and_completion_idx(tmp_path) -> None:

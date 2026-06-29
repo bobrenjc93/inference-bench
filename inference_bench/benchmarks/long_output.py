@@ -65,15 +65,18 @@ class LongOutputBenchmark(Benchmark):
         def _do_request(idx: int):
             big_num = test_cases[idx]
             equation = f"1 * {big_num} ="
+            max_tokens = len(big_num) // 3 + 16
             messages = [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": f"Q: {equation}\nA:"},
             ]
             response_text, metrics = self._stream_request(
                 client, model, messages, temperature=0.0,
-                max_tokens=len(big_num) // 3 + 16,
+                max_tokens=max_tokens,
             )
             metrics.metadata["request_idx"] = idx
+            metrics.metadata["digit_len"] = len(big_num)
+            metrics.metadata["max_tokens"] = max_tokens
             metrics.correct = _check_prefix(response_text, big_num)
             completed[0] += 1
             if self.verbose and completed[0] % 1000 == 0:

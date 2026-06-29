@@ -46,6 +46,12 @@ def _request_idx(completion_idx: int, metadata: dict[str, int | float | str | bo
     return completion_idx
 
 
+def _metadata_fields(
+    metadata: dict[str, int | float | str | bool],
+) -> dict[str, int | float | str | bool]:
+    return {f"metadata_{key}": value for key, value in metadata.items()}
+
+
 @dataclass
 class ProviderResults:
     provider: str
@@ -94,6 +100,7 @@ class RunResults:
                                 "correct": rm.correct,
                                 **({"response_text": rm.response_text} if rm.response_text is not None else {}),
                                 **({"metadata": rm.metadata} if rm.metadata else {}),
+                                **(_metadata_fields(rm.metadata) if rm.metadata else {}),
                             }
                             for i, rm in enumerate(br.raw_requests)
                         ],
