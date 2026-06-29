@@ -17,5 +17,9 @@ dependencies = [
 [tool.setuptools.packages.find]
 include = ["inference_bench*", "scripts*"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["builds"]
+
 [project.scripts]
 inference-bench = "inference_bench.main:main"
