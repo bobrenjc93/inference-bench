@@ -4,7 +4,7 @@ import json
 import re
 from datetime import datetime, timezone
 
-from inference_bench.benchmarks.base import BenchmarkResult
+from inference_bench.benchmarks.base import BenchmarkResult, RequestMetrics
 from inference_bench.results import ProviderResults, RunResults
 
 
@@ -50,6 +50,30 @@ def test_save_copies_provider_logs(tmp_path) -> None:
     assert provider["server_log"] == "provider_logs/torchinferno.log"
     copied_log = results_path.parent / provider["server_log"]
     assert copied_log.read_text() == "server tail\n"
+
+
+def test_save_preserves_raw_request_metadata(tmp_path) -> None:
+    results = RunResults(model="model", tensor_parallel_size=1)
+    results.providers["torchinferno"] = ProviderResults(
+        provider="torchinferno",
+        benchmarks={
+            "multi_turn": BenchmarkResult(
+                name="multi_turn",
+                raw_requests=[
+                    RequestMetrics(
+                        ttft_ms=1.0,
+                        metadata={"conversation_idx": 7, "turn_idx": 3},
+                    )
+                ],
+            )
+        },
+    )
+
+    results_path = results.save(tmp_path / "results")
+    data = json.loads(results_path.read_text())
+
+    raw = data["providers"]["torchinferno"]["benchmarks"]["multi_turn"]["raw_requests"]
+    assert raw[0]["metadata"] == {"conversation_idx": 7, "turn_idx": 3}
 
 
 def test_console_summary_scores_latency_and_throughput_only(capsys) -> None:

@@ -60,6 +60,8 @@ class MultiTurnBenchmark(Benchmark):
                     client, model, messages, temperature=0.0, max_tokens=512
                 )
                 metrics.correct = check_answer(response_text, expected)
+                metrics.metadata["conversation_idx"] = conv_idx
+                metrics.metadata["turn_idx"] = turn
                 conv_metrics.append(metrics)
                 messages.append({"role": "assistant", "content": response_text})
 
@@ -94,8 +96,30 @@ class MultiTurnBenchmark(Benchmark):
             result.metrics["ttft_first_turn_ms"] = avg_first
             result.metrics["ttft_last_turn_ms"] = avg_last
             result.metrics["ttft_growth_ratio"] = avg_last / avg_first if avg_first > 0 else 0
+            result.metrics["ttft_first_turn_median_ms"] = _median(first_turns)
+            result.metrics["ttft_first_turn_p99_ms"] = _p99(first_turns)
+            result.metrics["ttft_last_turn_median_ms"] = _median(last_turns)
+            result.metrics["ttft_last_turn_p99_ms"] = _p99(last_turns)
 
         correct = sum(1 for r in result.raw_requests if r.correct)
         print(f"  [{self.name}] Done: {correct}/{total_requests} correct")
         self._close_client(client)
         return result
+
+
+def _median(values: list[float]) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    middle = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[middle]
+    return (ordered[middle - 1] + ordered[middle]) / 2
+
+
+def _p99(values: list[float]) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    index = int(len(ordered) * 0.99)
+    return ordered[min(index, len(ordered) - 1)]

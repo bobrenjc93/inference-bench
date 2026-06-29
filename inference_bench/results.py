@@ -81,6 +81,7 @@ class RunResults:
                                 "throughput_tps": rm.throughput_tps,
                                 "correct": rm.correct,
                                 **({"response_text": rm.response_text} if rm.response_text is not None else {}),
+                                **({"metadata": rm.metadata} if rm.metadata else {}),
                             }
                             for i, rm in enumerate(br.raw_requests)
                         ],
@@ -173,6 +174,15 @@ class RunResults:
             for br in pr.benchmarks.values()
             for rm in br.raw_requests
         )
+        metadata_keys = sorted(
+            {
+                key
+                for pr in self.providers.values()
+                for br in pr.benchmarks.values()
+                for rm in br.raw_requests
+                for key in rm.metadata
+            }
+        )
 
         w.writerow(["Per-Request Raw Data"])
         header = [
@@ -180,6 +190,7 @@ class RunResults:
             "ttft_ms", "tpot_ms", "e2e_latency_ms",
             "output_tokens", "throughput_tps", "correct",
         ]
+        header.extend(f"metadata_{key}" for key in metadata_keys)
         if has_response_text:
             header.append("response_text")
         w.writerow(header)
@@ -198,6 +209,7 @@ class RunResults:
                         f"{rm.throughput_tps:.2f}",
                         "" if rm.correct is None else int(rm.correct),
                     ]
+                    row.extend(rm.metadata.get(key, "") for key in metadata_keys)
                     if has_response_text:
                         row.append(rm.response_text or "")
                     w.writerow(row)

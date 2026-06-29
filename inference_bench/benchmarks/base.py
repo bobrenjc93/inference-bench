@@ -33,6 +33,7 @@ class RequestMetrics:
     throughput_tps: float = 0.0
     correct: bool | None = None
     response_text: str | None = None
+    metadata: dict[str, int | float | str | bool] = field(default_factory=dict)
 
 
 @dataclass
