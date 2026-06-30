@@ -1,0 +1,102 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-e114089b/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_replicated_page_cache_warm=0 rank0_direct_scatter=0 rank0_shard_scatter=0
+[Llama3TP] loading initial embedding/norm/head tensors
+[Llama3TP] loaded initial embedding/norm/head tensors in 312.1s
+[Llama3TP] loaded 10/80 layers in 498.6s
+[Llama3TP] loaded 20/80 layers in 680.2s
+[Llama3TP] loaded 30/80 layers in 838.6s
+[Llama3TP] loaded 40/80 layers in 1021.8s
+[Llama3TP] loaded 50/80 layers in 1191.2s
+[Llama3TP] loaded 60/80 layers in 1366.0s
+[Llama3TP] loaded 70/80 layers in 1541.6s
+[Llama3TP] loaded 80/80 layers in 1703.3s
+[Llama3TP] checkpoint load complete in 1703.3s
+NCCL version 2.27.5+cuda12.9
+[Gloo] Rank 7 is connected to 7 peer ranks. Expected number of connected peer ranks is : 7
+[Gloo] Rank 1 is connected to 7 peer ranks. Expected number of connected peer ranks is : 7
+[Gloo] Rank 0 is connected to 7 peer ranks. Expected number of connected peer ranks is : 7
+[Gloo] Rank [Gloo] Rank 3 is connected to 72 peer ranks.  is connected to Expected number of connected peer ranks is : 77 peer ranks. 
+Expected number of connected peer ranks is : 7
+[Gloo] Rank 4 is connected to 7 peer ranks. Expected number of connected peer ranks is : 7
+[Gloo] Rank 6 is connected to [Gloo] Rank 7 peer ranks. 5Expected number of connected peer ranks is :  is connected to 77
+ peer ranks. Expected number of connected peer ranks is : 7
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+[WARMUP] FlashInfer decode graphs: 8 captured
+TorchInferno OpenAI server listening on http://0.0.0.0:8001/v1 model=/home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+W0629 23:45:56.343000 1001 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/agent/server/api.py:725] Received 15 death signal, shutting down workers
+W0629 23:45:56.344000 1001 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 1802 closing signal SIGTERM
+W0629 23:45:56.349000 1001 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 1803 closing signal SIGTERM
+W0629 23:45:56.351000 1001 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 1804 closing signal SIGTERM
+W0629 23:45:56.355000 1001 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 1805 closing signal SIGTERM
+W0629 23:45:56.357000 1001 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 1806 closing signal SIGTERM
+W0629 23:45:56.358000 1001 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 1807 closing signal SIGTERM
+W0629 23:45:56.359000 1001 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 1808 closing signal SIGTERM
+[rank7]: Traceback (most recent call last):
+[rank7]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank7]:   File "<frozen runpy>", line 88, in _run_code
+[rank7]:   File "/workspace/submit-e114089b/builds/torchinferno/src/torchinferno/openai_server.py", line 16133, in <module>
+[rank7]:     raise SystemExit(main())
+[rank7]:                      ~~~~^^
+[rank7]:   File "/workspace/submit-e114089b/builds/torchinferno/src/torchinferno/openai_server.py", line 16128, in main
+[rank7]:     serve(config)
+[rank7]:     ~~~~~^^^^^^^^
+[rank7]:   File "/workspace/submit-e114089b/builds/torchinferno/src/torchinferno/openai_server.py", line 11237, in serve
+[rank7]:     _tensor_parallel_worker_loop(engine)
+[rank7]:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+[rank7]:   File "/workspace/submit-e114089b/builds/torchinferno/src/torchinferno/openai_server.py", line 13445, in _tensor_parallel_worker_loop
+[rank7]:     _sync_tensor_parallel_command(getattr(engine, "model", None), engine.device, cuda_sync=cuda_sync)
+[rank7]:     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank7]:   File "/workspace/submit-e114089b/builds/torchinferno/src/torchinferno/openai_server.py", line 11739, in _sync_tensor_parallel_command
+[rank7]:     dist.barrier(group=control_group)
+[rank7]:     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+[rank7]:   File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/c10d_logger.py", line 81, in wrapper
+[rank7]:     return func(*args, **kwargs)
+[rank7]:   File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/distributed_c10d.py", line 4888, in barrier
+[rank7]:     work.wait()
+[rank7]:     ~~~~~~~~~^^
+[rank7]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/pair.cc:538] Read error [10.0.53.219]:33206: Connection reset by peer
+/home/dev/miniconda3/lib/python3.13/multiprocessing/resource_tracker.py:400: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown: {'/psm_fce94d9f'}
+  warnings.warn(
+W0629 23:45:56.363000 1001 builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 1809 closing signal SIGTERM
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 940, in <module>
+    main()
+    ~~~~^^
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 357, in wrapper
+    return f(*args, **kwargs)
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 936, in main
+    run(args)
+    ~~~^^^^^^
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/run.py", line 927, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 156, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 284, in launch_agent
+    result = agent.run()
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/metrics/api.py", line 138, in wrapper
+    result = f(*args, **kwargs)
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/agent/server/api.py", line 717, in run
+    result = self._invoke_run(role)
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/agent/server/api.py", line 881, in _invoke_run
+    time.sleep(monitor_interval)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/workspace/submit-e114089b/builds/torchinferno/venv/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 85, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 1001 got signal: 15
