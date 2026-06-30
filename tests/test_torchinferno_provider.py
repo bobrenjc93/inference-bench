@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 import subprocess
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import mock
 
 from inference_bench.providers.torchinferno import TorchInfernoProvider
@@ -17,6 +19,35 @@ class TorchInfernoProviderTest(unittest.TestCase):
 
         self.assertEqual(env["NCCL_CUMEM_ENABLE"], "0")
         self.assertNotIn("TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST", env)
+
+    def test_server_env_defaults_torchinferno_profile_logs(self) -> None:
+        with TemporaryDirectory() as tmp:
+            provider = TorchInfernoProvider(build_dir=tmp)
+            build_dir = Path(tmp).resolve()
+            stale_queue = build_dir / "torchinferno_queue_profile.jsonl"
+            stale_queue.write_text("stale\n")
+
+            with mock.patch.dict(os.environ, {}, clear=True):
+                env = provider._server_env()
+
+            self.assertEqual(
+                env["TORCHINFERNO_OPENAI_QUEUE_PROFILE_JSONL"],
+                str(build_dir / "torchinferno_queue_profile.jsonl"),
+            )
+            self.assertEqual(
+                env["TORCHINFERNO_OPENAI_FAST_HTTP_PROFILE_JSONL"],
+                str(build_dir / "torchinferno_fast_http_profile.jsonl"),
+            )
+            self.assertEqual(
+                provider.extra_log_paths(),
+                {
+                    "queue_profile": str(build_dir / "torchinferno_queue_profile.jsonl"),
+                    "fast_http_profile": str(
+                        build_dir / "torchinferno_fast_http_profile.jsonl"
+                    ),
+                },
+            )
+            self.assertFalse(stale_queue.exists())
 
     def test_build_installs_flashinfer_extra_by_default(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")

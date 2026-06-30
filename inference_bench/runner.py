@@ -116,6 +116,13 @@ def run_all(
             log_path = getattr(provider, "_log_path", None)
             if log_path is not None:
                 pr.server_log_path = str(log_path)
+            extra_log_paths = getattr(provider, "extra_log_paths", None)
+            if callable(extra_log_paths):
+                pr.extra_log_paths = {
+                    str(name): str(path)
+                    for name, path in extra_log_paths().items()
+                    if path
+                }
             _free_gpu_memory()
             time.sleep(5)
 

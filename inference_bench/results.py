@@ -60,6 +60,7 @@ class ProviderResults:
     benchmarks: dict[str, BenchmarkResult] = field(default_factory=dict)
     errors: dict[str, str] = field(default_factory=dict)
     server_log_path: str = ""
+    extra_log_paths: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -111,6 +112,19 @@ class RunResults:
             server_log = self._copy_provider_log(run_dir, pname, pr.server_log_path)
             if server_log:
                 prov_data["server_log"] = server_log
+            extra_logs = {
+                name: copied
+                for name, source_path in pr.extra_log_paths.items()
+                if (
+                    copied := self._copy_provider_log(
+                        run_dir,
+                        f"{pname}_{name}",
+                        source_path,
+                    )
+                )
+            }
+            if extra_logs:
+                prov_data["extra_logs"] = extra_logs
             if pr.errors:
                 prov_data["errors"] = pr.errors
             data["providers"][pname] = prov_data
@@ -126,7 +140,7 @@ class RunResults:
         if not source.exists():
             return ""
         safe_name = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in provider_name)
-        rel_path = Path("provider_logs") / f"{safe_name}.log"
+        rel_path = Path("provider_logs") / f"{safe_name}{source.suffix or '.log'}"
         dest = run_dir / rel_path
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, dest)

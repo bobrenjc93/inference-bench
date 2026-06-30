@@ -52,6 +52,36 @@ def test_save_copies_provider_logs(tmp_path) -> None:
     assert copied_log.read_text() == "server tail\n"
 
 
+def test_save_copies_extra_provider_logs(tmp_path) -> None:
+    queue_log = tmp_path / "torchinferno_queue_profile.jsonl"
+    http_log = tmp_path / "torchinferno_fast_http_profile.jsonl"
+    queue_log.write_text('{"queue": 1}\n')
+    http_log.write_text('{"http": 1}\n')
+    results = RunResults(model="model", tensor_parallel_size=1)
+    results.providers["torchinferno"] = ProviderResults(
+        provider="torchinferno",
+        extra_log_paths={
+            "queue_profile": str(queue_log),
+            "fast_http_profile": str(http_log),
+        },
+    )
+
+    results_path = results.save(tmp_path / "results")
+
+    data = json.loads(results_path.read_text())
+    provider = data["providers"]["torchinferno"]
+    assert provider["extra_logs"] == {
+        "queue_profile": "provider_logs/torchinferno_queue_profile.jsonl",
+        "fast_http_profile": "provider_logs/torchinferno_fast_http_profile.jsonl",
+    }
+    assert (
+        results_path.parent / provider["extra_logs"]["queue_profile"]
+    ).read_text() == '{"queue": 1}\n'
+    assert (
+        results_path.parent / provider["extra_logs"]["fast_http_profile"]
+    ).read_text() == '{"http": 1}\n'
+
+
 def test_save_preserves_raw_request_metadata(tmp_path) -> None:
     results = RunResults(model="model", tensor_parallel_size=1)
     results.providers["torchinferno"] = ProviderResults(

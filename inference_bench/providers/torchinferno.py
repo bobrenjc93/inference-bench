@@ -28,6 +28,7 @@ class TorchInfernoProvider(Provider):
 
     def __init__(self, build_dir: str = "./builds"):
         super().__init__(build_dir=build_dir)
+        self._extra_log_paths: dict[str, str] = {}
         local = os.environ.get("TORCHINFERNO_LOCAL_REPO")
         if local:
             self.repo_dir = Path(local).resolve()
@@ -90,6 +91,20 @@ class TorchInfernoProvider(Provider):
 
     def _server_env(self) -> dict[str, str]:
         env = super()._server_env()
+        self._extra_log_paths = {}
+        if _env_flag("INFERENCE_BENCH_TORCHINFERNO_PROFILE", True):
+            self._set_profile_env_default(
+                env,
+                "queue_profile",
+                "TORCHINFERNO_OPENAI_QUEUE_PROFILE_JSONL",
+                "queue_profile.jsonl",
+            )
+            self._set_profile_env_default(
+                env,
+                "fast_http_profile",
+                "TORCHINFERNO_OPENAI_FAST_HTTP_PROFILE_JSONL",
+                "fast_http_profile.jsonl",
+            )
         # Public TorchInferno runs have repeatedly stalled during NCCL startup
         # broadcasts on P2P/CUMEM paths. Keep CUMEM disabled by default and let
         # TorchInferno use its portable checkpoint loading default unless a run
@@ -110,6 +125,30 @@ class TorchInfernoProvider(Provider):
             env["TORCH_NCCL_ASYNC_ERROR_HANDLING"] = env["NCCL_ASYNC_ERROR_HANDLING"]
         env.pop("NCCL_ASYNC_ERROR_HANDLING", None)
         return env
+
+    def _set_profile_env_default(
+        self,
+        env: dict[str, str],
+        log_name: str,
+        env_name: str,
+        filename: str,
+    ) -> None:
+        configured = env.get(env_name, "").strip()
+        if configured:
+            self._extra_log_paths[log_name] = configured
+            return
+        path = self.build_dir / f"{self.name}_{filename}"
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+        except OSError:
+            pass
+        env[env_name] = str(path)
+        self._extra_log_paths[log_name] = str(path)
+
+    def extra_log_paths(self) -> dict[str, str]:
+        return dict(self._extra_log_paths)
 
     def _gpu_memory_wait_fraction(self) -> float | None:
         if "INFERENCE_BENCH_TORCHINFERNO_MIN_GPU_FREE_FRACTION" in os.environ:
