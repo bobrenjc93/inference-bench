@@ -52,6 +52,14 @@ def _metadata_fields(
     return {f"metadata_{key}": value for key, value in metadata.items()}
 
 
+def _format_console_metric(metric_key: str, value: int | float | str | bool) -> str:
+    if not isinstance(value, float):
+        return str(value)
+    if metric_key == "correctness_rate":
+        return f"{value:.3f}"
+    return f"{value:.1f}"
+
+
 @dataclass
 class ProviderResults:
     provider: str
@@ -326,7 +334,7 @@ class RunResults:
                 if bname in pr.benchmarks and mk in pr.benchmarks[bname].metrics:
                     val = pr.benchmarks[bname].metrics[mk]
                     values[pname] = val
-                    row.append(f"{val:.1f}" if isinstance(val, float) else str(val))
+                    row.append(_format_console_metric(mk, val))
                 else:
                     row.append("-")
 
@@ -343,13 +351,13 @@ class RunResults:
                 if bname in pr.benchmarks and mk in pr.benchmarks[bname].metrics:
                     val = pr.benchmarks[bname].metrics[mk]
                     values[pname] = val
-                    row.append(f"{val:.1f}" if isinstance(val, float) else str(val))
+                    row.append(_format_console_metric(mk, val))
                 else:
                     row.append("-")
             row.append("")
             rows.append(row)
 
-        print(tabulate(rows, headers=headers, tablefmt="simple"))
+        print(tabulate(rows, headers=headers, tablefmt="simple", disable_numparse=True))
 
     def _pick_winner(self, metric_key: str, values: dict[str, float]) -> str:
         if len(values) < 2:

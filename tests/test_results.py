@@ -167,9 +167,42 @@ def test_console_summary_scores_latency_and_throughput_only(capsys) -> None:
     results.print_comparison()
 
     output = capsys.readouterr().out
-    assert re.search(r"^correctness_rate\s+0\.5\s+1\s+accurate$", output, re.MULTILINE)
+    assert re.search(r"^correctness_rate\s+0\.500\s+1\.000\s+accurate$", output, re.MULTILINE)
     assert re.search(r"^fast\s+4$", output, re.MULTILINE)
     assert re.search(r"^accurate\s+0$", output, re.MULTILINE)
+
+
+def test_console_summary_does_not_round_near_perfect_correctness(capsys) -> None:
+    results = RunResults(model="model", tensor_parallel_size=1)
+    results.providers["almost"] = ProviderResults(
+        provider="almost",
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={
+                    "ttft_median_ms": 1.0,
+                    "correctness_rate": 0.977,
+                },
+            )
+        },
+    )
+    results.providers["perfect"] = ProviderResults(
+        provider="perfect",
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={
+                    "ttft_median_ms": 2.0,
+                    "correctness_rate": 1.0,
+                },
+            )
+        },
+    )
+
+    results.print_comparison()
+
+    output = capsys.readouterr().out
+    assert re.search(r"^correctness_rate\s+0\.977\s+1\.000\s+perfect$", output, re.MULTILINE)
 
 
 def test_console_summary_does_not_score_tied_metrics(capsys) -> None:
@@ -206,6 +239,6 @@ def test_console_summary_does_not_score_tied_metrics(capsys) -> None:
     results.print_comparison()
 
     output = capsys.readouterr().out
-    assert re.search(r"^tpot_median_ms\s+0\s+0\s*$", output, re.MULTILINE)
+    assert re.search(r"^tpot_median_ms\s+0\.0\s+0\.0\s*$", output, re.MULTILINE)
     assert re.search(r"^fast\s+3$", output, re.MULTILINE)
     assert re.search(r"^same_tpot\s+0$", output, re.MULTILINE)
