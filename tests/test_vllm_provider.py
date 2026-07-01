@@ -140,6 +140,51 @@ class VllmProviderTest(unittest.TestCase):
             "https://wheels.vllm.ai/nightly/cu130/vllm-x86_64.whl",
         )
 
+    def test_server_cmd_appends_env_extra_args(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        with mock.patch.dict(
+            os.environ,
+            {"INFERENCE_BENCH_VLLM_SERVER_ARGS": "--disable-custom-all-reduce --max-num-seqs 256"},
+            clear=True,
+        ):
+            cmd = provider._server_cmd("model", tp=8, port=9000)
+
+        self.assertIn("--disable-custom-all-reduce", cmd)
+        self.assertEqual(cmd[cmd.index("--max-num-seqs") + 1], "256")
+
+    def test_server_env_sets_flashinfer_workspace_default(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        with mock.patch.dict(os.environ, {}, clear=True):
+            env = provider._server_env()
+
+        self.assertEqual(
+            env["VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE"],
+            str(394 * 1024 * 1024),
+        )
+
+    def test_server_env_respects_flashinfer_workspace_override(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        with mock.patch.dict(
+            os.environ,
+            {"INFERENCE_BENCH_VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE": str(8 * 1024 * 1024)},
+            clear=True,
+        ):
+            env = provider._server_env()
+
+        self.assertEqual(env["VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE"], str(8 * 1024 * 1024))
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "INFERENCE_BENCH_VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE": str(8 * 1024 * 1024),
+                "VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE": str(16 * 1024 * 1024),
+            },
+            clear=True,
+        ):
+            env = provider._server_env()
+
+        self.assertEqual(env["VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE"], str(16 * 1024 * 1024))
+
     def test_server_env_prepends_configured_libstdcxx_dir(self) -> None:
         provider = VllmProvider(build_dir="/tmp/inference-bench-test")
         with tempfile.TemporaryDirectory() as tmpdir:

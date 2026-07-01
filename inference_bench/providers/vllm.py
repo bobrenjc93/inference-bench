@@ -4,6 +4,7 @@ import json
 import os
 import platform
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -12,6 +13,8 @@ from urllib.request import urlopen
 
 from . import register
 from .base import Provider, _env_flag, _env_float, _visible_gpu_tokens
+
+_DEFAULT_FLASHINFER_WORKSPACE_BUFFER_SIZE = 394 * 1024 * 1024
 
 
 @register("vllm")
@@ -314,10 +317,20 @@ class VllmProvider(Provider):
         gpu_memory_utilization = os.environ.get("INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION")
         if gpu_memory_utilization:
             cmd.extend(["--gpu-memory-utilization", gpu_memory_utilization])
+        extra_args = os.environ.get("INFERENCE_BENCH_VLLM_SERVER_ARGS", "").strip()
+        if extra_args:
+            cmd.extend(shlex.split(extra_args))
         return cmd
 
     def _server_env(self) -> dict[str, str]:
         env = super()._server_env()
+        env.setdefault(
+            "VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE",
+            env.get(
+                "INFERENCE_BENCH_VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE",
+                str(_DEFAULT_FLASHINFER_WORKSPACE_BUFFER_SIZE),
+            ),
+        )
         libstdcxx_dir = self._find_compatible_libstdcxx_dir(env)
         if libstdcxx_dir:
             self._prepend_env_path(env, "LD_LIBRARY_PATH", libstdcxx_dir)
