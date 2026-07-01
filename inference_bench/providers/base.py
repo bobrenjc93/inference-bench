@@ -62,6 +62,24 @@ class Provider(ABC):
         return str(self.venv_dir / "bin" / "python")
 
     @property
+    def server_python(self) -> str:
+        override = self._server_python_override()
+        return override if override else self.venv_python
+
+    def _server_python_override(self) -> str:
+        env_name = f"INFERENCE_BENCH_{self.name.upper().replace('-', '_')}_PYTHON"
+        return os.environ.get(env_name, "").strip()
+
+    def _server_python_bin_dir(self) -> str:
+        override = self._server_python_override()
+        if not override:
+            return str(self.venv_dir / "bin")
+        path = Path(override).expanduser()
+        if path.parent == Path("."):
+            return ""
+        return str(path.parent)
+
+    @property
     def api_base(self) -> str:
         return f"http://localhost:{self._port}/v1"
 
@@ -167,7 +185,9 @@ class Provider(ABC):
         self._wait_for_gpu_memory_ready(tp)
         cmd = self._server_cmd(model, tp, port)
         env = self._server_env()
-        env["PATH"] = str(self.venv_dir / "bin") + ":" + env.get("PATH", "")
+        python_bin_dir = self._server_python_bin_dir()
+        if python_bin_dir:
+            env["PATH"] = python_bin_dir + ":" + env.get("PATH", "")
 
         self._log_path = self.build_dir / f"{self.name}_server.log"
         self._log_path.parent.mkdir(parents=True, exist_ok=True)

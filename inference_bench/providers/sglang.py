@@ -39,7 +39,7 @@ class SglangProvider(Provider):
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         server_model = self._server_model(model)
         cmd = [
-            self.venv_python, "-m", "sglang.launch_server",
+            self.server_python, "-m", "sglang.launch_server",
             "--model-path", server_model,
             "--tp", str(tp),
             "--port", str(port),

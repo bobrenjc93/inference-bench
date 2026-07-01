@@ -73,7 +73,7 @@ class TorchInfernoProvider(Provider):
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         server_model = self._server_model(model)
         cmd = [
-            self.venv_python,
+            self.server_python,
             "-m",
             "torchinferno.openai_server",
             "--model",

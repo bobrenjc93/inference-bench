@@ -43,6 +43,27 @@ def test_cached_hf_snapshot_can_be_disabled(tmp_path, monkeypatch) -> None:
     assert "--served-model-name" not in cmd
 
 
+def test_provider_python_override_controls_server_command(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("INFERENCE_BENCH_VLLM_PYTHON", "/opt/vllm/bin/python")
+    monkeypatch.setenv("INFERENCE_BENCH_SGLANG_PYTHON", "/opt/sglang/bin/python")
+    monkeypatch.setenv("INFERENCE_BENCH_TORCHINFERNO_PYTHON", "/opt/ti/bin/python")
+    monkeypatch.setenv("INFERENCE_BENCH_USE_CACHED_HF_SNAPSHOT", "0")
+
+    model = "org/model"
+
+    assert VllmProvider(build_dir=str(tmp_path))._server_cmd(model, tp=8, port=9001)[0] == (
+        "/opt/vllm/bin/python"
+    )
+    assert SglangProvider(build_dir=str(tmp_path))._server_cmd(model, tp=8, port=9002)[0] == (
+        "/opt/sglang/bin/python"
+    )
+    assert TorchInfernoProvider(build_dir=str(tmp_path))._server_cmd(
+        model,
+        tp=8,
+        port=9000,
+    )[0] == "/opt/ti/bin/python"
+
+
 def _write_hf_snapshot(hf_home: Path, model: str) -> Path:
     commit = "a" * 40
     repo_cache = hf_home / "hub" / f"models--{model.replace('/', '--')}"

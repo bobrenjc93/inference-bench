@@ -303,7 +303,7 @@ class VllmProvider(Provider):
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         server_model = self._server_model(model)
         cmd = [
-            self.venv_python, "-m", "vllm.entrypoints.openai.api_server",
+            self.server_python, "-m", "vllm.entrypoints.openai.api_server",
             "--model", server_model,
             "--tensor-parallel-size", str(tp),
             "--port", str(port),
@@ -348,7 +348,7 @@ class VllmProvider(Provider):
         conda_python = env.get("CONDA_PYTHON_EXE", "")
         if conda_python:
             candidates.append(Path(conda_python).expanduser().resolve().parent.parent / "lib")
-        candidates.append(Path(self.venv_python).expanduser().resolve().parent.parent / "lib")
+        candidates.append(Path(self.server_python).expanduser().resolve().parent.parent / "lib")
         candidates.append(Path(sys.executable).expanduser().resolve().parent.parent / "lib")
         home = Path.home()
         candidates.extend(sorted((home / ".conda" / "envs").glob("*/lib")))
