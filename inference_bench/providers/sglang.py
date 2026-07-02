@@ -41,7 +41,7 @@ class SglangProvider(Provider):
         cmd = [
             self.server_python, "-m", "sglang.launch_server",
             "--model-path", server_model,
-            "--tp", str(tp),
+            "--tp-size", str(tp),
             "--port", str(port),
             "--trust-remote-code",
         ]

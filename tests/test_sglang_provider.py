@@ -10,6 +10,15 @@ from inference_bench.providers.sglang import SglangProvider
 
 
 class SglangProviderTest(unittest.TestCase):
+    def test_server_cmd_uses_current_tensor_parallel_flag(self) -> None:
+        provider = SglangProvider(build_dir="/tmp/inference-bench-test")
+
+        cmd = provider._server_cmd("model", tp=8, port=9000)
+
+        self.assertIn("--tp-size", cmd)
+        self.assertEqual(cmd[cmd.index("--tp-size") + 1], "8")
+        self.assertNotIn("--tp", cmd)
+
     def test_editable_failure_retries_binary_wheel(self) -> None:
         provider = SglangProvider(build_dir="/tmp/inference-bench-test")
         calls: list[tuple[tuple[str, ...], Path | None]] = []
