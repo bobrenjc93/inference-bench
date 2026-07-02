@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import tempfile
@@ -151,6 +152,47 @@ class VllmProviderTest(unittest.TestCase):
 
         self.assertIn("--disable-custom-all-reduce", cmd)
         self.assertEqual(cmd[cmd.index("--max-num-seqs") + 1], "256")
+        self.assertEqual(
+            json.loads(cmd[cmd.index("--compilation-config") + 1]),
+            {"pass_config": {"fuse_allreduce_rms": False}},
+        )
+
+    def test_server_cmd_disables_allreduce_rms_fusion_by_default(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        with mock.patch.dict(os.environ, {}, clear=True):
+            cmd = provider._server_cmd("model", tp=8, port=9000)
+
+        self.assertEqual(
+            json.loads(cmd[cmd.index("--compilation-config") + 1]),
+            {"pass_config": {"fuse_allreduce_rms": False}},
+        )
+
+    def test_server_cmd_respects_explicit_compilation_config(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        configured = '{"pass_config":{"fuse_allreduce_rms":true}}'
+        with mock.patch.dict(
+            os.environ,
+            {"INFERENCE_BENCH_VLLM_SERVER_ARGS": f"--compilation-config '{configured}'"},
+            clear=True,
+        ):
+            cmd = provider._server_cmd("model", tp=8, port=9000)
+
+        self.assertEqual(cmd.count("--compilation-config"), 1)
+        self.assertEqual(
+            json.loads(cmd[cmd.index("--compilation-config") + 1]),
+            {"pass_config": {"fuse_allreduce_rms": True}},
+        )
+
+    def test_server_cmd_can_keep_allreduce_rms_fusion_default(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        with mock.patch.dict(
+            os.environ,
+            {"INFERENCE_BENCH_VLLM_DISABLE_ALLREDUCE_RMS_FUSION": "0"},
+            clear=True,
+        ):
+            cmd = provider._server_cmd("model", tp=8, port=9000)
+
+        self.assertNotIn("--compilation-config", cmd)
 
     def test_server_env_sets_flashinfer_workspace_default(self) -> None:
         provider = VllmProvider(build_dir="/tmp/inference-bench-test")

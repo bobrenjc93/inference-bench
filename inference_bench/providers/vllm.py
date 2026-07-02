@@ -15,6 +15,10 @@ from . import register
 from .base import Provider, _env_flag, _env_float, _visible_gpu_tokens
 
 _DEFAULT_FLASHINFER_WORKSPACE_BUFFER_SIZE = 394 * 1024 * 1024
+_DEFAULT_COMPILATION_CONFIG = json.dumps(
+    {"pass_config": {"fuse_allreduce_rms": False}},
+    separators=(",", ":"),
+)
 
 
 @register("vllm")
@@ -318,9 +322,16 @@ class VllmProvider(Provider):
         if gpu_memory_utilization:
             cmd.extend(["--gpu-memory-utilization", gpu_memory_utilization])
         extra_args = os.environ.get("INFERENCE_BENCH_VLLM_SERVER_ARGS", "").strip()
-        if extra_args:
-            cmd.extend(shlex.split(extra_args))
+        extra_cmd = shlex.split(extra_args) if extra_args else []
+        if self._should_disable_allreduce_rms_fusion(extra_cmd):
+            cmd.extend(["--compilation-config", _DEFAULT_COMPILATION_CONFIG])
+        cmd.extend(extra_cmd)
         return cmd
+
+    def _should_disable_allreduce_rms_fusion(self, extra_cmd: list[str]) -> bool:
+        if not _env_flag("INFERENCE_BENCH_VLLM_DISABLE_ALLREDUCE_RMS_FUSION", True):
+            return False
+        return "--compilation-config" not in extra_cmd
 
     def _server_env(self) -> dict[str, str]:
         env = super()._server_env()
