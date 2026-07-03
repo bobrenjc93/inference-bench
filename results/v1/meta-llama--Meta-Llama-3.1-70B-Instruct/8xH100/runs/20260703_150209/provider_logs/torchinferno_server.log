@@ -1,0 +1,373 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-5cac713d/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model meta-llama/Meta-Llama-3.1-70B-Instruct --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[Llama3TP] resolving checkpoint meta-llama/Meta-Llama-3.1-70B-Instruct
+Fetching 36 files:   0%|          | 0/36 [00:00<?, ?it/s]Fetching 36 files:   3%|▎         | 1/36 [00:00<00:03,  9.19it/s]Fetching 36 files:   8%|▊         | 3/36 [00:39<08:02, 14.62s/it]Fetching 36 files:  11%|█         | 4/36 [00:43<05:54, 11.08s/it]Fetching 36 files:  28%|██▊       | 10/36 [00:44<01:13,  2.83s/it]Fetching 36 files:  28%|██▊       | 10/36 [00:59<01:13,  2.83s/it]Fetching 36 files:  33%|███▎      | 12/36 [01:17<02:35,  6.47s/it]Fetching 36 files:  39%|███▉      | 14/36 [01:20<01:52,  5.10s/it]Fetching 36 files:  44%|████▍     | 16/36 [01:25<01:27,  4.38s/it]Fetching 36 files:  53%|█████▎    | 19/36 [01:31<00:59,  3.50s/it]Fetching 36 files:  56%|█████▌    | 20/36 [01:43<01:15,  4.73s/it]Fetching 36 files:  58%|█████▊    | 21/36 [01:49<01:14,  4.94s/it]Fetching 36 files:  61%|██████    | 22/36 [01:59<01:25,  6.11s/it]Fetching 36 files:  72%|███████▏  | 26/36 [02:03<00:32,  3.25s/it]Fetching 36 files:  78%|███████▊  | 28/36 [02:17<00:34,  4.33s/it]Fetching 36 files:  83%|████████▎ | 30/36 [02:17<00:18,  3.14s/it]Fetching 36 files:  86%|████████▌ | 31/36 [02:19<00:14,  2.94s/it]Fetching 36 files: 100%|██████████| 36/36 [02:19<00:00,  3.88s/it]
+[Llama3TP] resolved checkpoint /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+NCCL version 2.29.7+cuda13.2
+
+[2026-07-03 15:05:32] gpu-dev-5cac713d:1847:1847 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-03 15:05:32] gpu-dev-5cac713d:1853:1853 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-03 15:05:32] gpu-dev-5cac713d:1854:1854 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-03 15:05:32] gpu-dev-5cac713d:1852:1852 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-03 15:05:32] gpu-dev-5cac713d:1850:1850 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-03 15:05:32] gpu-dev-5cac713d:1849:1849 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-03 15:05:32] gpu-dev-5cac713d:1848:1848 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-03 15:05:32] gpu-dev-5cac713d:1851:1851 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_replicated_page_cache_warm=0 rank0_direct_scatter=0 rank0_shard_scatter=0
+[Llama3TP] loading initial embedding/norm/head tensors
+[Llama3TP] loaded initial embedding/norm/head tensors in 0.3s
+[Llama3TP] loaded 10/80 layers in 1.2s
+[Llama3TP] loaded 20/80 layers in 2.2s
+[Llama3TP] loaded 30/80 layers in 3.2s
+[Llama3TP] loaded 40/80 layers in 4.1s
+[Llama3TP] loaded 50/80 layers in 5.2s
+[Llama3TP] loaded 60/80 layers in 6.2s
+[Llama3TP] loaded 70/80 layers in 7.2s
+[Llama3TP] loaded 80/80 layers in 8.2s
+[Llama3TP] checkpoint load complete in 8.2s
+[WARMUP] FlashInfer decode graphs: 4 captured
+[WARMUP] FlashInfer decode graphs: 4 captured
+[WARMUP] FlashInfer decode graphs: 4 captured
+[WARMUP] FlashInfer decode graphs: 4 captured
+[WARMUP] FlashInfer decode graphs: 4 captured
+[WARMUP] FlashInfer decode graphs: 4 captured
+[WARMUP] FlashInfer decode graphs: 4 captured
+[rank7]:[E703 15:37:17.701476354 ProcessGroupNCCL.cpp:757] [Rank 7] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=56279, OpType=ALLREDUCE, NumelIn=65536, NumelOut=65536, Timeout(ms)=1800000) ran for 1800001 milliseconds before timing out.
+[rank7]:[E703 15:37:17.702161504 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 7]  failure detected by watchdog at work sequence id: 56279 PG status: last enqueued work: 56392, last completed work: 56118
+[rank7]:[E703 15:37:17.703256358 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 all_reduce from /usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py:3174
+#1 wrapper from /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83
+#2 _all_reduce from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:6360
+#3 _decode_linear_all_reduce from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2230
+#4 forward_flashinfer from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:1958
+#5 _forward_decode_flashinfer_body from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:4968
+#6 forward_decode_flashinfer from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:4933
+#7 _warmup_flashinfer_decode_graphs from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py:4228
+#8 _warmup_unified_scheduler_cache from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py:3617
+#9 _warmup_tensor_parallel_model from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py:7749
+#10 __init__ from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py:2978
+#11 build_engine from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py:12199
+#12 serve from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py:12214
+#13 main from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py:17240
+#14 <module> from /workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py:17245
+#15 _run_code from <frozen runpy>:88
+#16 _run_module_as_main from <frozen runpy>:198
+
+[rank7]:[E703 15:37:17.703370695 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 7] First PG on this rank to signal dumping.
+[rank2]: Traceback (most recent call last):
+[rank2]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank2]:   File "<frozen runpy>", line 88, in _run_code
+[rank2]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17245, in <module>
+[rank2]:     raise SystemExit(main())
+[rank2]:                      ^^^^^^
+[rank2]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17240, in main
+[rank2]:     serve(config)
+[rank2]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12214, in serve
+[rank2]:     engine = build_engine(config)
+[rank2]:              ^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12199, in build_engine
+[rank2]:     return OpenAICompletionEngine(
+[rank2]:            ^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 2978, in __init__
+[rank2]:     self._warmup_tensor_parallel_model()
+[rank2]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 7754, in _warmup_tensor_parallel_model
+[rank2]:     _sync_tensor_parallel_command(self.model, self.device, cuda_sync=False)
+[rank2]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12718, in _sync_tensor_parallel_command
+[rank2]:     dist.barrier(group=control_group)
+[rank2]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank2]:     return func(*args, **kwargs)
+[rank2]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank2]:     work.wait()
+[rank2]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/pair.cc:547] Connection closed by peer [10.0.63.207]:32454
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank0]:   File "<frozen runpy>", line 88, in _run_code
+[rank0]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17245, in <module>
+[rank0]:     raise SystemExit(main())
+[rank0]:                      ^^^^^^
+[rank0]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17240, in main
+[rank0]:     serve(config)
+[rank0]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12214, in serve
+[rank0]:     engine = build_engine(config)
+[rank0]:              ^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12199, in build_engine
+[rank0]:     return OpenAICompletionEngine(
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 2978, in __init__
+[rank0]:     self._warmup_tensor_parallel_model()
+[rank0]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 7754, in _warmup_tensor_parallel_model
+[rank0]:     _sync_tensor_parallel_command(self.model, self.device, cuda_sync=False)
+[rank0]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12718, in _sync_tensor_parallel_command
+[rank0]:     dist.barrier(group=control_group)
+[rank0]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank0]:     return func(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank0]:     work.wait()
+[rank0]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:78] Timed out waiting 1800000ms for recv operation to complete
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank1]:   File "<frozen runpy>", line 88, in _run_code
+[rank1]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17245, in <module>
+[rank1]:     raise SystemExit(main())
+[rank1]:                      ^^^^^^
+[rank1]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17240, in main
+[rank1]:     serve(config)
+[rank1]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12214, in serve
+[rank1]:     engine = build_engine(config)
+[rank1]:              ^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12199, in build_engine
+[rank1]:     return OpenAICompletionEngine(
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 2978, in __init__
+[rank1]:     self._warmup_tensor_parallel_model()
+[rank1]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 7754, in _warmup_tensor_parallel_model
+[rank1]:     _sync_tensor_parallel_command(self.model, self.device, cuda_sync=False)
+[rank1]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12718, in _sync_tensor_parallel_command
+[rank1]:     dist.barrier(group=control_group)
+[rank1]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank1]:     return func(*args, **kwargs)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank1]:     work.wait()
+[rank1]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:78] Timed out waiting 1800000ms for recv operation to complete
+[rank4]: Traceback (most recent call last):
+[rank4]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank4]:   File "<frozen runpy>", line 88, in _run_code
+[rank4]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17245, in <module>
+[rank4]:     raise SystemExit(main())
+[rank4]:                      ^^^^^^
+[rank4]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17240, in main
+[rank4]:     serve(config)
+[rank4]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12214, in serve
+[rank4]:     engine = build_engine(config)
+[rank4]:              ^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12199, in build_engine
+[rank4]:     return OpenAICompletionEngine(
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 2978, in __init__
+[rank4]:     self._warmup_tensor_parallel_model()
+[rank4]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 7754, in _warmup_tensor_parallel_model
+[rank4]:     _sync_tensor_parallel_command(self.model, self.device, cuda_sync=False)
+[rank4]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12718, in _sync_tensor_parallel_command
+[rank4]:     dist.barrier(group=control_group)
+[rank4]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank4]:     return func(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank4]:     work.wait()
+[rank4]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:129] Timed out waiting 1800000ms for send operation to complete
+[rank3]: Traceback (most recent call last):
+[rank3]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:   File "<frozen runpy>", line 88, in _run_code
+[rank3]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17245, in <module>
+[rank3]:     raise SystemExit(main())
+[rank3]:                      ^^^^^^
+[rank3]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17240, in main
+[rank3]:     serve(config)
+[rank3]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12214, in serve
+[rank3]:     engine = build_engine(config)
+[rank3]:              ^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12199, in build_engine
+[rank3]:     return OpenAICompletionEngine(
+[rank3]:            ^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 2978, in __init__
+[rank3]:     self._warmup_tensor_parallel_model()
+[rank3]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 7754, in _warmup_tensor_parallel_model
+[rank3]:     _sync_tensor_parallel_command(self.model, self.device, cuda_sync=False)
+[rank3]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12718, in _sync_tensor_parallel_command
+[rank3]:     dist.barrier(group=control_group)
+[rank3]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank3]:     return func(*args, **kwargs)
+[rank3]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank3]:     work.wait()
+[rank3]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:78] Timed out waiting 1800000ms for recv operation to complete
+[rank6]: Traceback (most recent call last):
+[rank6]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank6]:   File "<frozen runpy>", line 88, in _run_code
+[rank6]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17245, in <module>
+[rank6]:     raise SystemExit(main())
+[rank6]:                      ^^^^^^
+[rank6]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17240, in main
+[rank6]:     serve(config)
+[rank6]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12214, in serve
+[rank6]:     engine = build_engine(config)
+[rank6]:              ^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12199, in build_engine
+[rank6]:     return OpenAICompletionEngine(
+[rank6]:            ^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 2978, in __init__
+[rank6]:     self._warmup_tensor_parallel_model()
+[rank6]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 7754, in _warmup_tensor_parallel_model
+[rank6]:     _sync_tensor_parallel_command(self.model, self.device, cuda_sync=False)
+[rank6]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12718, in _sync_tensor_parallel_command
+[rank6]:     dist.barrier(group=control_group)
+[rank6]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank6]:     return func(*args, **kwargs)
+[rank6]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank6]:     work.wait()
+[rank6]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:129] Timed out waiting 1800000ms for send operation to complete
+[rank5]: Traceback (most recent call last):
+[rank5]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank5]:   File "<frozen runpy>", line 88, in _run_code
+[rank5]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17245, in <module>
+[rank5]:     raise SystemExit(main())
+[rank5]:                      ^^^^^^
+[rank5]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 17240, in main
+[rank5]:     serve(config)
+[rank5]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12214, in serve
+[rank5]:     engine = build_engine(config)
+[rank5]:              ^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12199, in build_engine
+[rank5]:     return OpenAICompletionEngine(
+[rank5]:            ^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 2978, in __init__
+[rank5]:     self._warmup_tensor_parallel_model()
+[rank5]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 7754, in _warmup_tensor_parallel_model
+[rank5]:     _sync_tensor_parallel_command(self.model, self.device, cuda_sync=False)
+[rank5]:   File "/workspace/submit-5cac713d/builds/torchinferno/src/torchinferno/openai_server.py", line 12718, in _sync_tensor_parallel_command
+[rank5]:     dist.barrier(group=control_group)
+[rank5]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank5]:     return func(*args, **kwargs)
+[rank5]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank5]:     work.wait()
+[rank5]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:129] Timed out waiting 1800000ms for send operation to complete
+[rank0]:[E703 15:37:17.129520716 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 0] Observed flight recorder dump signal from another rank via TCPStore.
+[rank0]:[E703 15:37:17.129803213 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 0] Received a dump signal due to a collective timeout from  rank 7 and we will try our best to dump the debug info. Last enqueued NCCL work: 56118, last completed NCCL work: 56118.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank0]:[E703 15:37:17.130801761 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 0] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank0]:[E703 15:37:17.135498007 ProcessGroupNCCL.cpp:1442] [PG ID 0 PG GUID 0(default_pg) Rank 0] Exception thrown when waiting for future Flight recorder dump in heartbeatMonitor: std::future_error: Broken promise
+[rank0]:[E703 15:37:17.135647486 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 0] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 0, only active collectives: 0
+[rank7]:[E703 15:37:17.175233724 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 7] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 56392, last completed NCCL work: 56118.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank2]:[E703 15:37:17.175361122 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 2] Observed flight recorder dump signal from another rank via TCPStore.
+[rank7]:[E703 15:37:17.175525941 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 7] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank2]:[E703 15:37:17.175549523 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 2] Received a dump signal due to a collective timeout from  rank 7 and we will try our best to dump the debug info. Last enqueued NCCL work: 56118, last completed NCCL work: 56118.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank2]:[E703 15:37:17.176008490 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 2] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank4]:[E703 15:37:17.178022178 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 4] Observed flight recorder dump signal from another rank via TCPStore.
+[rank3]:[E703 15:37:17.178057290 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 3] Observed flight recorder dump signal from another rank via TCPStore.
+[rank1]:[E703 15:37:17.178099253 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 1] Observed flight recorder dump signal from another rank via TCPStore.
+[rank5]:[E703 15:37:17.178116623 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 5] Observed flight recorder dump signal from another rank via TCPStore.
+[rank4]:[E703 15:37:17.178360488 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 4] Received a dump signal due to a collective timeout from  rank 7 and we will try our best to dump the debug info. Last enqueued NCCL work: 56118, last completed NCCL work: 56118.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank3]:[E703 15:37:17.178377689 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 3] Received a dump signal due to a collective timeout from  rank 7 and we will try our best to dump the debug info. Last enqueued NCCL work: 56118, last completed NCCL work: 56118.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank1]:[E703 15:37:17.178404831 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 1] Received a dump signal due to a collective timeout from  rank 7 and we will try our best to dump the debug info. Last enqueued NCCL work: 56118, last completed NCCL work: 56118.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank5]:[E703 15:37:17.178428962 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 5] Received a dump signal due to a collective timeout from  rank 7 and we will try our best to dump the debug info. Last enqueued NCCL work: 56118, last completed NCCL work: 56118.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank3]:[E703 15:37:17.178677976 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 3] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank1]:[E703 15:37:17.178786223 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 1] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank5]:[E703 15:37:17.178883309 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 5] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank4]:[E703 15:37:17.178922121 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 4] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank6]:[E703 15:37:17.179008206 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 6] Observed flight recorder dump signal from another rank via TCPStore.
+[rank6]:[E703 15:37:17.179206018 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 6] Received a dump signal due to a collective timeout from  rank 7 and we will try our best to dump the debug info. Last enqueued NCCL work: 56118, last completed NCCL work: 56118.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank6]:[E703 15:37:17.179616962 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 6] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank2]:[E703 15:37:17.182070226 ProcessGroupNCCL.cpp:1442] [PG ID 0 PG GUID 0(default_pg) Rank 2] Exception thrown when waiting for future Flight recorder dump in heartbeatMonitor: std::future_error: Broken promise
+[rank2]:[E703 15:37:17.182181542 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 2] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 0, only active collectives: 0
+[rank1]:[E703 15:37:17.182737945 ProcessGroupNCCL.cpp:1442] [PG ID 0 PG GUID 0(default_pg) Rank 1] Exception thrown when waiting for future Flight recorder dump in heartbeatMonitor: std::future_error: Broken promise
+[rank1]:[E703 15:37:17.182873793 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 1] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 0, only active collectives: 0
+[rank3]:[E703 15:37:17.183015542 ProcessGroupNCCL.cpp:1442] [PG ID 0 PG GUID 0(default_pg) Rank 3] Exception thrown when waiting for future Flight recorder dump in heartbeatMonitor: std::future_error: Broken promise
+[rank3]:[E703 15:37:17.183108227 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 3] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 0, only active collectives: 0
+[rank6]:[E703 15:37:17.184134157 ProcessGroupNCCL.cpp:1442] [PG ID 0 PG GUID 0(default_pg) Rank 6] Exception thrown when waiting for future Flight recorder dump in heartbeatMonitor: std::future_error: Broken promise
+[rank6]:[E703 15:37:17.184308287 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 6] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 0, only active collectives: 0
+[rank5]:[E703 15:37:17.186855637 ProcessGroupNCCL.cpp:1442] [PG ID 0 PG GUID 0(default_pg) Rank 5] Exception thrown when waiting for future Flight recorder dump in heartbeatMonitor: std::future_error: Broken promise
+[rank5]:[E703 15:37:17.186978664 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 5] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 0, only active collectives: 0
+[rank4]:[E703 15:37:17.195328505 ProcessGroupNCCL.cpp:1442] [PG ID 0 PG GUID 0(default_pg) Rank 4] Exception thrown when waiting for future Flight recorder dump in heartbeatMonitor: std::future_error: Broken promise
+[rank4]:[E703 15:37:17.195460473 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 4] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 0, only active collectives: 0
+[rank0]:[W703 15:37:19.669182747 ProcessGroupNCCL.cpp:1647] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+W0703 15:37:21.320000 1051 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1847 closing signal SIGTERM
+W0703 15:37:21.322000 1051 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1848 closing signal SIGTERM
+W0703 15:37:21.323000 1051 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1849 closing signal SIGTERM
+W0703 15:37:21.323000 1051 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1851 closing signal SIGTERM
+W0703 15:37:21.323000 1051 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1852 closing signal SIGTERM
+W0703 15:37:21.323000 1051 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1853 closing signal SIGTERM
+W0703 15:37:21.323000 1051 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1854 closing signal SIGTERM
+E0703 15:37:24.512000 1051 torch/distributed/elastic/multiprocessing/api.py:988] failed (exitcode: 1) local_rank: 3 (pid: 1850) of binary: /workspace/submit-5cac713d/builds/torchinferno/venv/bin/python
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1020, in <module>
+    main()
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1016, in main
+    run(args)
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 191, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 371, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+torchinferno.openai_server FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-07-03_15:37:24
+  host      : gpu-dev-5cac713d
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 1847)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1847
+[2]:
+  time      : 2026-07-03_15:37:24
+  host      : gpu-dev-5cac713d
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 1848) 
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2026-07-03_15:37:24
+  host      : gpu-dev-5cac713d
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 1849) 
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[4]:
+  time      : 2026-07-03_15:37:24
+  host      : gpu-dev-5cac713d
+  rank      : 4 (local_rank: 4)
+  exitcode  : 1 (pid: 1851) 
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[5]:
+  time      : 2026-07-03_15:37:24
+  host      : gpu-dev-5cac713d
+  rank      : 5 (local_rank: 5)
+  exitcode  : 1 (pid: 1852) 
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[6]:
+  time      : 2026-07-03_15:37:24
+  host      : gpu-dev-5cac713d
+  rank      : 6 (local_rank: 6)
+  exitcode  : 1 (pid: 1853) 
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[7]:
+  time      : 2026-07-03_15:37:24
+  host      : gpu-dev-5cac713d
+  rank      : 7 (local_rank: 7)
+  exitcode  : -15 (pid: 1854)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1854
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-07-03_15:37:21
+  host      : gpu-dev-5cac713d
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 1850) 
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
