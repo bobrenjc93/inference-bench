@@ -18,6 +18,7 @@ class TorchInfernoProviderTest(unittest.TestCase):
             env = provider._server_env()
 
         self.assertEqual(env["NCCL_CUMEM_ENABLE"], "0")
+        self.assertEqual(env["TORCHINFERNO_FI_DECODE_GRAPH"], "off")
         self.assertNotIn("TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST", env)
 
     def test_server_env_defaults_torchinferno_profile_logs(self) -> None:
@@ -131,6 +132,14 @@ class TorchInfernoProviderTest(unittest.TestCase):
             env = provider._server_env()
 
         self.assertEqual(env["TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST"], "0")
+
+    def test_server_env_preserves_explicit_flashinfer_decode_graph_override(self) -> None:
+        provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
+
+        with mock.patch.dict(os.environ, {"TORCHINFERNO_FI_DECODE_GRAPH": "sampled"}, clear=True):
+            env = provider._server_env()
+
+        self.assertEqual(env["TORCHINFERNO_FI_DECODE_GRAPH"], "sampled")
 
     def test_server_cmd_appends_env_extra_args(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")

@@ -116,6 +116,11 @@ class TorchInfernoProvider(Provider):
         env.setdefault("NCCL_NET", "Socket")
         env.setdefault("NCCL_NET_PLUGIN", "none")
         env.setdefault("NCCL_IB_DISABLE", "1")
+        # TorchInferno commit 390fed4 can hang during startup while capturing
+        # FlashInfer decode CUDA graphs under tensor parallelism. Keep the
+        # server on its standard decode graph path unless a run explicitly opts
+        # back into FlashInfer decode graphs.
+        env.setdefault("TORCHINFERNO_FI_DECODE_GRAPH", "off")
         # TorchInferno launches eight worker processes before it can bind /health.
         # Inherited NCCL INFO logging can dominate startup logs on public runners
         # and obscure readiness failures. Keep the default quiet; set
