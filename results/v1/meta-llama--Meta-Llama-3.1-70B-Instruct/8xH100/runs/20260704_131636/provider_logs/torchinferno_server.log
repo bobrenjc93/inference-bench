@@ -1,0 +1,76 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-16d95267/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model meta-llama/Meta-Llama-3.1-70B-Instruct --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[Llama3TP] resolving checkpoint meta-llama/Meta-Llama-3.1-70B-Instruct
+Fetching 36 files:   0%|          | 0/36 [00:00<?, ?it/s]Fetching 36 files:   3%|▎         | 1/36 [00:00<00:04,  8.19it/s]Fetching 36 files:   8%|▊         | 3/36 [00:07<01:33,  2.82s/it]Fetching 36 files:  14%|█▍        | 5/36 [00:08<00:46,  1.51s/it]Fetching 36 files:  31%|███       | 11/36 [00:11<00:21,  1.15it/s]Fetching 36 files:  33%|███▎      | 12/36 [00:16<00:33,  1.41s/it]Fetching 36 files:  36%|███▌      | 13/36 [00:16<00:28,  1.26s/it]Fetching 36 files:  53%|█████▎    | 19/36 [00:17<00:08,  1.89it/s]Fetching 36 files:  58%|█████▊    | 21/36 [00:22<00:15,  1.07s/it]Fetching 36 files:  64%|██████▍   | 23/36 [00:24<00:12,  1.01it/s]Fetching 36 files:  78%|███████▊  | 28/36 [00:24<00:04,  1.73it/s]Fetching 36 files:  81%|████████  | 29/36 [00:27<00:05,  1.30it/s]Fetching 36 files:  83%|████████▎ | 30/36 [00:27<00:04,  1.47it/s]Fetching 36 files:  86%|████████▌ | 31/36 [00:28<00:03,  1.30it/s]Fetching 36 files: 100%|██████████| 36/36 [00:28<00:00,  1.26it/s]
+[Llama3TP] resolved checkpoint /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+NCCL version 2.29.7+cuda13.2
+
+[2026-07-04 13:18:41] gpu-dev-16d95267:1935:1935 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-04 13:18:42] gpu-dev-16d95267:1936:1936 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-04 13:18:42] gpu-dev-16d95267:1931:1931 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-04 13:18:42] gpu-dev-16d95267:1932:1932 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-04 13:18:42] gpu-dev-16d95267:1930:1930 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-04 13:18:42] gpu-dev-16d95267:1929:1929 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-04 13:18:42] gpu-dev-16d95267:1934:1934 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-04 13:18:42] gpu-dev-16d95267:1933:1933 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_replicated_page_cache_warm=0 rank0_direct_scatter=0 rank0_shard_scatter=0
+[Llama3TP] loading initial embedding/norm/head tensors
+[Llama3TP] loaded initial embedding/norm/head tensors in 0.3s
+[Llama3TP] loaded 10/80 layers in 1.3s
+[Llama3TP] loaded 20/80 layers in 2.3s
+[Llama3TP] loaded 30/80 layers in 3.3s
+[Llama3TP] loaded 40/80 layers in 4.3s
+[Llama3TP] loaded 50/80 layers in 5.4s
+[Llama3TP] loaded 60/80 layers in 6.4s
+[Llama3TP] loaded 70/80 layers in 8.0s
+[Llama3TP] loaded 80/80 layers in 8.7s
+[Llama3TP] checkpoint load complete in 8.8s
+TorchInferno OpenAI server listening on http://0.0.0.0:8001/v1 model=meta-llama/Meta-Llama-3.1-70B-Instruct
+W0704 13:21:21.975000 1133 torch/distributed/elastic/agent/server/api.py:753] Received 15 death signal, shutting down workers
+W0704 13:21:21.976000 1133 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1929 closing signal SIGTERM
+W0704 13:21:21.978000 1133 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1930 closing signal SIGTERM
+W0704 13:21:21.978000 1133 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1931 closing signal SIGTERM
+W0704 13:21:21.978000 1133 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1932 closing signal SIGTERM
+W0704 13:21:21.978000 1133 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1933 closing signal SIGTERM
+W0704 13:21:21.978000 1133 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1934 closing signal SIGTERM
+W0704 13:21:21.978000 1133 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1935 closing signal SIGTERM
+W0704 13:21:21.978000 1133 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1936 closing signal SIGTERM
+/usr/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1020, in <module>
+    main()
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1016, in main
+    run(args)
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 191, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 362, in launch_agent
+    result = agent.run()
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/elastic/metrics/api.py", line 134, in wrapper
+    result = f(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/elastic/agent/server/api.py", line 745, in run
+    result = self._invoke_run(role)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/elastic/agent/server/api.py", line 923, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/elastic/multiprocessing/api.py", line 86, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 1133 got signal: 15
