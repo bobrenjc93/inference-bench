@@ -21,12 +21,14 @@ class TorchInfernoProviderTest(unittest.TestCase):
         self.assertEqual(env["TORCHINFERNO_FI_DECODE_GRAPH"], "off")
         self.assertNotIn("TORCHINFERNO_TP_RANK0_CHECKPOINT_BROADCAST", env)
 
-    def test_server_env_defaults_torchinferno_profile_logs(self) -> None:
+    def test_server_env_defaults_torchinferno_queue_profile_log(self) -> None:
         with TemporaryDirectory() as tmp:
             provider = TorchInfernoProvider(build_dir=tmp)
             build_dir = Path(tmp).resolve()
             stale_queue = build_dir / "torchinferno_queue_profile.jsonl"
+            stale_fast_http = build_dir / "torchinferno_fast_http_profile.jsonl"
             stale_queue.write_text("stale\n")
+            stale_fast_http.write_text("stale\n")
 
             with mock.patch.dict(os.environ, {}, clear=True):
                 env = provider._server_env()
@@ -35,6 +37,30 @@ class TorchInfernoProviderTest(unittest.TestCase):
                 env["TORCHINFERNO_OPENAI_QUEUE_PROFILE_JSONL"],
                 str(build_dir / "torchinferno_queue_profile.jsonl"),
             )
+            self.assertNotIn("TORCHINFERNO_OPENAI_FAST_HTTP_PROFILE_JSONL", env)
+            self.assertEqual(
+                provider.extra_log_paths(),
+                {
+                    "queue_profile": str(build_dir / "torchinferno_queue_profile.jsonl"),
+                },
+            )
+            self.assertFalse(stale_queue.exists())
+            self.assertTrue(stale_fast_http.exists())
+
+    def test_server_env_can_opt_into_torchinferno_fast_http_profile_log(self) -> None:
+        with TemporaryDirectory() as tmp:
+            provider = TorchInfernoProvider(build_dir=tmp)
+            build_dir = Path(tmp).resolve()
+            stale_fast_http = build_dir / "torchinferno_fast_http_profile.jsonl"
+            stale_fast_http.write_text("stale\n")
+
+            with mock.patch.dict(
+                os.environ,
+                {"INFERENCE_BENCH_TORCHINFERNO_FAST_HTTP_PROFILE": "1"},
+                clear=True,
+            ):
+                env = provider._server_env()
+
             self.assertEqual(
                 env["TORCHINFERNO_OPENAI_FAST_HTTP_PROFILE_JSONL"],
                 str(build_dir / "torchinferno_fast_http_profile.jsonl"),
@@ -48,7 +74,7 @@ class TorchInfernoProviderTest(unittest.TestCase):
                     ),
                 },
             )
-            self.assertFalse(stale_queue.exists())
+            self.assertFalse(stale_fast_http.exists())
 
     def test_build_installs_flashinfer_extra_by_default(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")

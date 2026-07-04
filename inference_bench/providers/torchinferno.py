@@ -99,12 +99,13 @@ class TorchInfernoProvider(Provider):
                 "TORCHINFERNO_OPENAI_QUEUE_PROFILE_JSONL",
                 "queue_profile.jsonl",
             )
-            self._set_profile_env_default(
-                env,
-                "fast_http_profile",
-                "TORCHINFERNO_OPENAI_FAST_HTTP_PROFILE_JSONL",
-                "fast_http_profile.jsonl",
-            )
+            if _env_flag("INFERENCE_BENCH_TORCHINFERNO_FAST_HTTP_PROFILE", False):
+                self._set_profile_env_default(
+                    env,
+                    "fast_http_profile",
+                    "TORCHINFERNO_OPENAI_FAST_HTTP_PROFILE_JSONL",
+                    "fast_http_profile.jsonl",
+                )
         # Public TorchInferno runs have repeatedly stalled during NCCL startup
         # broadcasts on P2P/CUMEM paths. Keep CUMEM disabled by default and let
         # TorchInferno use its portable checkpoint loading default unless a run
