@@ -56,13 +56,14 @@ class LongOutputBenchmark(Benchmark):
     description = "1 × <huge number> × 10k requests (64 concurrent) — tests decode throughput under load"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = self._make_client(api_base)
+        client_for_thread = self._make_thread_local_client_factory(api_base)
         result = BenchmarkResult(name=self.name)
 
         test_cases = _generate_test_cases(NUM_REQUESTS)
         completed = [0]
 
         def _do_request(idx: int):
+            client = client_for_thread()
             big_num = test_cases[idx]
             equation = f"1 * {big_num} ="
             max_tokens = len(big_num) // 3 + 16
@@ -93,5 +94,5 @@ class LongOutputBenchmark(Benchmark):
         correct = sum(1 for r in result.raw_requests if r.correct)
         print(f"  [{self.name}] Done: {correct}/{NUM_REQUESTS} correct")
         result.summarize()
-        self._close_client(client)
+        self._close_open_clients()
         return result

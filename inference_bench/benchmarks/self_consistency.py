@@ -18,7 +18,7 @@ class SelfConsistencyBenchmark(Benchmark):
     description = "10k concurrent identical math prompts at temp=0.7 — tests batch throughput and prefix caching"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = self._make_client(api_base)
+        client_for_thread = self._make_thread_local_client_factory(api_base)
         result = BenchmarkResult(name=self.name)
 
         messages = [
@@ -31,6 +31,7 @@ class SelfConsistencyBenchmark(Benchmark):
         completed = [0]
 
         def _do_request(idx: int) -> tuple[str, RequestMetrics]:
+            client = client_for_thread()
             text, metrics = self._stream_request(
                 client, model, messages, temperature=0.7, max_tokens=256
             )
@@ -57,5 +58,5 @@ class SelfConsistencyBenchmark(Benchmark):
             f"  [{self.name}] {unique_answers} unique final answers across {NUM_SAMPLES} samples, "
             f"{correct_count}/{NUM_SAMPLES} correct"
         )
-        self._close_client(client)
+        self._close_open_clients()
         return result

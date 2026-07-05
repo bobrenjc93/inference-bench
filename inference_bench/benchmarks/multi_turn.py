@@ -42,11 +42,12 @@ class MultiTurnBenchmark(Benchmark):
     description = "1250 concurrent 8-turn conversations (10k requests) — tests KV cache management under load"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = self._make_client(api_base)
+        client_for_thread = self._make_thread_local_client_factory(api_base)
         result = BenchmarkResult(name=self.name)
         completed = [0]
 
         def _run_conversation(conv_idx: int) -> list[RequestMetrics]:
+            client = client_for_thread()
             turns = _generate_turns(TURNS_PER_CONVERSATION, seed=conv_idx)
             conv_metrics = []
             messages: list[dict] = [
@@ -102,7 +103,7 @@ class MultiTurnBenchmark(Benchmark):
 
         correct = sum(1 for r in result.raw_requests if r.correct)
         print(f"  [{self.name}] Done: {correct}/{total_requests} correct")
-        self._close_client(client)
+        self._close_open_clients()
         return result
 
 

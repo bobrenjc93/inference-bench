@@ -49,7 +49,7 @@ class FewShotBenchmark(Benchmark):
     description = "5-shot math × 10k requests (64 concurrent) — tests prefill speed under load"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = self._make_client(api_base)
+        client_for_thread = self._make_thread_local_client_factory(api_base)
         result = BenchmarkResult(name=self.name)
 
         example_text = "\n\n".join(
@@ -64,6 +64,7 @@ class FewShotBenchmark(Benchmark):
         questions = _generate_questions(NUM_REQUESTS)
 
         def _do_request(idx: int):
+            client = client_for_thread()
             question, expected = questions[idx]
             if self.verbose and idx % 1000 == 0:
                 print(f"  [{self.name}] Progress: {idx}/{NUM_REQUESTS}")
@@ -88,5 +89,5 @@ class FewShotBenchmark(Benchmark):
         correct = sum(1 for r in result.raw_requests if r.correct)
         print(f"  [{self.name}] Done: {correct}/{NUM_REQUESTS} correct")
         result.summarize()
-        self._close_client(client)
+        self._close_open_clients()
         return result

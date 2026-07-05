@@ -49,7 +49,7 @@ class TreeOfThoughtBenchmark(Benchmark):
     description = "323 tree searches (4-wide × 3-deep, ~10k requests) — tests bursty scheduling under load"
 
     def run(self, api_base: str, model: str) -> BenchmarkResult:
-        client = self._make_client(api_base)
+        client_for_thread = self._make_thread_local_client_factory(api_base)
         result = BenchmarkResult(name=self.name)
         completed = [0]
 
@@ -64,6 +64,7 @@ class TreeOfThoughtBenchmark(Benchmark):
 
                 for cand_idx in range(num_candidates):
                     def _generate(local_eq_idx, branch_idx, local_request_idx):
+                        client = client_for_thread()
                         eq, expected = equations[local_eq_idx % len(equations)]
                         messages = [
                             {"role": "system", "content": SYSTEM_PROMPT},
@@ -94,6 +95,7 @@ class TreeOfThoughtBenchmark(Benchmark):
                     tree_request_idx += BRANCHES
 
                 eval_eq, eval_expected = equations[eq_idx % len(equations)]
+                client = client_for_thread()
                 eval_messages = [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": eval_eq},
@@ -134,5 +136,5 @@ class TreeOfThoughtBenchmark(Benchmark):
             f"{correct} correct"
         )
         result.summarize()
-        self._close_client(client)
+        self._close_open_clients()
         return result

@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import os
 import re
+import threading
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 import httpx
@@ -122,6 +124,20 @@ class Benchmark(ABC):
             self._open_clients = open_clients
         open_clients.append(client)
         return client
+
+    def _make_thread_local_client_factory(self, api_base: str) -> Callable[[], openai.OpenAI]:
+        local = threading.local()
+        creation_lock = threading.Lock()
+
+        def client_for_thread() -> openai.OpenAI:
+            client = getattr(local, "client", None)
+            if client is None:
+                with creation_lock:
+                    client = self._make_client(api_base)
+                local.client = client
+            return client
+
+        return client_for_thread
 
     def _close_client(self, client: openai.OpenAI) -> None:
         open_clients = getattr(self, "_open_clients", None)
