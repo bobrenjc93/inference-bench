@@ -30,6 +30,7 @@ class VllmProvider(Provider):
         self._create_venv()
         self._pip_install("--upgrade", "pip")
         self._disable_fastapi_metrics_middleware()
+        self._harden_optional_torchcodec_import()
         precompiled_explicit = (
             "VLLM_USE_PRECOMPILED" in os.environ
             or "INFERENCE_BENCH_VLLM_USE_PRECOMPILED" in os.environ
@@ -306,6 +307,32 @@ class VllmProvider(Provider):
         if old not in text or new in text:
             return
         metrics_py.write_text(text.replace(old, new))
+
+    def _harden_optional_torchcodec_import(self) -> None:
+        video_py = self.repo_dir / "vllm" / "multimodal" / "video.py"
+        if not video_py.exists():
+            return
+        text = video_py.read_text()
+        old = """try:
+    from torchcodec.decoders import VideoDecoder
+except ImportError:
+    VideoDecoder = PlaceholderModule("torchcodec").placeholder_attr(  # type: ignore[assignment]
+        "decoders.VideoDecoder",
+    )
+"""
+        new = """try:
+    from torchcodec.decoders import VideoDecoder
+except (ImportError, OSError, RuntimeError):
+    # TorchCodec can be installed but unusable when FFmpeg shared libraries
+    # are absent or incompatible with the installed PyTorch. Treat that like a
+    # missing optional video backend; text-only OpenAI serving does not need it.
+    VideoDecoder = PlaceholderModule("torchcodec").placeholder_attr(  # type: ignore[assignment]
+        "decoders.VideoDecoder",
+    )
+"""
+        if old not in text or new in text:
+            return
+        video_py.write_text(text.replace(old, new))
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         server_model = self._server_model(model)

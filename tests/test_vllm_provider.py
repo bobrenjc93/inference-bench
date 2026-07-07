@@ -271,6 +271,28 @@ class VllmProviderTest(unittest.TestCase):
 
         self.assertEqual(env["LD_LIBRARY_PATH"], "/old/lib")
 
+    def test_harden_optional_torchcodec_import_catches_runtime_failures(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            provider = VllmProvider(build_dir=tmpdir)
+            video_dir = provider.repo_dir / "vllm" / "multimodal"
+            video_dir.mkdir(parents=True)
+            video_py = video_dir / "video.py"
+            video_py.write_text(
+                """try:
+    from torchcodec.decoders import VideoDecoder
+except ImportError:
+    VideoDecoder = PlaceholderModule("torchcodec").placeholder_attr(  # type: ignore[assignment]
+        "decoders.VideoDecoder",
+    )
+"""
+            )
+
+            provider._harden_optional_torchcodec_import()
+
+            patched = video_py.read_text()
+            self.assertIn("except (ImportError, OSError, RuntimeError):", patched)
+            self.assertIn("missing optional video backend", patched)
+
 
 if __name__ == "__main__":
     unittest.main()
