@@ -313,14 +313,7 @@ class VllmProvider(Provider):
         if not video_py.exists():
             return
         text = video_py.read_text()
-        old = """try:
-    from torchcodec.decoders import VideoDecoder
-except ImportError:
-    VideoDecoder = PlaceholderModule("torchcodec").placeholder_attr(  # type: ignore[assignment]
-        "decoders.VideoDecoder",
-    )
-"""
-        new = """try:
+        patched = """try:
     from torchcodec.decoders import VideoDecoder
 except (ImportError, OSError, RuntimeError):
     # TorchCodec can be installed but unusable when FFmpeg shared libraries
@@ -330,9 +323,29 @@ except (ImportError, OSError, RuntimeError):
         "decoders.VideoDecoder",
     )
 """
-        if old not in text or new in text:
+        if patched in text:
             return
-        video_py.write_text(text.replace(old, new))
+        old_with_comma = """try:
+    from torchcodec.decoders import VideoDecoder
+except ImportError:
+    VideoDecoder = PlaceholderModule("torchcodec").placeholder_attr(  # type: ignore[assignment]
+        "decoders.VideoDecoder",
+    )
+"""
+        old_without_comma = """try:
+    from torchcodec.decoders import VideoDecoder
+except ImportError:
+    VideoDecoder = PlaceholderModule("torchcodec").placeholder_attr(  # type: ignore[assignment]
+        "decoders.VideoDecoder"
+    )
+"""
+        direct_import = "from torchcodec.decoders import VideoDecoder"
+        if old_with_comma in text:
+            video_py.write_text(text.replace(old_with_comma, patched))
+        elif old_without_comma in text:
+            video_py.write_text(text.replace(old_without_comma, patched))
+        elif direct_import in text:
+            video_py.write_text(text.replace(direct_import, patched.rstrip()))
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         server_model = self._server_model(model)

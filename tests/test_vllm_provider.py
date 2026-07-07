@@ -293,6 +293,25 @@ except ImportError:
             self.assertIn("except (ImportError, OSError, RuntimeError):", patched)
             self.assertIn("missing optional video backend", patched)
 
+    def test_harden_optional_torchcodec_import_wraps_direct_import(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            provider = VllmProvider(build_dir=tmpdir)
+            video_dir = provider.repo_dir / "vllm" / "multimodal"
+            video_dir.mkdir(parents=True)
+            video_py = video_dir / "video.py"
+            video_py.write_text(
+                """from vllm.utils.import_utils import PlaceholderModule
+from torchcodec.decoders import VideoDecoder
+"""
+            )
+
+            provider._harden_optional_torchcodec_import()
+
+            patched = video_py.read_text()
+            self.assertIn("except (ImportError, OSError, RuntimeError):", patched)
+            self.assertIn("missing optional video backend", patched)
+            self.assertNotIn("\nfrom torchcodec.decoders import VideoDecoder\n", patched)
+
 
 if __name__ == "__main__":
     unittest.main()
