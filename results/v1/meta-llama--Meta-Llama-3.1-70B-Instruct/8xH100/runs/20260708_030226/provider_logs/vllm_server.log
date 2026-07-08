@@ -1,0 +1,25 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/submit-8059878a/builds/vllm/vllm/entrypoints/openai/api_server.py", line 26, in <module>
+    from vllm.engine.arg_utils import AsyncEngineArgs
+  File "/workspace/submit-8059878a/builds/vllm/vllm/engine/arg_utils.py", line 119, in <module>
+    from vllm.v1.sample.logits_processor import LogitsProcessor
+  File "/workspace/submit-8059878a/builds/vllm/vllm/v1/sample/logits_processor/__init__.py", line 15, in <module>
+    from vllm.sampling_params import SamplingParams
+  File "/workspace/submit-8059878a/builds/vllm/vllm/sampling_params.py", line 23, in <module>
+    from vllm.v1.serial_utils import PydanticMsgspecMixin
+  File "/workspace/submit-8059878a/builds/vllm/vllm/v1/serial_utils.py", line 25, in <module>
+    from vllm.multimodal.inputs import (
+  File "/workspace/submit-8059878a/builds/vllm/vllm/multimodal/__init__.py", line 3, in <module>
+    from .hasher import MultiModalHasher
+  File "/workspace/submit-8059878a/builds/vllm/vllm/multimodal/hasher.py", line 17, in <module>
+    from .media import MediaWithBytes
+  File "/workspace/submit-8059878a/builds/vllm/vllm/multimodal/media/__init__.py", line 5, in <module>
+    from .connector import MEDIA_CONNECTOR_REGISTRY, MediaConnector
+  File "/workspace/submit-8059878a/builds/vllm/vllm/multimodal/media/connector.py", line 28, in <module>
+    from vllm.multimodal.video import get_video_loader_backend_for_processor
+  File "/workspace/submit-8059878a/builds/vllm/vllm/multimodal/video.py", line 36
+    from torchcodec.decoders import VideoDecoder
+    ^
+IndentationError: expected an indented block after 'try' statement on line 35
