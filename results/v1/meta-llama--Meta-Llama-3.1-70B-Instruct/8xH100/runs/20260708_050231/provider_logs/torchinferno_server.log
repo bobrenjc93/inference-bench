@@ -1,0 +1,750 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_replicated_page_cache_warm=0 rank0_direct_scatter=0 rank0_shard_scatter=0
+[Llama3TP] loading initial embedding/norm/head tensors
+[Llama3TP] loaded initial embedding/norm/head tensors in 285.0s
+[Llama3TP] loaded 10/80 layers in 474.3s
+[Llama3TP] loaded 20/80 layers in 652.5s
+[Llama3TP] loaded 30/80 layers in 829.5s
+[Llama3TP] loaded 40/80 layers in 989.2s
+[Llama3TP] loaded 50/80 layers in 1123.0s
+[Llama3TP] loaded 60/80 layers in 1237.3s
+[Llama3TP] loaded 70/80 layers in 1355.3s
+[Llama3TP] loaded 80/80 layers in 1492.8s
+[Llama3TP] checkpoint load complete in 1492.8s
+NCCL version 2.29.7+cuda13.2
+
+[2026-07-08 05:28:46] gpu-dev-c6ed6ca2:1899:1899 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 05:28:46] gpu-dev-c6ed6ca2:1897:1897 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 05:28:46] gpu-dev-c6ed6ca2:1898:1898 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 05:28:46] gpu-dev-c6ed6ca2:1896:1896 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 05:28:46] gpu-dev-c6ed6ca2:1900:1900 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 05:28:47] gpu-dev-c6ed6ca2:1901:1901 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 05:28:47] gpu-dev-c6ed6ca2:1902:1902 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 05:28:48] gpu-dev-c6ed6ca2:1903:1903 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+TorchInferno OpenAI server listening on http://0.0.0.0:8001/v1 model=/home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+/usr/local/lib/python3.12/dist-packages/torch/cuda/graphs.py:126: UserWarning: The CUDA Graph is empty. This usually means that the graph was attempted to be captured on wrong device or stream. (Triggered internally at /pytorch/aten/src/ATen/cuda/CUDAGraph.cpp:207.)
+  super().capture_end()
+/usr/local/lib/python3.12/dist-packages/torch/cuda/graphs.py:126: UserWarning: The CUDA Graph is empty. This usually means that the graph was attempted to be captured on wrong device or stream. (Triggered internally at /pytorch/aten/src/ATen/cuda/CUDAGraph.cpp:207.)
+  super().capture_end()
+/usr/local/lib/python3.12/dist-packages/torch/cuda/graphs.py:126: UserWarning: The CUDA Graph is empty. This usually means that the graph was attempted to be captured on wrong device or stream. (Triggered internally at /pytorch/aten/src/ATen/cuda/CUDAGraph.cpp:207.)
+  super().capture_end()
+/usr/local/lib/python3.12/dist-packages/torch/cuda/graphs.py:126: UserWarning: The CUDA Graph is empty. This usually means that the graph was attempted to be captured on wrong device or stream. (Triggered internally at /pytorch/aten/src/ATen/cuda/CUDAGraph.cpp:207.)
+  super().capture_end()
+/usr/local/lib/python3.12/dist-packages/torch/cuda/graphs.py:126: UserWarning: The CUDA Graph is empty. This usually means that the graph was attempted to be captured on wrong device or stream. (Triggered internally at /pytorch/aten/src/ATen/cuda/CUDAGraph.cpp:207.)
+  super().capture_end()
+/usr/local/lib/python3.12/dist-packages/torch/cuda/graphs.py:126: UserWarning: The CUDA Graph is empty. This usually means that the graph was attempted to be captured on wrong device or stream. (Triggered internally at /pytorch/aten/src/ATen/cuda/CUDAGraph.cpp:207.)
+  super().capture_end()
+/usr/local/lib/python3.12/dist-packages/torch/cuda/graphs.py:126: UserWarning: The CUDA Graph is empty. This usually means that the graph was attempted to be captured on wrong device or stream. (Triggered internally at /pytorch/aten/src/ATen/cuda/CUDAGraph.cpp:207.)
+  super().capture_end()
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15572, in _tensor_parallel_worker_loop
+[rank1]:     run_online_worker_steps(int(payload.get("steps", 1)))
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15143, in run_online_worker_steps
+[rank1]:     runtime.step_online()
+[rank1]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank1]:     return func(*args, **kwargs)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 1985, in step_online
+[rank1]:     _admitted_results, admitted_active = self._prefill_many(admitted, step, events=events)
+[rank1]:                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 2906, in _prefill_many
+[rank1]:     shared_prefix_active = self._prefill_common_prefix_batch(plain_group, step, events=events)
+[rank1]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 3047, in _prefill_common_prefix_batch
+[rank1]:     prefix_logits, _ = self._prefill_logits(prefix_ids, cache=self._cache_view([prefix_row]))
+[rank1]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7729, in _prefill_logits
+[rank1]:     return self._forward_model(input_ids, cache=cache, use_cache=True)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7633, in _forward_model
+[rank1]:     return forward(
+[rank1]:            ^^^^^^^^
+[rank1]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank1]:     return func(*args, **kwargs)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3606, in forward
+[rank1]:     hidden, attn_in = layer.forward_prefill_fast(
+[rank1]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1535, in forward_prefill_fast
+[rank1]:     return self._post_attention_forward(
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1548, in _post_attention_forward
+[rank1]:     return self._post_attention_forward_impl(attention, residual, next_norm_weight)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1560, in _post_attention_forward_impl
+[rank1]:     projected = self._mlp_project_fast_prefill(mlp_in)
+[rank1]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2406, in _mlp_project_fast_prefill
+[rank1]:     reduced = self._mlp_project_prefill_reduce(hidden)
+[rank1]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2399, in _mlp_project_prefill_reduce
+[rank1]:     activated = self._profile_block(
+[rank1]:                 ^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3032, in _profile_block
+[rank1]:     return fn()
+[rank1]:            ^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2401, in <lambda>
+[rank1]:     lambda: self._prefill_gate_up_activation(hidden),
+[rank1]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2442, in _prefill_gate_up_activation
+[rank1]:     gate, up = F.linear(hidden, self.gate_up_proj_weight).split(
+[rank1]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 1 has a total capacity of 79.18 GiB of which 8.06 MiB is free. Including non-PyTorch memory, this process has 79.16 GiB memory in use. Of the allocated memory 74.61 GiB is allocated by PyTorch, with 26.46 GiB allocated in private pools (e.g., CUDA Graphs), and 838.02 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+
+[rank1]: During handling of the above exception, another exception occurred:
+
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank1]:   File "<frozen runpy>", line 88, in _run_code
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18492, in <module>
+[rank1]:     raise SystemExit(main())
+[rank1]:                      ^^^^^^
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18487, in main
+[rank1]:     serve(config)
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13329, in serve
+[rank1]:     _tensor_parallel_worker_loop(engine)
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15670, in _tensor_parallel_worker_loop
+[rank1]:     _sync_tensor_parallel_command(getattr(engine, "model", None), engine.device, cuda_sync=cuda_sync)
+[rank1]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13877, in _sync_tensor_parallel_command
+[rank1]:     dist.barrier(group=control_group)
+[rank1]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank1]:     return func(*args, **kwargs)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank1]:     work.wait()
+[rank1]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:78] Timed out waiting 1800000ms for recv operation to complete
+[rank2]: Traceback (most recent call last):
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15572, in _tensor_parallel_worker_loop
+[rank2]:     run_online_worker_steps(int(payload.get("steps", 1)))
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15143, in run_online_worker_steps
+[rank2]:     runtime.step_online()
+[rank2]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank2]:     return func(*args, **kwargs)
+[rank2]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 1985, in step_online
+[rank2]:     _admitted_results, admitted_active = self._prefill_many(admitted, step, events=events)
+[rank2]:                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 2906, in _prefill_many
+[rank2]:     shared_prefix_active = self._prefill_common_prefix_batch(plain_group, step, events=events)
+[rank2]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 3047, in _prefill_common_prefix_batch
+[rank2]:     prefix_logits, _ = self._prefill_logits(prefix_ids, cache=self._cache_view([prefix_row]))
+[rank2]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7729, in _prefill_logits
+[rank2]:     return self._forward_model(input_ids, cache=cache, use_cache=True)
+[rank2]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7633, in _forward_model
+[rank2]:     return forward(
+[rank2]:            ^^^^^^^^
+[rank2]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank2]:     return func(*args, **kwargs)
+[rank2]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3606, in forward
+[rank2]:     hidden, attn_in = layer.forward_prefill_fast(
+[rank2]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1535, in forward_prefill_fast
+[rank2]:     return self._post_attention_forward(
+[rank2]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1548, in _post_attention_forward
+[rank2]:     return self._post_attention_forward_impl(attention, residual, next_norm_weight)
+[rank2]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1560, in _post_attention_forward_impl
+[rank2]:     projected = self._mlp_project_fast_prefill(mlp_in)
+[rank2]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2406, in _mlp_project_fast_prefill
+[rank2]:     reduced = self._mlp_project_prefill_reduce(hidden)
+[rank2]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2399, in _mlp_project_prefill_reduce
+[rank2]:     activated = self._profile_block(
+[rank2]:                 ^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3032, in _profile_block
+[rank2]:     return fn()
+[rank2]:            ^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2401, in <lambda>
+[rank2]:     lambda: self._prefill_gate_up_activation(hidden),
+[rank2]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2442, in _prefill_gate_up_activation
+[rank2]:     gate, up = F.linear(hidden, self.gate_up_proj_weight).split(
+[rank2]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank2]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 2 has a total capacity of 79.18 GiB of which 8.06 MiB is free. Including non-PyTorch memory, this process has 79.16 GiB memory in use. Of the allocated memory 74.61 GiB is allocated by PyTorch, with 26.46 GiB allocated in private pools (e.g., CUDA Graphs), and 838.02 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+
+[rank2]: During handling of the above exception, another exception occurred:
+
+[rank2]: Traceback (most recent call last):
+[rank2]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank2]:   File "<frozen runpy>", line 88, in _run_code
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18492, in <module>
+[rank2]:     raise SystemExit(main())
+[rank2]:                      ^^^^^^
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18487, in main
+[rank2]:     serve(config)
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13329, in serve
+[rank2]:     _tensor_parallel_worker_loop(engine)
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15670, in _tensor_parallel_worker_loop
+[rank2]:     _sync_tensor_parallel_command(getattr(engine, "model", None), engine.device, cuda_sync=cuda_sync)
+[rank2]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13877, in _sync_tensor_parallel_command
+[rank2]:     dist.barrier(group=control_group)
+[rank2]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank2]:     return func(*args, **kwargs)
+[rank2]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank2]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank2]:     work.wait()
+[rank2]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:78] Timed out waiting 1800000ms for recv operation to complete
+[rank3]: Traceback (most recent call last):
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15572, in _tensor_parallel_worker_loop
+[rank3]:     run_online_worker_steps(int(payload.get("steps", 1)))
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15143, in run_online_worker_steps
+[rank3]:     runtime.step_online()
+[rank3]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank3]:     return func(*args, **kwargs)
+[rank3]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 1985, in step_online
+[rank3]:     _admitted_results, admitted_active = self._prefill_many(admitted, step, events=events)
+[rank3]:                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 2906, in _prefill_many
+[rank3]:     shared_prefix_active = self._prefill_common_prefix_batch(plain_group, step, events=events)
+[rank3]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 3047, in _prefill_common_prefix_batch
+[rank3]:     prefix_logits, _ = self._prefill_logits(prefix_ids, cache=self._cache_view([prefix_row]))
+[rank3]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7729, in _prefill_logits
+[rank3]:     return self._forward_model(input_ids, cache=cache, use_cache=True)
+[rank3]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7633, in _forward_model
+[rank3]:     return forward(
+[rank3]:            ^^^^^^^^
+[rank3]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank3]:     return func(*args, **kwargs)
+[rank3]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3606, in forward
+[rank3]:     hidden, attn_in = layer.forward_prefill_fast(
+[rank3]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1535, in forward_prefill_fast
+[rank3]:     return self._post_attention_forward(
+[rank3]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1548, in _post_attention_forward
+[rank3]:     return self._post_attention_forward_impl(attention, residual, next_norm_weight)
+[rank3]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1560, in _post_attention_forward_impl
+[rank3]:     projected = self._mlp_project_fast_prefill(mlp_in)
+[rank3]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2406, in _mlp_project_fast_prefill
+[rank3]:     reduced = self._mlp_project_prefill_reduce(hidden)
+[rank3]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2399, in _mlp_project_prefill_reduce
+[rank3]:     activated = self._profile_block(
+[rank3]:                 ^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3032, in _profile_block
+[rank3]:     return fn()
+[rank3]:            ^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2401, in <lambda>
+[rank3]:     lambda: self._prefill_gate_up_activation(hidden),
+[rank3]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2442, in _prefill_gate_up_activation
+[rank3]:     gate, up = F.linear(hidden, self.gate_up_proj_weight).split(
+[rank3]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 3 has a total capacity of 79.18 GiB of which 8.06 MiB is free. Including non-PyTorch memory, this process has 79.16 GiB memory in use. Of the allocated memory 74.61 GiB is allocated by PyTorch, with 26.46 GiB allocated in private pools (e.g., CUDA Graphs), and 838.02 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+
+[rank3]: During handling of the above exception, another exception occurred:
+
+[rank3]: Traceback (most recent call last):
+[rank3]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:   File "<frozen runpy>", line 88, in _run_code
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18492, in <module>
+[rank3]:     raise SystemExit(main())
+[rank3]:                      ^^^^^^
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18487, in main
+[rank3]:     serve(config)
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13329, in serve
+[rank3]:     _tensor_parallel_worker_loop(engine)
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15670, in _tensor_parallel_worker_loop
+[rank3]:     _sync_tensor_parallel_command(getattr(engine, "model", None), engine.device, cuda_sync=cuda_sync)
+[rank3]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13877, in _sync_tensor_parallel_command
+[rank3]:     dist.barrier(group=control_group)
+[rank3]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank3]:     return func(*args, **kwargs)
+[rank3]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank3]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank3]:     work.wait()
+[rank3]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:78] Timed out waiting 1800000ms for recv operation to complete
+[rank6]: Traceback (most recent call last):
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15572, in _tensor_parallel_worker_loop
+[rank6]:     run_online_worker_steps(int(payload.get("steps", 1)))
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15143, in run_online_worker_steps
+[rank6]:     runtime.step_online()
+[rank6]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank6]:     return func(*args, **kwargs)
+[rank6]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 1985, in step_online
+[rank6]:     _admitted_results, admitted_active = self._prefill_many(admitted, step, events=events)
+[rank6]:                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 2906, in _prefill_many
+[rank6]:     shared_prefix_active = self._prefill_common_prefix_batch(plain_group, step, events=events)
+[rank6]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 3047, in _prefill_common_prefix_batch
+[rank6]:     prefix_logits, _ = self._prefill_logits(prefix_ids, cache=self._cache_view([prefix_row]))
+[rank6]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7729, in _prefill_logits
+[rank6]:     return self._forward_model(input_ids, cache=cache, use_cache=True)
+[rank6]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7633, in _forward_model
+[rank6]:     return forward(
+[rank6]:            ^^^^^^^^
+[rank6]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank6]:     return func(*args, **kwargs)
+[rank6]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3606, in forward
+[rank6]:     hidden, attn_in = layer.forward_prefill_fast(
+[rank6]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1535, in forward_prefill_fast
+[rank6]:     return self._post_attention_forward(
+[rank6]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1548, in _post_attention_forward
+[rank6]:     return self._post_attention_forward_impl(attention, residual, next_norm_weight)
+[rank6]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1560, in _post_attention_forward_impl
+[rank6]:     projected = self._mlp_project_fast_prefill(mlp_in)
+[rank6]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2406, in _mlp_project_fast_prefill
+[rank6]:     reduced = self._mlp_project_prefill_reduce(hidden)
+[rank6]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2399, in _mlp_project_prefill_reduce
+[rank6]:     activated = self._profile_block(
+[rank6]:                 ^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3032, in _profile_block
+[rank6]:     return fn()
+[rank6]:            ^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2401, in <lambda>
+[rank6]:     lambda: self._prefill_gate_up_activation(hidden),
+[rank6]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2442, in _prefill_gate_up_activation
+[rank6]:     gate, up = F.linear(hidden, self.gate_up_proj_weight).split(
+[rank6]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank6]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 6 has a total capacity of 79.18 GiB of which 8.06 MiB is free. Including non-PyTorch memory, this process has 79.16 GiB memory in use. Of the allocated memory 74.61 GiB is allocated by PyTorch, with 26.46 GiB allocated in private pools (e.g., CUDA Graphs), and 838.02 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+
+[rank6]: During handling of the above exception, another exception occurred:
+
+[rank6]: Traceback (most recent call last):
+[rank6]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank6]:   File "<frozen runpy>", line 88, in _run_code
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18492, in <module>
+[rank6]:     raise SystemExit(main())
+[rank6]:                      ^^^^^^
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18487, in main
+[rank6]:     serve(config)
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13329, in serve
+[rank6]:     _tensor_parallel_worker_loop(engine)
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15670, in _tensor_parallel_worker_loop
+[rank6]:     _sync_tensor_parallel_command(getattr(engine, "model", None), engine.device, cuda_sync=cuda_sync)
+[rank6]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13877, in _sync_tensor_parallel_command
+[rank6]:     dist.barrier(group=control_group)
+[rank6]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank6]:     return func(*args, **kwargs)
+[rank6]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank6]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank6]:     work.wait()
+[rank6]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:129] Timed out waiting 1800000ms for send operation to complete
+[rank5]: Traceback (most recent call last):
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15572, in _tensor_parallel_worker_loop
+[rank5]:     run_online_worker_steps(int(payload.get("steps", 1)))
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15143, in run_online_worker_steps
+[rank5]:     runtime.step_online()
+[rank5]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank5]:     return func(*args, **kwargs)
+[rank5]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 1985, in step_online
+[rank5]:     _admitted_results, admitted_active = self._prefill_many(admitted, step, events=events)
+[rank5]:                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 2906, in _prefill_many
+[rank5]:     shared_prefix_active = self._prefill_common_prefix_batch(plain_group, step, events=events)
+[rank5]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 3047, in _prefill_common_prefix_batch
+[rank5]:     prefix_logits, _ = self._prefill_logits(prefix_ids, cache=self._cache_view([prefix_row]))
+[rank5]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7729, in _prefill_logits
+[rank5]:     return self._forward_model(input_ids, cache=cache, use_cache=True)
+[rank5]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7633, in _forward_model
+[rank5]:     return forward(
+[rank5]:            ^^^^^^^^
+[rank5]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank5]:     return func(*args, **kwargs)
+[rank5]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3606, in forward
+[rank5]:     hidden, attn_in = layer.forward_prefill_fast(
+[rank5]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1535, in forward_prefill_fast
+[rank5]:     return self._post_attention_forward(
+[rank5]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1548, in _post_attention_forward
+[rank5]:     return self._post_attention_forward_impl(attention, residual, next_norm_weight)
+[rank5]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1560, in _post_attention_forward_impl
+[rank5]:     projected = self._mlp_project_fast_prefill(mlp_in)
+[rank5]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2406, in _mlp_project_fast_prefill
+[rank5]:     reduced = self._mlp_project_prefill_reduce(hidden)
+[rank5]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2399, in _mlp_project_prefill_reduce
+[rank5]:     activated = self._profile_block(
+[rank5]:                 ^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3032, in _profile_block
+[rank5]:     return fn()
+[rank5]:            ^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2401, in <lambda>
+[rank5]:     lambda: self._prefill_gate_up_activation(hidden),
+[rank5]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2442, in _prefill_gate_up_activation
+[rank5]:     gate, up = F.linear(hidden, self.gate_up_proj_weight).split(
+[rank5]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank5]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 5 has a total capacity of 79.18 GiB of which 8.06 MiB is free. Including non-PyTorch memory, this process has 79.16 GiB memory in use. Of the allocated memory 74.61 GiB is allocated by PyTorch, with 26.46 GiB allocated in private pools (e.g., CUDA Graphs), and 838.02 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+
+[rank5]: During handling of the above exception, another exception occurred:
+
+[rank5]: Traceback (most recent call last):
+[rank5]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank5]:   File "<frozen runpy>", line 88, in _run_code
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18492, in <module>
+[rank5]:     raise SystemExit(main())
+[rank5]:                      ^^^^^^
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18487, in main
+[rank5]:     serve(config)
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13329, in serve
+[rank5]:     _tensor_parallel_worker_loop(engine)
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15670, in _tensor_parallel_worker_loop
+[rank5]:     _sync_tensor_parallel_command(getattr(engine, "model", None), engine.device, cuda_sync=cuda_sync)
+[rank5]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13877, in _sync_tensor_parallel_command
+[rank5]:     dist.barrier(group=control_group)
+[rank5]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank5]:     return func(*args, **kwargs)
+[rank5]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank5]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank5]:     work.wait()
+[rank5]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:129] Timed out waiting 1800000ms for send operation to complete
+[rank4]: Traceback (most recent call last):
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15572, in _tensor_parallel_worker_loop
+[rank4]:     run_online_worker_steps(int(payload.get("steps", 1)))
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15143, in run_online_worker_steps
+[rank4]:     runtime.step_online()
+[rank4]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank4]:     return func(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 1985, in step_online
+[rank4]:     _admitted_results, admitted_active = self._prefill_many(admitted, step, events=events)
+[rank4]:                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 2906, in _prefill_many
+[rank4]:     shared_prefix_active = self._prefill_common_prefix_batch(plain_group, step, events=events)
+[rank4]:                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 3047, in _prefill_common_prefix_batch
+[rank4]:     prefix_logits, _ = self._prefill_logits(prefix_ids, cache=self._cache_view([prefix_row]))
+[rank4]:                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7729, in _prefill_logits
+[rank4]:     return self._forward_model(input_ids, cache=cache, use_cache=True)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/runtime/serving.py", line 7633, in _forward_model
+[rank4]:     return forward(
+[rank4]:            ^^^^^^^^
+[rank4]:   File "/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+[rank4]:     return func(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3606, in forward
+[rank4]:     hidden, attn_in = layer.forward_prefill_fast(
+[rank4]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1535, in forward_prefill_fast
+[rank4]:     return self._post_attention_forward(
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1548, in _post_attention_forward
+[rank4]:     return self._post_attention_forward_impl(attention, residual, next_norm_weight)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 1560, in _post_attention_forward_impl
+[rank4]:     projected = self._mlp_project_fast_prefill(mlp_in)
+[rank4]:                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2406, in _mlp_project_fast_prefill
+[rank4]:     reduced = self._mlp_project_prefill_reduce(hidden)
+[rank4]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2399, in _mlp_project_prefill_reduce
+[rank4]:     activated = self._profile_block(
+[rank4]:                 ^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 3032, in _profile_block
+[rank4]:     return fn()
+[rank4]:            ^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2401, in <lambda>
+[rank4]:     lambda: self._prefill_gate_up_activation(hidden),
+[rank4]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py", line 2442, in _prefill_gate_up_activation
+[rank4]:     gate, up = F.linear(hidden, self.gate_up_proj_weight).split(
+[rank4]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank4]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 4 has a total capacity of 79.18 GiB of which 8.06 MiB is free. Including non-PyTorch memory, this process has 79.16 GiB memory in use. Of the allocated memory 74.61 GiB is allocated by PyTorch, with 26.46 GiB allocated in private pools (e.g., CUDA Graphs), and 838.02 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+
+[rank4]: During handling of the above exception, another exception occurred:
+
+[rank4]: Traceback (most recent call last):
+[rank4]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank4]:   File "<frozen runpy>", line 88, in _run_code
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18492, in <module>
+[rank4]:     raise SystemExit(main())
+[rank4]:                      ^^^^^^
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 18487, in main
+[rank4]:     serve(config)
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13329, in serve
+[rank4]:     _tensor_parallel_worker_loop(engine)
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 15670, in _tensor_parallel_worker_loop
+[rank4]:     _sync_tensor_parallel_command(getattr(engine, "model", None), engine.device, cuda_sync=cuda_sync)
+[rank4]:   File "/workspace/submit-c6ed6ca2/builds/torchinferno/src/torchinferno/openai_server.py", line 13877, in _sync_tensor_parallel_command
+[rank4]:     dist.barrier(group=control_group)
+[rank4]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py", line 83, in wrapper
+[rank4]:     return func(*args, **kwargs)
+[rank4]:            ^^^^^^^^^^^^^^^^^^^^^
+[rank4]:   File "/usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py", line 5237, in barrier
+[rank4]:     work.wait()
+[rank4]: RuntimeError: [/pytorch/third_party/gloo/gloo/transport/tcp/unbound_buffer.cc:129] Timed out waiting 1800000ms for send operation to complete
+terminate called after throwing an instance of 'c10::Error'
+  what():  captures_underway.empty() INTERNAL ASSERT FAILED at "/pytorch/c10/cuda/CUDACachingAllocator.cpp":3941, please report a bug to PyTorch. 
+Exception raised from synchronize_and_free_events at /pytorch/c10/cuda/CUDACachingAllocator.cpp:3941 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f8ca416afad in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, char const*) + 0x69 (0x7f8ca40f9373 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #2: <unknown function> + 0x1dd84 (0x7f8ca45d7d84 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #3: <unknown function> + 0x36843 (0x7f8ca45f0843 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #4: at::cuda::MemPool::~MemPool() + 0x57 (0x7f8beedfca37 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #5: <unknown function> + 0x3f8167 (0x7f8c1c00f167 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #6: <unknown function> + 0xe71241 (0x7f8c1ca88241 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #7: <unknown function> + 0x406831 (0x7f8c1c01d831 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #8: <unknown function> + 0x4071be (0x7f8c1c01e1be in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #9: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x59ee43]
+frame #10: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x575986]
+frame #11: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x5755fc]
+frame #12: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x572d66]
+frame #13: _PyModule_Clear + 0xc4 (0x5831c4 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #14: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x6b1cc9]
+frame #15: Py_FinalizeEx + 0xad (0x6b114d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #16: Py_RunMain + 0x281 (0x6bcb01 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #17: Py_BytesMain + 0x2d (0x6bc71d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #18: <unknown function> + 0x2a1ca (0x7f8ca4e7d1ca in /lib/x86_64-linux-gnu/libc.so.6)
+frame #19: __libc_start_main + 0x8b (0x7f8ca4e7d28b in /lib/x86_64-linux-gnu/libc.so.6)
+frame #20: _start + 0x25 (0x657bc5 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+
+terminate called after throwing an instance of 'c10::Error'
+  what():  captures_underway.empty() INTERNAL ASSERT FAILED at "/pytorch/c10/cuda/CUDACachingAllocator.cpp":3941, please report a bug to PyTorch. 
+Exception raised from synchronize_and_free_events at /pytorch/c10/cuda/CUDACachingAllocator.cpp:3941 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f4091f6afad in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, char const*) + 0x69 (0x7f4091ef9373 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #2: <unknown function> + 0x1dd84 (0x7f409232ed84 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #3: <unknown function> + 0x36843 (0x7f4092347843 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #4: at::cuda::MemPool::~MemPool() + 0x57 (0x7f3fdcbfca37 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #5: <unknown function> + 0x3f8167 (0x7f4009e0f167 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #6: <unknown function> + 0xe71241 (0x7f400a888241 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #7: <unknown function> + 0x406831 (0x7f4009e1d831 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #8: <unknown function> + 0x4071be (0x7f4009e1e1be in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #9: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x59ee43]
+frame #10: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x575986]
+frame #11: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x5755fc]
+frame #12: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x572d66]
+frame #13: _PyModule_Clear + 0xc4 (0x5831c4 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #14: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x6b1cc9]
+frame #15: Py_FinalizeEx + 0xad (0x6b114d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #16: Py_RunMain + 0x281 (0x6bcb01 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #17: Py_BytesMain + 0x2d (0x6bc71d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #18: <unknown function> + 0x2a1ca (0x7f4092bd41ca in /lib/x86_64-linux-gnu/libc.so.6)
+frame #19: __libc_start_main + 0x8b (0x7f4092bd428b in /lib/x86_64-linux-gnu/libc.so.6)
+frame #20: _start + 0x25 (0x657bc5 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+
+terminate called after throwing an instance of 'c10::Error'
+  what():  captures_underway.empty() INTERNAL ASSERT FAILED at "/pytorch/c10/cuda/CUDACachingAllocator.cpp":3941, please report a bug to PyTorch. 
+Exception raised from synchronize_and_free_events at /pytorch/c10/cuda/CUDACachingAllocator.cpp:3941 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fef8eb6afad in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, char const*) + 0x69 (0x7fef8eaf9373 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #2: <unknown function> + 0x1dd84 (0x7fef8ef7cd84 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #3: <unknown function> + 0x36843 (0x7fef8ef95843 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #4: at::cuda::MemPool::~MemPool() + 0x57 (0x7feed97fca37 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #5: <unknown function> + 0x3f8167 (0x7fef06a0f167 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #6: <unknown function> + 0xe71241 (0x7fef07488241 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #7: <unknown function> + 0x406831 (0x7fef06a1d831 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #8: <unknown function> + 0x4071be (0x7fef06a1e1be in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #9: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x59ee43]
+frame #10: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x575986]
+frame #11: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x5755fc]
+frame #12: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x572d66]
+frame #13: _PyModule_Clear + 0xc4 (0x5831c4 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #14: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x6b1cc9]
+frame #15: Py_FinalizeEx + 0xad (0x6b114d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #16: Py_RunMain + 0x281 (0x6bcb01 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #17: Py_BytesMain + 0x2d (0x6bc71d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #18: <unknown function> + 0x2a1ca (0x7fef8f8221ca in /lib/x86_64-linux-gnu/libc.so.6)
+frame #19: __libc_start_main + 0x8b (0x7fef8f82228b in /lib/x86_64-linux-gnu/libc.so.6)
+frame #20: _start + 0x25 (0x657bc5 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+
+terminate called after throwing an instance of 'c10::Error'
+  what():  captures_underway.empty() INTERNAL ASSERT FAILED at "/pytorch/c10/cuda/CUDACachingAllocator.cpp":3941, please report a bug to PyTorch. 
+Exception raised from synchronize_and_free_events at /pytorch/c10/cuda/CUDACachingAllocator.cpp:3941 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f492756afad in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, char const*) + 0x69 (0x7f49274f9373 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #2: <unknown function> + 0x1dd84 (0x7f49279c4d84 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #3: <unknown function> + 0x36843 (0x7f49279dd843 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #4: at::cuda::MemPool::~MemPool() + 0x57 (0x7f48721fca37 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #5: <unknown function> + 0x3f8167 (0x7f489f40f167 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #6: <unknown function> + 0xe71241 (0x7f489fe88241 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #7: <unknown function> + 0x406831 (0x7f489f41d831 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #8: <unknown function> + 0x4071be (0x7f489f41e1be in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #9: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x59ee43]
+frame #10: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x575986]
+frame #11: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x5755fc]
+frame #12: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x572d66]
+frame #13: _PyModule_Clear + 0xc4 (0x5831c4 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #14: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x6b1cc9]
+frame #15: Py_FinalizeEx + 0xad (0x6b114d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #16: Py_RunMain + 0x281 (0x6bcb01 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #17: Py_BytesMain + 0x2d (0x6bc71d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #18: <unknown function> + 0x2a1ca (0x7f492826a1ca in /lib/x86_64-linux-gnu/libc.so.6)
+frame #19: __libc_start_main + 0x8b (0x7f492826a28b in /lib/x86_64-linux-gnu/libc.so.6)
+frame #20: _start + 0x25 (0x657bc5 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+
+terminate called after throwing an instance of 'c10::Error'
+  what():  captures_underway.empty() INTERNAL ASSERT FAILED at "/pytorch/c10/cuda/CUDACachingAllocator.cpp":3941, please report a bug to PyTorch. 
+Exception raised from synchronize_and_free_events at /pytorch/c10/cuda/CUDACachingAllocator.cpp:3941 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fe19ff6afad in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, char const*) + 0x69 (0x7fe19fef9373 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #2: <unknown function> + 0x1dd84 (0x7fe1cd983d84 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #3: <unknown function> + 0x36843 (0x7fe1cd99c843 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #4: at::cuda::MemPool::~MemPool() + 0x57 (0x7fe1185fca37 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #5: <unknown function> + 0x3f8167 (0x7fe14580f167 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #6: <unknown function> + 0xe71241 (0x7fe146288241 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #7: <unknown function> + 0x406831 (0x7fe14581d831 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #8: <unknown function> + 0x4071be (0x7fe14581e1be in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #9: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x59ee43]
+frame #10: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x575986]
+frame #11: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x5755fc]
+frame #12: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x572d66]
+frame #13: _PyModule_Clear + 0xc4 (0x5831c4 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #14: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x6b1cc9]
+frame #15: Py_FinalizeEx + 0xad (0x6b114d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #16: Py_RunMain + 0x281 (0x6bcb01 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #17: Py_BytesMain + 0x2d (0x6bc71d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #18: <unknown function> + 0x2a1ca (0x7fe1ce5471ca in /lib/x86_64-linux-gnu/libc.so.6)
+frame #19: __libc_start_main + 0x8b (0x7fe1ce54728b in /lib/x86_64-linux-gnu/libc.so.6)
+frame #20: _start + 0x25 (0x657bc5 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+
+terminate called after throwing an instance of 'c10::Error'
+  what():  captures_underway.empty() INTERNAL ASSERT FAILED at "/pytorch/c10/cuda/CUDACachingAllocator.cpp":3941, please report a bug to PyTorch. 
+Exception raised from synchronize_and_free_events at /pytorch/c10/cuda/CUDACachingAllocator.cpp:3941 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7f567576afad in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, char const*) + 0x69 (0x7f56756f9373 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #2: <unknown function> + 0x1dd84 (0x7f5675ba7d84 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #3: <unknown function> + 0x36843 (0x7f5675bc0843 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #4: at::cuda::MemPool::~MemPool() + 0x57 (0x7f55c03fca37 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #5: <unknown function> + 0x3f8167 (0x7f55ed60f167 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #6: <unknown function> + 0xe71241 (0x7f55ee088241 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #7: <unknown function> + 0x406831 (0x7f55ed61d831 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #8: <unknown function> + 0x4071be (0x7f55ed61e1be in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_python.so)
+frame #9: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x59ee43]
+frame #10: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x575986]
+frame #11: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x5755fc]
+frame #12: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x572d66]
+frame #13: _PyModule_Clear + 0xc4 (0x5831c4 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #14: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python() [0x6b1cc9]
+frame #15: Py_FinalizeEx + 0xad (0x6b114d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #16: Py_RunMain + 0x281 (0x6bcb01 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #17: Py_BytesMain + 0x2d (0x6bc71d in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+frame #18: <unknown function> + 0x2a1ca (0x7f567644d1ca in /lib/x86_64-linux-gnu/libc.so.6)
+frame #19: __libc_start_main + 0x8b (0x7f567644d28b in /lib/x86_64-linux-gnu/libc.so.6)
+frame #20: _start + 0x25 (0x657bc5 in /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python)
+
+W0708 06:05:24.039000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1896 closing signal SIGTERM
+W0708 06:05:24.043000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1898 closing signal SIGTERM
+W0708 06:05:24.043000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1899 closing signal SIGTERM
+W0708 06:05:24.045000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1900 closing signal SIGTERM
+W0708 06:05:24.045000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1901 closing signal SIGTERM
+W0708 06:05:24.046000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1902 closing signal SIGTERM
+W0708 06:05:24.046000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1903 closing signal SIGTERM
+/usr/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+E0708 06:05:27.876000 1100 torch/distributed/elastic/multiprocessing/api.py:988] failed (exitcode: -6) local_rank: 1 (pid: 1897) of binary: /workspace/submit-c6ed6ca2/builds/torchinferno/venv/bin/python
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1020, in <module>
+    main()
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1016, in main
+    run(args)
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 191, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 371, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+======================================================
+torchinferno.openai_server FAILED
+------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-07-08_06:05:27
+  host      : gpu-dev-c6ed6ca2
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 1896)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1896
+[2]:
+  time      : 2026-07-08_06:05:27
+  host      : gpu-dev-c6ed6ca2
+  rank      : 2 (local_rank: 2)
+  exitcode  : -6 (pid: 1898)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1898
+[3]:
+  time      : 2026-07-08_06:05:27
+  host      : gpu-dev-c6ed6ca2
+  rank      : 3 (local_rank: 3)
+  exitcode  : -6 (pid: 1899)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1899
+[4]:
+  time      : 2026-07-08_06:05:27
+  host      : gpu-dev-c6ed6ca2
+  rank      : 4 (local_rank: 4)
+  exitcode  : -6 (pid: 1900)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1900
+[5]:
+  time      : 2026-07-08_06:05:27
+  host      : gpu-dev-c6ed6ca2
+  rank      : 5 (local_rank: 5)
+  exitcode  : -6 (pid: 1901)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1901
+[6]:
+  time      : 2026-07-08_06:05:27
+  host      : gpu-dev-c6ed6ca2
+  rank      : 6 (local_rank: 6)
+  exitcode  : -6 (pid: 1902)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1902
+[7]:
+  time      : 2026-07-08_06:05:27
+  host      : gpu-dev-c6ed6ca2
+  rank      : 7 (local_rank: 7)
+  exitcode  : -15 (pid: 1903)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1903
+------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-07-08_06:05:24
+  host      : gpu-dev-c6ed6ca2
+  rank      : 1 (local_rank: 1)
+  exitcode  : -6 (pid: 1897)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1897
+======================================================
