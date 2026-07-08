@@ -127,6 +127,10 @@ class TorchInfernoProvider(Provider):
         # and obscure readiness failures. Keep the default quiet; set
         # INFERENCE_BENCH_TORCHINFERNO_NCCL_DEBUG=INFO for transport debugging.
         env["NCCL_DEBUG"] = os.environ.get("INFERENCE_BENCH_TORCHINFERNO_NCCL_DEBUG", "WARN")
+        # The tensor command path can leave TP workers on different collectives
+        # after long online-serving runs. Prefer the supported object command
+        # transport for public correctness runs unless explicitly overridden.
+        env.setdefault("TORCHINFERNO_OPENAI_TP_TENSOR_COMMANDS", "0")
         if "TORCH_NCCL_ASYNC_ERROR_HANDLING" not in env and "NCCL_ASYNC_ERROR_HANDLING" in env:
             env["TORCH_NCCL_ASYNC_ERROR_HANDLING"] = env["NCCL_ASYNC_ERROR_HANDLING"]
         env.pop("NCCL_ASYNC_ERROR_HANDLING", None)
