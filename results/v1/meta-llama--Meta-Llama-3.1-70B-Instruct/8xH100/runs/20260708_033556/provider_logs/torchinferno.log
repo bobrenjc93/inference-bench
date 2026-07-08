@@ -1,0 +1,74 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /tmp/TorchInferno-origin-main-bench-20260707-1230/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model /home/bobren/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b --tensor-parallel-size 8 --port 8087 --trust-remote-code
+
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+*****************************************
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_replicated_page_cache_warm=0 rank0_direct_scatter=0 rank0_shard_scatter=0
+[Llama3TP] loading initial embedding/norm/head tensors
+[Llama3TP] loaded initial embedding/norm/head tensors in 0.3s
+[Llama3TP] loaded 10/80 layers in 3.0s
+[Llama3TP] loaded 20/80 layers in 5.2s
+[Llama3TP] loaded 30/80 layers in 7.5s
+[Llama3TP] loaded 40/80 layers in 9.6s
+[Llama3TP] loaded 50/80 layers in 11.9s
+[Llama3TP] loaded 60/80 layers in 14.1s
+[Llama3TP] loaded 70/80 layers in 16.2s
+[Llama3TP] loaded 80/80 layers in 18.4s
+[Llama3TP] checkpoint load complete in 18.4s
+NCCL version 2.29.7+cuda12.6
+
+[2026-07-07 20:37:00] devgpu006:3801580:3801580 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-07 20:37:00] devgpu006:3801574:3801574 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-07 20:37:00] devgpu006:3801577:3801577 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-07 20:37:01] devgpu006:3801576:3801576 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-07 20:37:01] devgpu006:3801579:3801579 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-07 20:37:01] devgpu006:3801578:3801578 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-07 20:37:01] devgpu006:3801575:3801575 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-07 20:37:01] devgpu006:3801581:3801581 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+TorchInferno OpenAI server listening on http://0.0.0.0:8087/v1 model=/home/bobren/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+W0707 20:41:37.682000 3759185 /data/users/bobren/d/pytorch/torch/distributed/elastic/agent/server/api.py:753] Received Signals.SIGTERM death signal, shutting down workers
+W0707 20:41:37.683000 3759185 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3801574 closing signal SIGTERM
+W0707 20:41:37.683000 3759185 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3801575 closing signal SIGTERM
+W0707 20:41:37.683000 3759185 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3801576 closing signal SIGTERM
+W0707 20:41:37.683000 3759185 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3801577 closing signal SIGTERM
+W0707 20:41:37.684000 3759185 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3801578 closing signal SIGTERM
+W0707 20:41:37.684000 3759185 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3801579 closing signal SIGTERM
+W0707 20:41:37.685000 3759185 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3801580 closing signal SIGTERM
+W0707 20:41:37.691000 3759185 /data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 3801581 closing signal SIGTERM
+/home/bobren/local/d/pytorch-env/lib/python3.10/multiprocessing/resource_tracker.py:224: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+Traceback (most recent call last):
+  File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/bobren/local/d/pytorch-env/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/data/users/bobren/d/pytorch/torch/distributed/run.py", line 1020, in <module>
+    main()
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+  File "/data/users/bobren/d/pytorch/torch/distributed/run.py", line 1016, in main
+    run(args)
+  File "/data/users/bobren/d/pytorch/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+  File "/data/users/bobren/d/pytorch/torch/distributed/launcher/api.py", line 194, in __call__
+    return launch_agent(
+  File "/data/users/bobren/d/pytorch/torch/distributed/launcher/api.py", line 374, in launch_agent
+    result = agent.run()
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/metrics/api.py", line 134, in wrapper
+    result = f(*args, **kwargs)
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/agent/server/api.py", line 745, in run
+    result = self._invoke_run(role)
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/agent/server/api.py", line 923, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/data/users/bobren/d/pytorch/torch/distributed/elastic/multiprocessing/api.py", line 86, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 3759185 got signal: 15
