@@ -1,0 +1,178 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-a4331efb/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_replicated_page_cache_warm=0 rank0_direct_scatter=0 rank0_shard_scatter=0
+[Llama3TP] loading initial embedding/norm/head tensors
+[Llama3TP] loaded initial embedding/norm/head tensors in 221.4s
+[Llama3TP] loaded 10/80 layers in 369.1s
+[Llama3TP] loaded 20/80 layers in 504.1s
+[Llama3TP] loaded 30/80 layers in 678.5s
+[Llama3TP] loaded 40/80 layers in 852.2s
+[Llama3TP] loaded 50/80 layers in 1017.2s
+[Llama3TP] loaded 60/80 layers in 1195.5s
+[Llama3TP] loaded 70/80 layers in 1332.8s
+[Llama3TP] loaded 80/80 layers in 1413.6s
+[Llama3TP] checkpoint load complete in 1413.6s
+NCCL version 2.29.7+cuda13.2
+
+[2026-07-08 01:27:12] gpu-dev-a4331efb:1903:1903 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 01:27:12] gpu-dev-a4331efb:1897:1897 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 01:27:12] gpu-dev-a4331efb:1899:1899 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 01:27:12] gpu-dev-a4331efb:1901:1901 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 01:27:12] gpu-dev-a4331efb:1902:1902 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 01:27:12] gpu-dev-a4331efb:1898:1898 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 01:27:12] gpu-dev-a4331efb:1896:1896 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-08 01:27:12] gpu-dev-a4331efb:1900:1900 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+TorchInferno OpenAI server listening on http://0.0.0.0:8001/v1 model=/home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+/usr/local/lib/python3.12/dist-packages/torch/cuda/graphs.py:126: UserWarning: The CUDA Graph is empty. This usually means that the graph was attempted to be captured on wrong device or stream. (Triggered internally at /pytorch/aten/src/ATen/cuda/CUDAGraph.cpp:207.)
+  super().capture_end()
+[rank0]:[E708 01:58:42.197086413 ProcessGroupNCCL.cpp:757] [Rank 0] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=44402, OpType=ALLREDUCE, NumelIn=1, NumelOut=1, Timeout(ms)=1800000) ran for 1800019 milliseconds before timing out.
+[rank0]:[E708 01:58:42.197269017 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 0]  failure detected by watchdog at work sequence id: 44402 PG status: last enqueued work: 44402, last completed work: 44401
+[rank0]:[E708 01:58:42.198104135 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 all_reduce from /usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py:3174
+#1 wrapper from /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83
+#2 _capture_needed_on_any_rank from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:124
+#3 _run_decode_step_logits_graph from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:4416
+#4 try_decode_one_token_logits_graph from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:4153
+#5 _call_decode_graph from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/runtime/serving.py:9051
+#6 _static_decode_logits from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/runtime/serving.py:8785
+#7 _decode_one from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/runtime/serving.py:5757
+#8 _decode_active from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/runtime/serving.py:5518
+#9 step_online from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/runtime/serving.py:1964
+#10 decorate_context from /usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py:124
+#11 _run_tensor_parallel_online_batcher from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/openai_server.py:6216
+#12 _batch_worker from /workspace/submit-a4331efb/builds/torchinferno/src/torchinferno/openai_server.py:3562
+#13 run from /usr/lib/python3.12/threading.py:1010
+#14 _bootstrap_inner from /usr/lib/python3.12/threading.py:1073
+#15 _bootstrap from /usr/lib/python3.12/threading.py:1030
+
+[rank0]:[E708 01:58:42.198185587 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 0] First PG on this rank to signal dumping.
+[rank6]:[E708 01:58:42.644525648 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 6] Observed flight recorder dump signal from another rank via TCPStore.
+[rank7]:[E708 01:58:42.644580969 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 7] Observed flight recorder dump signal from another rank via TCPStore.
+[rank2]:[E708 01:58:42.644645431 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 2] Observed flight recorder dump signal from another rank via TCPStore.
+[rank5]:[E708 01:58:42.644680742 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 5] Observed flight recorder dump signal from another rank via TCPStore.
+[rank3]:[E708 01:58:42.644706012 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 3] Observed flight recorder dump signal from another rank via TCPStore.
+[rank1]:[E708 01:58:42.644740973 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 1] Observed flight recorder dump signal from another rank via TCPStore.
+[rank4]:[E708 01:58:42.644753573 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 4] Observed flight recorder dump signal from another rank via TCPStore.
+[rank6]:[E708 01:58:42.644937997 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 6] Received a dump signal due to a collective timeout from  rank 0 and we will try our best to dump the debug info. Last enqueued NCCL work: 44401, last completed NCCL work: 44401.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank7]:[E708 01:58:42.644946037 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 7] Received a dump signal due to a collective timeout from  rank 0 and we will try our best to dump the debug info. Last enqueued NCCL work: 44401, last completed NCCL work: 44401.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank2]:[E708 01:58:42.644978108 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 2] Received a dump signal due to a collective timeout from  rank 0 and we will try our best to dump the debug info. Last enqueued NCCL work: 44401, last completed NCCL work: 44401.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank3]:[E708 01:58:42.644998369 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 3] Received a dump signal due to a collective timeout from  rank 0 and we will try our best to dump the debug info. Last enqueued NCCL work: 44401, last completed NCCL work: 44401.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank1]:[E708 01:58:42.645012569 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 1] Received a dump signal due to a collective timeout from  rank 0 and we will try our best to dump the debug info. Last enqueued NCCL work: 44401, last completed NCCL work: 44401.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank5]:[E708 01:58:42.645023419 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 5] Received a dump signal due to a collective timeout from  rank 0 and we will try our best to dump the debug info. Last enqueued NCCL work: 44401, last completed NCCL work: 44401.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank4]:[E708 01:58:42.645090440 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 4] Received a dump signal due to a collective timeout from  rank 0 and we will try our best to dump the debug info. Last enqueued NCCL work: 44401, last completed NCCL work: 44401.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank3]:[E708 01:58:42.645387837 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 3] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank2]:[E708 01:58:42.645416918 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 2] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank1]:[E708 01:58:42.645416138 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 1] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank5]:[E708 01:58:42.645452698 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 5] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank6]:[E708 01:58:42.645451508 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 6] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank4]:[E708 01:58:42.645686253 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 4] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank7]:[E708 01:58:42.646527582 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 7] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank0]:[E708 01:58:43.091303098 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 0] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 44402, last completed NCCL work: 44401.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank0]:[E708 01:58:43.091740187 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 0] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank7]:[F708 02:06:42.720213244 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 7] [PG ID 0 PG GUID 0(default_pg) Rank 7] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank5]:[F708 02:06:42.728468773 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 5] [PG ID 0 PG GUID 0(default_pg) Rank 5] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank6]:[F708 02:06:42.730372064 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 6] [PG ID 0 PG GUID 0(default_pg) Rank 6] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank3]:[F708 02:06:42.730387714 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 3] [PG ID 0 PG GUID 0(default_pg) Rank 3] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank1]:[F708 02:06:42.730392754 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 1] [PG ID 0 PG GUID 0(default_pg) Rank 1] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank4]:[F708 02:06:42.730391604 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 4] [PG ID 0 PG GUID 0(default_pg) Rank 4] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank2]:[F708 02:06:42.730567978 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 2] [PG ID 0 PG GUID 0(default_pg) Rank 2] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank0]:[F708 02:06:43.162359437 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 0] [PG ID 0 PG GUID 0(default_pg) Rank 0] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+W0708 02:11:44.798000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1896 closing signal SIGTERM
+W0708 02:11:44.799000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1897 closing signal SIGTERM
+W0708 02:11:44.800000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1898 closing signal SIGTERM
+W0708 02:11:44.800000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1899 closing signal SIGTERM
+W0708 02:11:44.800000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1900 closing signal SIGTERM
+W0708 02:11:44.800000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1901 closing signal SIGTERM
+W0708 02:11:44.800000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1902 closing signal SIGTERM
+/usr/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+E0708 02:11:48.855000 1100 torch/distributed/elastic/multiprocessing/api.py:988] failed (exitcode: -6) local_rank: 7 (pid: 1903) of binary: /workspace/submit-a4331efb/builds/torchinferno/venv/bin/python
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1020, in <module>
+    main()
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1016, in main
+    run(args)
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 191, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 371, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+=====================================================
+torchinferno.openai_server FAILED
+-----------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-07-08_02:11:48
+  host      : gpu-dev-a4331efb
+  rank      : 0 (local_rank: 0)
+  exitcode  : -6 (pid: 1896)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1896
+[2]:
+  time      : 2026-07-08_02:11:48
+  host      : gpu-dev-a4331efb
+  rank      : 1 (local_rank: 1)
+  exitcode  : -6 (pid: 1897)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1897
+[3]:
+  time      : 2026-07-08_02:11:48
+  host      : gpu-dev-a4331efb
+  rank      : 2 (local_rank: 2)
+  exitcode  : -6 (pid: 1898)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1898
+[4]:
+  time      : 2026-07-08_02:11:48
+  host      : gpu-dev-a4331efb
+  rank      : 3 (local_rank: 3)
+  exitcode  : -6 (pid: 1899)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1899
+[5]:
+  time      : 2026-07-08_02:11:48
+  host      : gpu-dev-a4331efb
+  rank      : 4 (local_rank: 4)
+  exitcode  : -6 (pid: 1900)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1900
+[6]:
+  time      : 2026-07-08_02:11:48
+  host      : gpu-dev-a4331efb
+  rank      : 5 (local_rank: 5)
+  exitcode  : -6 (pid: 1901)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1901
+[7]:
+  time      : 2026-07-08_02:11:48
+  host      : gpu-dev-a4331efb
+  rank      : 6 (local_rank: 6)
+  exitcode  : -6 (pid: 1902)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1902
+-----------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-07-08_02:11:44
+  host      : gpu-dev-a4331efb
+  rank      : 7 (local_rank: 7)
+  exitcode  : -6 (pid: 1903)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1903
+=====================================================
