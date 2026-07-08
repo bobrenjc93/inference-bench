@@ -344,8 +344,22 @@ except ImportError:
             video_py.write_text(text.replace(old_with_comma, patched))
         elif old_without_comma in text:
             video_py.write_text(text.replace(old_without_comma, patched))
-        elif direct_import in text:
-            video_py.write_text(text.replace(direct_import, patched.rstrip()))
+        elif "except (ImportError, OSError, RuntimeError):" not in text:
+            lines = text.splitlines(keepends=True)
+            for index, line in enumerate(lines):
+                stripped = line.lstrip(" \t")
+                if stripped.strip() != direct_import:
+                    continue
+                indent = line[: len(line) - len(stripped)]
+                indented_patch = "\n".join(
+                    f"{indent}{patched_line}"
+                    for patched_line in patched.rstrip("\n").splitlines()
+                )
+                if line.endswith("\n"):
+                    indented_patch += "\n"
+                lines[index] = indented_patch
+                video_py.write_text("".join(lines))
+                break
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         server_model = self._server_model(model)

@@ -311,6 +311,38 @@ from torchcodec.decoders import VideoDecoder
             self.assertIn("except (ImportError, OSError, RuntimeError):", patched)
             self.assertIn("missing optional video backend", patched)
             self.assertNotIn("\nfrom torchcodec.decoders import VideoDecoder\n", patched)
+            compile(patched, str(video_py), "exec")
+
+    def test_harden_optional_torchcodec_import_preserves_direct_import_indent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            provider = VllmProvider(build_dir=tmpdir)
+            video_dir = provider.repo_dir / "vllm" / "multimodal"
+            video_dir.mkdir(parents=True)
+            video_py = video_dir / "video.py"
+            video_py.write_text(
+                """from vllm.utils.import_utils import PlaceholderModule
+try:
+    from torchcodec.decoders import VideoDecoder
+except ImportError:
+    VideoDecoder = PlaceholderModule("torchcodec").placeholder_attr(
+        "decoders.VideoDecoder"
+    )
+"""
+            )
+
+            provider._harden_optional_torchcodec_import()
+
+            patched = video_py.read_text()
+            self.assertIn(
+                "try:\n    try:\n        from torchcodec.decoders import VideoDecoder",
+                patched,
+            )
+            self.assertIn("    except (ImportError, OSError, RuntimeError):", patched)
+            self.assertNotIn("try:\ntry:", patched)
+            compile(patched, str(video_py), "exec")
+
+            provider._harden_optional_torchcodec_import()
+            self.assertEqual(video_py.read_text(), patched)
 
 
 if __name__ == "__main__":
