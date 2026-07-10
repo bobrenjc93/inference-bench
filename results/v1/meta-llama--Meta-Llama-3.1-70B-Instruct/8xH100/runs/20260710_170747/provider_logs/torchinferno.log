@@ -1,0 +1,258 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-bd371d5d/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_replicated_page_cache_warm=0 rank0_direct_scatter=0 rank0_shard_scatter=0
+[Llama3TP] loading initial embedding/norm/head tensors
+[Llama3TP] loaded initial embedding/norm/head tensors in 215.3s
+[Llama3TP] loaded 10/80 layers in 351.1s
+[Llama3TP] loaded 20/80 layers in 484.6s
+[Llama3TP] loaded 30/80 layers in 622.7s
+[Llama3TP] loaded 40/80 layers in 743.2s
+[Llama3TP] loaded 50/80 layers in 859.7s
+[Llama3TP] loaded 60/80 layers in 985.8s
+[Llama3TP] loaded 70/80 layers in 1096.6s
+[Llama3TP] loaded 80/80 layers in 1194.7s
+[Llama3TP] checkpoint load complete in 1194.7s
+NCCL version 2.29.7+cuda13.2
+
+[2026-07-10 17:29:02] gpu-dev-bd371d5d:1897:1897 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-10 17:29:02] gpu-dev-bd371d5d:1901:1901 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-10 17:29:02] gpu-dev-bd371d5d:1898:1898 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-10 17:29:02] gpu-dev-bd371d5d:1896:1896 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-10 17:29:02] gpu-dev-bd371d5d:1899:1899 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-10 17:29:02] gpu-dev-bd371d5d:1900:1900 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-10 17:29:02] gpu-dev-bd371d5d:1902:1902 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-10 17:29:03] gpu-dev-bd371d5d:1903:1903 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+[WARMUP] tensor-parallel startup warmup start cache_backend=dense prompt_counts=(32, 16, 64, 128, 256) new_tokens=2
+[WARMUP] single-request generate warmup prompt_counts=(32, 16, 64, 128, 256) new_tokens=2 start
+[WARMUP] single-request generate warmup prompt_counts=(32, 16, 64, 128, 256) new_tokens=2 done in 3.7s
+[WARMUP] generation-cache/decode-attention warmup cache_tokens=258 start
+[WARMUP] generation-cache/decode-attention warmup cache_tokens=258 done in 0.0s
+[WARMUP] unified scheduler cache warmup start
+[WARMUP] unified scheduler cache prepared cache_rows=144 max_active=128 max_seq_len=768 prompt_tokens=32 decode_batches=(1, 2, 3, 4, 8, 16, 32, 64, 128) decode_policies=((0.0, 1), (1.0, 300))
+[WARMUP] online decode graph warmup start temperature=0 max_tokens=1 batches=(1, 2, 3, 4, 8, 16, 32, 64, 128)
+[WARMUP] online decode graph warmup done temperature=0 max_tokens=1 in 7.0s
+[WARMUP] online common-prefix prefill warmup start rows=(48, 53, 68, 69, 128) prefix_tokens=(45, 64, 128) suffix_tokens=(16,) suffix_batches=(1, 2, 4, 8, 16, 32, 64, 128) suffix_prefill=False
+[WARMUP] greedy common-prefix suffix warmup start temperature=0 max_tokens=128 row=48 prefixes=3 suffix_pairs=9 batches=7 shapes=63 token_graphs=True
+[WARMUP] greedy common-prefix suffix warmup done in 35.0s
+[WARMUP] greedy common-prefix suffix warmup start temperature=0 max_tokens=512 row=48 prefixes=1 suffix_pairs=12 batches=6 shapes=72 token_graphs=False
+[WARMUP] greedy common-prefix suffix warmup done in 17.2s
+[WARMUP] sampled common-prefix suffix warmup start temperature=1 max_tokens=300 row=48 prefixes=1 suffix_pairs=2 batches=7 shapes=14 token_graphs=False
+[WARMUP] sampled common-prefix suffix warmup done in 6.3s
+[WARMUP] online common-prefix prefill warmup done in 60.3s
+[rank4]:[E710 18:00:32.338107608 ProcessGroupNCCL.cpp:757] [Rank 4] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=59958, OpType=ALLREDUCE, NumelIn=8388608, NumelOut=8388608, Timeout(ms)=1800000) ran for 1800025 milliseconds before timing out.
+[rank4]:[E710 18:00:32.338322261 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 4]  failure detected by watchdog at work sequence id: 59958 PG status: last enqueued work: 59998, last completed work: 59957
+[rank5]:[E710 18:00:32.339025531 ProcessGroupNCCL.cpp:757] [Rank 5] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=59958, OpType=ALLREDUCE, NumelIn=8388608, NumelOut=8388608, Timeout(ms)=1800000) ran for 1800001 milliseconds before timing out.
+[rank1]:[E710 18:00:32.339103716 ProcessGroupNCCL.cpp:757] [Rank 1] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=59958, OpType=ALLREDUCE, NumelIn=8388608, NumelOut=8388608, Timeout(ms)=1800000) ran for 1800010 milliseconds before timing out.
+[rank1]:[E710 18:00:32.339203681 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 1]  failure detected by watchdog at work sequence id: 59958 PG status: last enqueued work: 59998, last completed work: 59957
+[rank5]:[E710 18:00:32.339236213 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 5]  failure detected by watchdog at work sequence id: 59958 PG status: last enqueued work: 59998, last completed work: 59957
+[rank4]:[E710 18:00:32.339492788 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 all_reduce from /usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py:3174
+#1 wrapper from /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83
+#2 _all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:8472
+#3 _decode_linear_all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2574
+#4 _attention_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2038
+#5 forward_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:1986
+#6 _forward_prefill_ragged_static from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5572
+#7 _capture_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7445
+#8 _run_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7236
+#9 try_prefill_ragged_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:6951
+#10 _warmup_online_mixed_prefix_suffix_prefill_graphs from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4986
+#11 _warmup_unified_scheduler_cache from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4153
+#12 _warmup_tensor_parallel_model from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:9334
+#13 __init__ from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:3491
+#14 build_engine from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13797
+#15 serve from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13812
+#16 main from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19070
+#17 <module> from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19075
+#18 _run_code from <frozen runpy>:88
+#19 _run_module_as_main from <frozen runpy>:198
+
+[rank4]:[E710 18:00:32.339611455 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 4] First PG on this rank to signal dumping.
+[rank1]:[E710 18:00:32.339906932 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 all_reduce from /usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py:3174
+#1 wrapper from /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83
+#2 _all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:8472
+#3 _decode_linear_all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2574
+#4 _attention_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2038
+#5 forward_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:1986
+#6 _forward_prefill_ragged_static from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5572
+#7 _capture_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7445
+#8 _run_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7236
+#9 try_prefill_ragged_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:6951
+#10 _warmup_online_mixed_prefix_suffix_prefill_graphs from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4986
+#11 _warmup_unified_scheduler_cache from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4153
+#12 _warmup_tensor_parallel_model from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:9334
+#13 __init__ from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:3491
+#14 build_engine from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13797
+#15 serve from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13812
+#16 main from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19070
+#17 <module> from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19075
+#18 _run_code from <frozen runpy>:88
+#19 _run_module_as_main from <frozen runpy>:198
+
+[rank1]:[E710 18:00:32.339994807 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 1] First PG on this rank to signal dumping.
+[rank5]:[E710 18:00:32.340326746 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 all_reduce from /usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py:3174
+#1 wrapper from /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83
+#2 _all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:8472
+#3 _decode_linear_all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2574
+#4 _attention_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2038
+#5 forward_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:1986
+#6 _forward_prefill_ragged_static from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5572
+#7 _capture_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7445
+#8 _run_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7236
+#9 try_prefill_ragged_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:6951
+#10 _warmup_online_mixed_prefix_suffix_prefill_graphs from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4986
+#11 _warmup_unified_scheduler_cache from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4153
+#12 _warmup_tensor_parallel_model from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:9334
+#13 __init__ from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:3491
+#14 build_engine from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13797
+#15 serve from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13812
+#16 main from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19070
+#17 <module> from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19075
+#18 _run_code from <frozen runpy>:88
+#19 _run_module_as_main from <frozen runpy>:198
+
+[rank5]:[E710 18:00:32.340415591 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 5] First PG on this rank to signal dumping.
+[rank0]:[E710 18:00:32.341058928 ProcessGroupNCCL.cpp:757] [Rank 0] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=59958, OpType=ALLREDUCE, NumelIn=8388608, NumelOut=8388608, Timeout(ms)=1800000) ran for 1800033 milliseconds before timing out.
+[rank0]:[E710 18:00:32.341153193 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 0]  failure detected by watchdog at work sequence id: 59958 PG status: last enqueued work: 59998, last completed work: 59957
+[rank0]:[E710 18:00:32.342213114 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 all_reduce from /usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py:3174
+#1 wrapper from /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83
+#2 _all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:8472
+#3 _decode_linear_all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2574
+#4 _attention_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2038
+#5 forward_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:1986
+#6 _forward_prefill_ragged_static from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5572
+#7 _capture_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7445
+#8 _run_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7236
+#9 try_prefill_ragged_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:6951
+#10 _warmup_online_mixed_prefix_suffix_prefill_graphs from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4986
+#11 _warmup_unified_scheduler_cache from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4153
+#12 _warmup_tensor_parallel_model from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:9334
+#13 __init__ from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:3491
+#14 build_engine from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13797
+#15 serve from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13812
+#16 main from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19070
+#17 <module> from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19075
+#18 _run_code from <frozen runpy>:88
+#19 _run_module_as_main from <frozen runpy>:198
+
+[rank0]:[E710 18:00:32.342282678 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 0] First PG on this rank to signal dumping.
+[rank6]:[E710 18:00:32.374027113 ProcessGroupNCCL.cpp:757] [Rank 6] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=59958, OpType=ALLREDUCE, NumelIn=8388608, NumelOut=8388608, Timeout(ms)=1800000) ran for 1800089 milliseconds before timing out.
+[rank6]:[E710 18:00:32.374212454 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 6]  failure detected by watchdog at work sequence id: 59958 PG status: last enqueued work: 59998, last completed work: 59957
+[rank6]:[E710 18:00:32.375397832 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 all_reduce from /usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py:3174
+#1 wrapper from /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83
+#2 _all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:8472
+#3 _decode_linear_all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2574
+#4 _attention_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2038
+#5 forward_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:1986
+#6 _forward_prefill_ragged_static from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5572
+#7 _capture_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7445
+#8 _run_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7236
+#9 try_prefill_ragged_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:6951
+#10 _warmup_online_mixed_prefix_suffix_prefill_graphs from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4986
+#11 _warmup_unified_scheduler_cache from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4153
+#12 _warmup_tensor_parallel_model from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:9334
+#13 __init__ from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:3491
+#14 build_engine from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13797
+#15 serve from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13812
+#16 main from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19070
+#17 <module> from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19075
+#18 _run_code from <frozen runpy>:88
+#19 _run_module_as_main from <frozen runpy>:198
+
+[rank6]:[E710 18:00:32.375456665 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 6] First PG on this rank to signal dumping.
+[rank2]:[E710 18:00:32.421356262 ProcessGroupNCCL.cpp:757] [Rank 2] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=59958, OpType=ALLREDUCE, NumelIn=8388608, NumelOut=8388608, Timeout(ms)=1800000) ran for 1800087 milliseconds before timing out.
+[rank2]:[E710 18:00:32.421447877 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 2]  failure detected by watchdog at work sequence id: 59958 PG status: last enqueued work: 59998, last completed work: 59957
+[rank2]:[E710 18:00:32.422402351 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 all_reduce from /usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py:3174
+#1 wrapper from /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83
+#2 _all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:8472
+#3 _decode_linear_all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2574
+#4 _attention_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2038
+#5 forward_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:1986
+#6 _forward_prefill_ragged_static from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5572
+#7 _capture_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7445
+#8 _run_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7236
+#9 try_prefill_ragged_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:6951
+#10 _warmup_online_mixed_prefix_suffix_prefill_graphs from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4986
+#11 _warmup_unified_scheduler_cache from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4153
+#12 _warmup_tensor_parallel_model from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:9334
+#13 __init__ from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:3491
+#14 build_engine from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13797
+#15 serve from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13812
+#16 main from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19070
+#17 <module> from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19075
+#18 _run_code from <frozen runpy>:88
+#19 _run_module_as_main from <frozen runpy>:198
+
+[rank2]:[E710 18:00:32.422479216 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 2] First PG on this rank to signal dumping.
+[rank3]:[E710 18:00:32.426182607 ProcessGroupNCCL.cpp:757] [Rank 3] Watchdog caught collective operation timeout: WorkNCCL(SeqNum=59958, OpType=ALLREDUCE, NumelIn=8388608, NumelOut=8388608, Timeout(ms)=1800000) ran for 1800077 milliseconds before timing out.
+[rank3]:[E710 18:00:32.426302794 ProcessGroupNCCL.cpp:2395] [PG ID 0 PG GUID 0(default_pg) Rank 3]  failure detected by watchdog at work sequence id: 59958 PG status: last enqueued work: 59998, last completed work: 59957
+[rank3]:[E710 18:00:32.427312432 ProcessGroupNCCL.cpp:801] Stack trace of the failed collective: 
+#0 all_reduce from /usr/local/lib/python3.12/dist-packages/torch/distributed/distributed_c10d.py:3174
+#1 wrapper from /usr/local/lib/python3.12/dist-packages/torch/distributed/c10d_logger.py:83
+#2 _all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:8472
+#3 _decode_linear_all_reduce from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2574
+#4 _attention_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:2038
+#5 forward_prefill_ragged from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:1986
+#6 _forward_prefill_ragged_static from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:5572
+#7 _capture_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7445
+#8 _run_ragged_prefill_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:7236
+#9 try_prefill_ragged_logits_graph from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/models/llama3/tensor_parallel.py:6951
+#10 _warmup_online_mixed_prefix_suffix_prefill_graphs from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4986
+#11 _warmup_unified_scheduler_cache from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:4153
+#12 _warmup_tensor_parallel_model from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:9334
+#13 __init__ from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:3491
+#14 build_engine from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13797
+#15 serve from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:13812
+#16 main from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19070
+#17 <module> from /workspace/submit-bd371d5d/builds/torchinferno/src/torchinferno/openai_server.py:19075
+#18 _run_code from <frozen runpy>:88
+#19 _run_module_as_main from <frozen runpy>:198
+
+[rank3]:[E710 18:00:32.427417358 ProcessGroupNCCL.cpp:2732] [PG ID 0 PG GUID 0(default_pg) Rank 3] First PG on this rank to signal dumping.
+[rank3]:[E710 18:00:32.603241927 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 3] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 59998, last completed NCCL work: 59957.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank3]:[E710 18:00:32.603530183 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 3] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank1]:[E710 18:00:32.686224934 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 1] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 59998, last completed NCCL work: 59957.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank2]:[E710 18:00:32.686262246 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 2] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 59998, last completed NCCL work: 59957.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank5]:[E710 18:00:32.686365442 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 5] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 59998, last completed NCCL work: 59957.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank6]:[E710 18:00:32.686417085 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 6] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 59998, last completed NCCL work: 59957.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank7]:[E710 18:00:32.686433436 ProcessGroupNCCL.cpp:1922] [PG ID 0 PG GUID 0(default_pg) Rank 7] Observed flight recorder dump signal from another rank via TCPStore.
+[rank4]:[E710 18:00:32.686477409 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 4] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 59998, last completed NCCL work: 59957.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank2]:[E710 18:00:32.686652949 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 2] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank7]:[E710 18:00:32.686716232 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 7] Received a dump signal due to a collective timeout from  rank 3 and we will try our best to dump the debug info. Last enqueued NCCL work: 59957, last completed NCCL work: 59957.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank6]:[E710 18:00:32.686736403 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 6] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank5]:[E710 18:00:32.686795127 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 5] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank4]:[E710 18:00:32.686820118 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 4] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank7]:[E710 18:00:32.687058842 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 7] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank1]:[E710 18:00:32.690089115 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 1] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank0]:[E710 18:00:32.089607983 ProcessGroupNCCL.cpp:1987] [PG ID 0 PG GUID 0(default_pg) Rank 0] Received a dump signal due to a collective timeout from this local rank and we will try our best to dump the debug info. Last enqueued NCCL work: 59998, last completed NCCL work: 59957.This is most likely caused by incorrect usages of collectives, e.g., wrong sizes used across ranks, the order of collectives is not same for all ranks or the scheduled collective, for some reason, didn't run. Additionally, this can be caused by GIL deadlock or other reasons such as network errors or bugs in the communications library (e.g. NCCL), etc. 
+[rank0]:[E710 18:00:32.090056919 ProcessGroupNCCL.cpp:1700] [PG ID 0 PG GUID 0(default_pg) Rank 0] ProcessGroupNCCL preparing to dump debug info. Include stack trace: 1, only active collectives: 0
+[rank3]:[F710 18:08:32.707469047 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 3] [PG ID 0 PG GUID 0(default_pg) Rank 3] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank4]:[F710 18:08:32.775586860 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 4] [PG ID 0 PG GUID 0(default_pg) Rank 4] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank5]:[F710 18:08:32.782402239 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 5] [PG ID 0 PG GUID 0(default_pg) Rank 5] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank7]:[F710 18:08:32.789963540 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 7] [PG ID 0 PG GUID 0(default_pg) Rank 7] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank6]:[F710 18:08:32.790053185 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 6] [PG ID 0 PG GUID 0(default_pg) Rank 6] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank2]:[F710 18:08:32.800745985 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 2] [PG ID 0 PG GUID 0(default_pg) Rank 2] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank1]:[F710 18:08:32.804707381 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 1] [PG ID 0 PG GUID 0(default_pg) Rank 1] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+[rank0]:[F710 18:08:33.186771213 ProcessGroupNCCL.cpp:1725] [PG ID 0 PG GUID 0(default_pg) Rank 0] [PG ID 0 PG GUID 0(default_pg) Rank 0] Terminating the process after attempting to dump debug info, due to collective timeout or exception.
+W0710 18:08:37.236000 1100 torch/distributed/elastic/agent/server/api.py:753] Received 15 death signal, shutting down workers
+W0710 18:08:37.238000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1896 closing signal SIGTERM
+W0710 18:08:37.239000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1897 closing signal SIGTERM
+W0710 18:08:37.239000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1898 closing signal SIGTERM
+W0710 18:08:37.239000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1899 closing signal SIGTERM
+W0710 18:08:37.239000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1900 closing signal SIGTERM
+W0710 18:08:37.239000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1901 closing signal SIGTERM
+W0710 18:08:37.240000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1902 closing signal SIGTERM
+W0710 18:08:37.240000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1903 closing signal SIGTERM
