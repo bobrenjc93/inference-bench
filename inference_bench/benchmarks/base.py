@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import json
 import os
 import re
 import threading
 import time
 from abc import ABC, abstractmethod
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
+from urllib.parse import urljoin
 
 import httpx
 import openai
@@ -176,24 +178,46 @@ class Benchmark(ABC):
         chunks: list[str] = []
 
         start = time.perf_counter()
-        stream = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            stream=True,
-        )
+        http_client = _openai_http_client(client)
+        url = urljoin(str(client.base_url), "chat/completions")
+        payload = {
+            "model": model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "stream": True,
+        }
 
         first_token_seen = False
-        for chunk in stream:
-            delta = chunk.choices[0].delta if chunk.choices else None
-            if delta and delta.content:
+        done_seen_s: float | None = None
+        with http_client.stream("POST", url, json=payload) as response:
+            response.raise_for_status()
+            for data in _iter_sse_data(response):
+                now = time.perf_counter()
+                if data.startswith("[DONE]"):
+                    done_seen_s = now
+                    continue
+                event = json.loads(data)
+                if isinstance(event, dict) and event.get("error"):
+                    raise RuntimeError(f"stream error: {event['error']}")
+                choices = event.get("choices")
+                if not isinstance(choices, list) or not choices:
+                    continue
+                first_choice = choices[0]
+                if not isinstance(first_choice, dict):
+                    continue
+                delta = first_choice.get("delta")
+                if not isinstance(delta, dict):
+                    continue
+                content = delta.get("content")
+                if not isinstance(content, str) or not content:
+                    continue
                 if not first_token_seen:
-                    metrics.ttft_ms = (time.perf_counter() - start) * 1000
+                    metrics.ttft_ms = (now - start) * 1000
                     first_token_seen = True
-                chunks.append(delta.content)
+                chunks.append(content)
 
-        end = time.perf_counter()
+        end = done_seen_s if done_seen_s is not None else time.perf_counter()
         metrics.e2e_latency_ms = (end - start) * 1000
         metrics.output_tokens = len(chunks)
 
@@ -209,3 +233,30 @@ class Benchmark(ABC):
             metrics.response_text = full_text
 
         return full_text, metrics
+
+
+def _openai_http_client(client: openai.OpenAI) -> httpx.Client:
+    http_client = getattr(client, "_client", None)
+    if isinstance(http_client, httpx.Client):
+        return http_client
+    raise TypeError("OpenAI client does not expose a synchronous httpx.Client")
+
+
+def _iter_sse_data(response: httpx.Response) -> Iterator[str]:
+    data_lines: list[str] = []
+    for line in response.iter_lines():
+        if not line:
+            if data_lines:
+                yield "\n".join(data_lines)
+                data_lines.clear()
+            continue
+        if line.startswith(":"):
+            continue
+        name, separator, value = line.partition(":")
+        if separator != ":" or name != "data":
+            continue
+        if value.startswith(" "):
+            value = value[1:]
+        data_lines.append(value)
+    if data_lines:
+        yield "\n".join(data_lines)
