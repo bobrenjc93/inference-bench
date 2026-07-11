@@ -180,6 +180,39 @@ class TorchInfernoProviderTest(unittest.TestCase):
 
         self.assertEqual(env["TORCHINFERNO_OPENAI_TP_TENSOR_COMMANDS"], "1")
 
+    def test_server_env_forces_logits_cache_shortcuts_off(self) -> None:
+        provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
+        cache_env = {
+            "TORCHINFERNO_CONTINUOUS_GENERATED_PREFIX_CACHE": "1",
+            "TORCHINFERNO_CONTINUOUS_ADAPTIVE_GENERATED_PREFIX_CACHE": "1",
+            "TORCHINFERNO_OPENAI_TP_ONLINE_GENERATED_PREFIX_CACHE": "1",
+            "TORCHINFERNO_CONTINUOUS_PREFIX_CACHE_STORE_LOGITS": "1",
+            "TORCHINFERNO_CONTINUOUS_PINNED_FULL_PROMPT_STORE_LOGITS": "1",
+            "TORCHINFERNO_OPENAI_PROMPT_LOGITS_CACHE": "1",
+        }
+
+        with mock.patch.dict(os.environ, cache_env, clear=True):
+            env = provider._server_env()
+
+        for env_name in cache_env:
+            self.assertEqual(env[env_name], "0")
+
+    def test_server_env_can_allow_logits_cache_diagnostics(self) -> None:
+        provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
+        cache_env = {
+            "INFERENCE_BENCH_TORCHINFERNO_ALLOW_LOGITS_CACHES": "1",
+            "TORCHINFERNO_CONTINUOUS_GENERATED_PREFIX_CACHE": "1",
+            "TORCHINFERNO_CONTINUOUS_PREFIX_CACHE_STORE_LOGITS": "1",
+            "TORCHINFERNO_OPENAI_PROMPT_LOGITS_CACHE": "1",
+        }
+
+        with mock.patch.dict(os.environ, cache_env, clear=True):
+            env = provider._server_env()
+
+        self.assertEqual(env["TORCHINFERNO_CONTINUOUS_GENERATED_PREFIX_CACHE"], "1")
+        self.assertEqual(env["TORCHINFERNO_CONTINUOUS_PREFIX_CACHE_STORE_LOGITS"], "1")
+        self.assertEqual(env["TORCHINFERNO_OPENAI_PROMPT_LOGITS_CACHE"], "1")
+
     def test_server_cmd_appends_env_extra_args(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
 

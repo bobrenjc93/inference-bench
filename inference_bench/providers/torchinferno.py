@@ -127,6 +127,16 @@ class TorchInfernoProvider(Provider):
         # and obscure readiness failures. Keep the default quiet; set
         # INFERENCE_BENCH_TORCHINFERNO_NCCL_DEBUG=INFO for transport debugging.
         env["NCCL_DEBUG"] = os.environ.get("INFERENCE_BENCH_TORCHINFERNO_NCCL_DEBUG", "WARN")
+        # Score-facing runs must not use exact-prompt/generated logits caches.
+        # Normal KV prefix reuse stays enabled; these switches only block cached
+        # logits paths that can turn repeated prompts into benchmark fingerprints.
+        if not _env_flag("INFERENCE_BENCH_TORCHINFERNO_ALLOW_LOGITS_CACHES", False):
+            env["TORCHINFERNO_CONTINUOUS_GENERATED_PREFIX_CACHE"] = "0"
+            env["TORCHINFERNO_CONTINUOUS_ADAPTIVE_GENERATED_PREFIX_CACHE"] = "0"
+            env["TORCHINFERNO_OPENAI_TP_ONLINE_GENERATED_PREFIX_CACHE"] = "0"
+            env["TORCHINFERNO_CONTINUOUS_PREFIX_CACHE_STORE_LOGITS"] = "0"
+            env["TORCHINFERNO_CONTINUOUS_PINNED_FULL_PROMPT_STORE_LOGITS"] = "0"
+            env["TORCHINFERNO_OPENAI_PROMPT_LOGITS_CACHE"] = "0"
         # The tensor command path can leave TP workers on different collectives
         # after long online-serving runs. Prefer the supported object command
         # transport for public correctness runs unless explicitly overridden.
