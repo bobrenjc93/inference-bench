@@ -5,6 +5,10 @@
 - **Hardware:** 8xH100
 - **Timestamp:** 6:22 AM PT, Jul 11 2026
 
+## Integrity Warnings
+
+- **torchinferno:** TorchInferno queue profile reports generated-prefix logits reuse (generated-prefix reuse requests=997, reuse tokens=55832, generated-prefix route count=997). Treat TorchInferno score-facing metrics in this run as not comparable; normal KV prefix reuse is still allowed.
+
 ## Scorecard
 
 | Benchmark        | torchinferno |      vllm | sglang |

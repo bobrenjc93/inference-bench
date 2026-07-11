@@ -11,6 +11,7 @@ from pathlib import Path
 from tabulate import tabulate
 
 from .benchmarks.base import BenchmarkResult
+from .integrity import warnings_for_live_provider
 
 
 SUMMARY_SCORABLE_METRICS = (
@@ -281,6 +282,7 @@ class RunResults:
         print(f"Model: {self.model}  |  TP: {self.tensor_parallel_size}")
         print("=" * 80)
 
+        self._print_integrity_warnings(provider_names)
         self._print_build_times(provider_names)
 
         benchmark_names = set()
@@ -300,6 +302,17 @@ class RunResults:
             mins = pr.build_time_s / 60
             rows.append([pname, f"{pr.build_time_s:.1f}s", f"{mins:.1f}m"])
         print(tabulate(rows, headers=["Provider", "Build Time", "Minutes"], tablefmt="simple"))
+
+    def _print_integrity_warnings(self, provider_names: list[str]) -> None:
+        warnings: list[str] = []
+        for pname in provider_names:
+            pr = self.providers[pname]
+            warnings.extend(warnings_for_live_provider(pname, pr.extra_log_paths))
+        if not warnings:
+            return
+        print("\n--- Integrity Warnings ---")
+        for warning in warnings:
+            print(f"! {warning}")
 
     def _print_benchmark_comparison(self, bname: str, provider_names: list[str]) -> None:
         print(f"\n--- {bname} ---")

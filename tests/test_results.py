@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 from inference_bench.benchmarks.base import BenchmarkResult, RequestMetrics
 from inference_bench.results import ProviderResults, RunResults
+from scripts.generate_summary import generate
 
 
 def test_default_timestamp_is_utc_aware() -> None:
@@ -170,6 +171,83 @@ def test_console_summary_scores_latency_and_throughput_only(capsys) -> None:
     assert re.search(r"^correctness_rate\s+0\.500\s+1\.000\s+accurate$", output, re.MULTILINE)
     assert re.search(r"^fast\s+4$", output, re.MULTILINE)
     assert re.search(r"^accurate\s+0$", output, re.MULTILINE)
+
+
+def test_console_summary_warns_on_torchinferno_generated_prefix_reuse(
+    capsys,
+    tmp_path,
+) -> None:
+    queue_log = tmp_path / "torchinferno_queue_profile.jsonl"
+    queue_log.write_text(
+        '{"runtime_generated_prefix_reuse_requests": 7, '
+        '"runtime_generated_prefix_reuse_tokens": 21, '
+        '"runtime_prefix_reuse_route_counts": {"generated_prefix": 7}}\n'
+    )
+    results = RunResults(model="model", tensor_parallel_size=1)
+    results.providers["torchinferno"] = ProviderResults(
+        provider="torchinferno",
+        extra_log_paths={"queue_profile": str(queue_log)},
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={"ttft_median_ms": 1.0},
+            )
+        },
+    )
+    results.providers["vllm"] = ProviderResults(
+        provider="vllm",
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={"ttft_median_ms": 2.0},
+            )
+        },
+    )
+
+    results.print_comparison()
+
+    output = capsys.readouterr().out
+    assert "Integrity Warnings" in output
+    assert "generated-prefix logits reuse" in output
+    assert "generated-prefix reuse requests=7" in output
+
+
+def test_markdown_summary_warns_on_saved_torchinferno_generated_prefix_reuse(
+    tmp_path,
+) -> None:
+    queue_log = tmp_path / "torchinferno_queue_profile.jsonl"
+    queue_log.write_text(
+        '{"runtime_generated_prefix_reuse_requests": 3, '
+        '"runtime_generated_prefix_reuse_tokens": 9, '
+        '"runtime_prefix_reuse_route_counts": {"generated_prefix": 3}}\n'
+    )
+    results = RunResults(model="model", tensor_parallel_size=1)
+    results.providers["torchinferno"] = ProviderResults(
+        provider="torchinferno",
+        extra_log_paths={"queue_profile": str(queue_log)},
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={"ttft_median_ms": 1.0},
+            )
+        },
+    )
+    results.providers["vllm"] = ProviderResults(
+        provider="vllm",
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={"ttft_median_ms": 2.0},
+            )
+        },
+    )
+    results_path = results.save(tmp_path / "results")
+
+    markdown = generate(results_path)
+
+    assert "## Integrity Warnings" in markdown
+    assert "**torchinferno:** TorchInferno queue profile reports generated-prefix logits reuse" in markdown
+    assert "generated-prefix reuse requests=3" in markdown
 
 
 def test_console_summary_does_not_round_near_perfect_correctness(capsys) -> None:

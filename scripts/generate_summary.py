@@ -7,6 +7,7 @@ import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+from inference_bench.integrity import warnings_for_saved_provider
 from inference_bench.results import SUMMARY_SCORABLE_METRICS
 
 
@@ -154,6 +155,22 @@ def generate(results_json: str | Path) -> str:
         except (ValueError, TypeError):
             lines.append(f"- **Timestamp:** {timestamp}")
     lines.append("")
+
+    integrity_warnings: list[str] = []
+    for pn in provider_names:
+        provider_warnings = warnings_for_saved_provider(
+            pn,
+            providers_data[pn],
+            run_dir=summary_dir,
+        )
+        for warning in provider_warnings:
+            integrity_warnings.append(f"**{pn}:** {warning}")
+    if integrity_warnings:
+        lines.append("## Integrity Warnings")
+        lines.append("")
+        for warning in integrity_warnings:
+            lines.append(f"- {warning}")
+        lines.append("")
 
     # -- Scorecard: one row per benchmark, one column per provider, cell = wins --
     lines.append("## Scorecard")
