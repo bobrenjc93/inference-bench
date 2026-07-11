@@ -250,6 +250,48 @@ def test_markdown_summary_warns_on_saved_torchinferno_generated_prefix_reuse(
     assert "generated-prefix reuse requests=3" in markdown
 
 
+def test_console_summary_warns_on_torchinferno_prompt_shortcuts(
+    capsys,
+    tmp_path,
+) -> None:
+    queue_log = tmp_path / "torchinferno_queue_profile.jsonl"
+    queue_log.write_text(
+        '{"runtime_prompt_lookup_requests": 4, '
+        '"runtime_prompt_lookup_accepted_tokens": 8, '
+        '"runtime_repeated_sample_state_hits": 2, '
+        '"runtime_repeated_sample_state_tokens": 5}\n'
+    )
+    results = RunResults(model="model", tensor_parallel_size=1)
+    results.providers["torchinferno"] = ProviderResults(
+        provider="torchinferno",
+        extra_log_paths={"queue_profile": str(queue_log)},
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={"ttft_median_ms": 1.0},
+            )
+        },
+    )
+    results.providers["vllm"] = ProviderResults(
+        provider="vllm",
+        benchmarks={
+            "bench": BenchmarkResult(
+                name="bench",
+                metrics={"ttft_median_ms": 2.0},
+            )
+        },
+    )
+
+    results.print_comparison()
+
+    output = capsys.readouterr().out
+    assert "Integrity Warnings" in output
+    assert "prompt lookup requests=4" in output
+    assert "accepted tokens=8" in output
+    assert "repeated-sample state hits=2" in output
+    assert "normal KV prefix reuse is still allowed" in output
+
+
 def test_console_summary_does_not_round_near_perfect_correctness(capsys) -> None:
     results = RunResults(model="model", tensor_parallel_size=1)
     results.providers["almost"] = ProviderResults(

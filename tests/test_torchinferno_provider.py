@@ -189,6 +189,8 @@ class TorchInfernoProviderTest(unittest.TestCase):
             "TORCHINFERNO_CONTINUOUS_PREFIX_CACHE_STORE_LOGITS": "1",
             "TORCHINFERNO_CONTINUOUS_PINNED_FULL_PROMPT_STORE_LOGITS": "1",
             "TORCHINFERNO_OPENAI_PROMPT_LOGITS_CACHE": "1",
+            "TORCHINFERNO_CONTINUOUS_PROMPT_LOOKUP_DECODE": "1",
+            "TORCHINFERNO_CONTINUOUS_CACHED_REPEATED_SAMPLE_STATE": "1",
         }
 
         with mock.patch.dict(os.environ, cache_env, clear=True):
@@ -204,6 +206,8 @@ class TorchInfernoProviderTest(unittest.TestCase):
             "TORCHINFERNO_CONTINUOUS_GENERATED_PREFIX_CACHE": "1",
             "TORCHINFERNO_CONTINUOUS_PREFIX_CACHE_STORE_LOGITS": "1",
             "TORCHINFERNO_OPENAI_PROMPT_LOGITS_CACHE": "1",
+            "TORCHINFERNO_CONTINUOUS_PROMPT_LOOKUP_DECODE": "1",
+            "TORCHINFERNO_CONTINUOUS_CACHED_REPEATED_SAMPLE_STATE": "1",
         }
 
         with mock.patch.dict(os.environ, cache_env, clear=True):
@@ -212,6 +216,8 @@ class TorchInfernoProviderTest(unittest.TestCase):
         self.assertEqual(env["TORCHINFERNO_CONTINUOUS_GENERATED_PREFIX_CACHE"], "1")
         self.assertEqual(env["TORCHINFERNO_CONTINUOUS_PREFIX_CACHE_STORE_LOGITS"], "1")
         self.assertEqual(env["TORCHINFERNO_OPENAI_PROMPT_LOGITS_CACHE"], "1")
+        self.assertEqual(env["TORCHINFERNO_CONTINUOUS_PROMPT_LOOKUP_DECODE"], "1")
+        self.assertEqual(env["TORCHINFERNO_CONTINUOUS_CACHED_REPEATED_SAMPLE_STATE"], "1")
 
     def test_server_cmd_appends_env_extra_args(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")

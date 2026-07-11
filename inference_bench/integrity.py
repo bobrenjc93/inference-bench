@@ -12,7 +12,12 @@ def torchinferno_logits_cache_warnings(queue_profile_path: str | Path) -> list[s
 
     max_reuse_requests = 0
     max_reuse_tokens = 0
+    max_store_requests = 0
     max_generated_route_count = 0
+    max_prompt_lookup_requests = 0
+    max_prompt_lookup_accepted_tokens = 0
+    max_repeated_sample_hits = 0
+    max_repeated_sample_tokens = 0
     parsed_records = 0
     for line in path.read_text().splitlines():
         if not line.strip():
@@ -32,6 +37,26 @@ def torchinferno_logits_cache_warnings(queue_profile_path: str | Path) -> list[s
             max_reuse_tokens,
             _nonnegative_int(record.get("runtime_generated_prefix_reuse_tokens")),
         )
+        max_store_requests = max(
+            max_store_requests,
+            _nonnegative_int(record.get("runtime_generated_prefix_store_requests")),
+        )
+        max_prompt_lookup_requests = max(
+            max_prompt_lookup_requests,
+            _nonnegative_int(record.get("runtime_prompt_lookup_requests")),
+        )
+        max_prompt_lookup_accepted_tokens = max(
+            max_prompt_lookup_accepted_tokens,
+            _nonnegative_int(record.get("runtime_prompt_lookup_accepted_tokens")),
+        )
+        max_repeated_sample_hits = max(
+            max_repeated_sample_hits,
+            _nonnegative_int(record.get("runtime_repeated_sample_state_hits")),
+        )
+        max_repeated_sample_tokens = max(
+            max_repeated_sample_tokens,
+            _nonnegative_int(record.get("runtime_repeated_sample_state_tokens")),
+        )
         route_counts = record.get("runtime_prefix_reuse_route_counts")
         if isinstance(route_counts, dict):
             max_generated_route_count = max(
@@ -41,15 +66,36 @@ def torchinferno_logits_cache_warnings(queue_profile_path: str | Path) -> list[s
 
     if parsed_records <= 0:
         return []
-    if max_reuse_requests <= 0 and max_generated_route_count <= 0:
+    if (
+        max_store_requests <= 0
+        and max_reuse_requests <= 0
+        and max_generated_route_count <= 0
+        and max_prompt_lookup_accepted_tokens <= 0
+        and max_repeated_sample_hits <= 0
+    ):
         return []
-    detail = (
-        f"generated-prefix reuse requests={max_reuse_requests}, "
-        f"reuse tokens={max_reuse_tokens}, "
-        f"generated-prefix route count={max_generated_route_count}"
-    )
+    details = []
+    if max_store_requests > 0 or max_reuse_requests > 0 or max_generated_route_count > 0:
+        details.append(
+            f"generated-prefix store requests={max_store_requests}, "
+            f"generated-prefix reuse requests={max_reuse_requests}, "
+            f"reuse tokens={max_reuse_tokens}, "
+            f"generated-prefix route count={max_generated_route_count}"
+        )
+    if max_prompt_lookup_accepted_tokens > 0:
+        details.append(
+            f"prompt lookup requests={max_prompt_lookup_requests}, "
+            f"accepted tokens={max_prompt_lookup_accepted_tokens}"
+        )
+    if max_repeated_sample_hits > 0:
+        details.append(
+            f"repeated-sample state hits={max_repeated_sample_hits}, "
+            f"tokens={max_repeated_sample_tokens}"
+        )
+    detail = "; ".join(details)
     return [
         "TorchInferno queue profile reports generated-prefix logits reuse "
+        "or related prompt shortcuts "
         f"({detail}). Treat TorchInferno score-facing metrics in this run as "
         "not comparable; normal KV prefix reuse is still allowed."
     ]

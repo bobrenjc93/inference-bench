@@ -137,6 +137,8 @@ class TorchInfernoProvider(Provider):
             env["TORCHINFERNO_CONTINUOUS_PREFIX_CACHE_STORE_LOGITS"] = "0"
             env["TORCHINFERNO_CONTINUOUS_PINNED_FULL_PROMPT_STORE_LOGITS"] = "0"
             env["TORCHINFERNO_OPENAI_PROMPT_LOGITS_CACHE"] = "0"
+            env["TORCHINFERNO_CONTINUOUS_PROMPT_LOOKUP_DECODE"] = "0"
+            env["TORCHINFERNO_CONTINUOUS_CACHED_REPEATED_SAMPLE_STATE"] = "0"
         # The tensor command path can leave TP workers on different collectives
         # after long online-serving runs. Prefer the supported object command
         # transport for public correctness runs unless explicitly overridden.
