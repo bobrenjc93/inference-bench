@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import gc
+import json
 import socket
 import time
+from pathlib import Path
 
 from .benchmarks import get_benchmark
 from .config import Config
@@ -39,6 +41,41 @@ def _free_gpu_memory() -> None:
     except ImportError:
         pass
     gc.collect()
+
+
+def _append_torchinferno_queue_profile_marker(
+    provider: object,
+    *,
+    event: str,
+    benchmark: str,
+    status: str | None = None,
+    error: str | None = None,
+) -> None:
+    if getattr(provider, "name", None) != "torchinferno":
+        return
+    extra_log_paths = getattr(provider, "extra_log_paths", None)
+    if not callable(extra_log_paths):
+        return
+    queue_profile = extra_log_paths().get("queue_profile")
+    if not queue_profile:
+        return
+    record = {
+        "event": event,
+        "provider": "torchinferno",
+        "benchmark": benchmark,
+        "timestamp_s": time.time(),
+    }
+    if status is not None:
+        record["status"] = status
+    if error is not None:
+        record["error"] = error
+    path = Path(queue_profile)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(record, sort_keys=True) + "\n")
+    except OSError:
+        return
 
 
 def run_all(
@@ -91,18 +128,35 @@ def run_all(
 
             for bench_name in config.benchmarks:
                 benchmark = None
+                marker_started = False
+                bench_error: str | None = None
                 try:
                     provider.wait_for_gpu_isolation(config.tensor_parallel_size)
                     benchmark = get_benchmark(bench_name)
                     benchmark.debug = debug
                     benchmark.verbose = verbose
+                    _append_torchinferno_queue_profile_marker(
+                        provider,
+                        event="benchmark_start",
+                        benchmark=bench_name,
+                    )
+                    marker_started = True
                     with provider.gpu_isolation_monitor(config.tensor_parallel_size):
                         bench_result = benchmark.run(provider.api_base, config.model)
                     pr.benchmarks[bench_name] = bench_result
                 except Exception as exc:
+                    bench_error = str(exc)
                     pr.errors[bench_name] = str(exc)
                     print(f"--- {bench_name} FAILED: {exc} ---")
                 finally:
+                    if marker_started:
+                        _append_torchinferno_queue_profile_marker(
+                            provider,
+                            event="benchmark_end",
+                            benchmark=bench_name,
+                            status="error" if bench_error is not None else "ok",
+                            error=bench_error,
+                        )
                     if benchmark is not None:
                         close_clients = getattr(benchmark, "_close_open_clients", None)
                         if callable(close_clients):
