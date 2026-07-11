@@ -1,0 +1,190 @@
+TorchInferno OpenAI server probing tensor-parallel symmetric-memory allreduce
+TorchInferno OpenAI server symmetric-memory allreduce enabled after probe (runtime scope)
+TorchInferno OpenAI server auto-launching tensor-parallel workers: /workspace/submit-12dfaefe/builds/torchinferno/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node 8 -m torchinferno.openai_server --model /home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b --tensor-parallel-size 8 --port 8001 --trust-remote-code
+[Llama3TP] loading checkpoint tensors world_size=8 dtype=bfloat16 rank0_broadcast=0 rank0_replicated_broadcast=0 rank0_replicated_page_cache_warm=0 rank0_direct_scatter=0 rank0_shard_scatter=0
+[Llama3TP] loading initial embedding/norm/head tensors
+[Llama3TP] loaded initial embedding/norm/head tensors in 227.7s
+[Llama3TP] loaded 10/80 layers in 377.8s
+[Llama3TP] loaded 20/80 layers in 515.2s
+[Llama3TP] loaded 30/80 layers in 696.9s
+[Llama3TP] loaded 40/80 layers in 858.5s
+[Llama3TP] loaded 50/80 layers in 1009.7s
+[Llama3TP] loaded 60/80 layers in 1177.5s
+[Llama3TP] loaded 70/80 layers in 1304.3s
+[Llama3TP] loaded 80/80 layers in 1368.4s
+[Llama3TP] checkpoint load complete in 1368.4s
+NCCL version 2.29.7+cuda13.2
+
+[2026-07-11 03:26:37] gpu-dev-12dfaefe:1896:1896 [0] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-11 03:26:37] gpu-dev-12dfaefe:1897:1897 [1] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-11 03:26:37] gpu-dev-12dfaefe:1898:1898 [2] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-11 03:26:37] gpu-dev-12dfaefe:1900:1900 [4] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-11 03:26:37] gpu-dev-12dfaefe:1899:1899 [3] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-11 03:26:37] gpu-dev-12dfaefe:1901:1901 [5] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-11 03:26:37] gpu-dev-12dfaefe:1902:1902 [6] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+
+[2026-07-11 03:26:38] gpu-dev-12dfaefe:1903:1903 [7] misc/ibvwrap.cc:173 NCCL WARN lib wrapper not initialized.
+[WARMUP] tensor-parallel startup warmup start cache_backend=dense prompt_counts=(32, 16, 64, 128, 256) new_tokens=2
+[WARMUP] single-request generate warmup prompt_counts=(32, 16, 64, 128, 256) new_tokens=2 start
+[WARMUP] single-request generate warmup prompt_counts=(32, 16, 64, 128, 256) new_tokens=2 done in 3.6s
+[WARMUP] generation-cache/decode-attention warmup cache_tokens=258 start
+[WARMUP] generation-cache/decode-attention warmup cache_tokens=258 done in 0.0s
+[WARMUP] unified scheduler cache warmup start
+[WARMUP] unified scheduler cache prepared cache_rows=144 max_active=128 max_seq_len=768 prompt_tokens=32 decode_batches=(1, 2, 3, 4, 8, 16, 32, 64, 128) decode_policies=((0.0, 1), (1.0, 300))
+[WARMUP] online decode graph warmup start temperature=0 max_tokens=1 batches=(1, 2, 3, 4, 8, 16, 32, 64, 128)
+[WARMUP] online decode graph warmup done temperature=0 max_tokens=1 in 7.0s
+[WARMUP] online common-prefix prefill warmup start rows=(48, 53, 68, 69, 105, 128) prefix_tokens=(45, 55, 64, 128) suffix_tokens=(16,) suffix_batches=(1, 2, 4, 8, 16, 32, 64, 128) suffix_prefill=False
+[WARMUP] greedy common-prefix suffix warmup start temperature=0 max_tokens=128 row=48 prefixes=3 suffix_pairs=9 batches=7 shapes=63 token_graphs=True
+[WARMUP] greedy common-prefix suffix warmup done in 34.9s
+[WARMUP] greedy common-prefix suffix warmup start temperature=0 max_tokens=512 row=48 prefixes=1 suffix_pairs=12 batches=6 shapes=72 token_graphs=False
+[WARMUP] greedy common-prefix suffix warmup done in 17.2s
+[WARMUP] sampled common-prefix suffix warmup start temperature=1 max_tokens=300 row=48 prefixes=1 suffix_pairs=2 batches=7 shapes=14 token_graphs=False
+[WARMUP] sampled common-prefix suffix warmup done in 6.5s
+[WARMUP] online common-prefix prefill warmup done in 61.1s
+[WARMUP] online decode graph warmup start temperature=1 max_tokens=300 batches=(1, 2, 3, 4, 8, 16, 32, 64, 128)
+[WARMUP] online decode graph warmup done temperature=1 max_tokens=300 in 0.0s
+[WARMUP] unified scheduler cache warmup done in 72.0s
+[WARMUP] tensor-parallel startup warmup done in 76.0s
+TorchInferno OpenAI server listening on http://0.0.0.0:8001/v1 model=/home/dev/.cache/huggingface/hub/models--meta-llama--Meta-Llama-3.1-70B-Instruct/snapshots/1605565b47bb9346c5515c34102e054115b4f98b
+[rank0]:[E711 03:28:42.585464626 ProcessGroupNCCL.cpp:2197] [PG ID 0 PG GUID 0(default_pg) Rank 0] Process group watchdog thread terminated with exception: CUDA error: unspecified launch failure
+Search for `cudaErrorLaunchFailure' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+Exception raised from query at /pytorch/c10/cuda/CUDAEvent.h:111 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fd8e256afad in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x48d2d (0x7fd90ff90d2d in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #2: c10::cuda::c10_cuda_check_implementation(int, char const*, char const*, unsigned int, bool) + 0xa93 (0x7fd90ff907a3 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::WorkNCCL::finishedGPUExecutionInternal() const + 0x50 (0x7fd85ae4ba20 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #4: c10d::ProcessGroupNCCL::WorkNCCL::isCompleted() + 0x68 (0x7fd85ae553f8 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #5: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0xa22 (0x7fd85ae60a52 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #6: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7fd85ae629b7 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #7: <unknown function> + 0xecdb4 (0x7fd90fa6edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #8: <unknown function> + 0x9caa4 (0x7fd910b3faa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #9: <unknown function> + 0x129c6c (0x7fd910bccc6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+terminate called after throwing an instance of 'c10::DistBackendError'
+  what():  [PG ID 0 PG GUID 0(default_pg) Rank 0] Process group watchdog thread terminated with exception: CUDA error: unspecified launch failure
+Search for `cudaErrorLaunchFailure' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+Exception raised from query at /pytorch/c10/cuda/CUDAEvent.h:111 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fd8e256afad in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x48d2d (0x7fd90ff90d2d in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #2: c10::cuda::c10_cuda_check_implementation(int, char const*, char const*, unsigned int, bool) + 0xa93 (0x7fd90ff907a3 in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10_cuda.so)
+frame #3: c10d::ProcessGroupNCCL::WorkNCCL::finishedGPUExecutionInternal() const + 0x50 (0x7fd85ae4ba20 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #4: c10d::ProcessGroupNCCL::WorkNCCL::isCompleted() + 0x68 (0x7fd85ae553f8 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #5: c10d::ProcessGroupNCCL::Watchdog::runLoop() + 0xa22 (0x7fd85ae60a52 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #6: c10d::ProcessGroupNCCL::Watchdog::run() + 0x157 (0x7fd85ae629b7 in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #7: <unknown function> + 0xecdb4 (0x7fd90fa6edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #8: <unknown function> + 0x9caa4 (0x7fd910b3faa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #9: <unknown function> + 0x129c6c (0x7fd910bccc6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+Exception raised from run at /pytorch/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:2203 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x9d (0x7fd8e256afad in /usr/local/lib/python3.12/dist-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x976a9f (0x7fd85a612a9f in /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch_cuda.so)
+frame #2: <unknown function> + 0xecdb4 (0x7fd90fa6edb4 in /lib/x86_64-linux-gnu/libstdc++.so.6)
+frame #3: <unknown function> + 0x9caa4 (0x7fd910b3faa4 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #4: <unknown function> + 0x129c6c (0x7fd910bccc6c in /lib/x86_64-linux-gnu/libc.so.6)
+
+[FAST HTTP 500] AcceleratorError("CUDA error: unspecified launch failure\nSearch for `cudaErrorLaunchFailure' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n")
+/usr/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+W0711 03:33:44.872000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1897 closing signal SIGTERM
+W0711 03:33:44.876000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1898 closing signal SIGTERM
+W0711 03:33:44.878000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1899 closing signal SIGTERM
+W0711 03:33:44.883000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1900 closing signal SIGTERM
+W0711 03:33:44.883000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1901 closing signal SIGTERM
+W0711 03:33:44.888000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1902 closing signal SIGTERM
+W0711 03:33:44.890000 1100 torch/distributed/elastic/multiprocessing/api.py:1014] Sending process 1903 closing signal SIGTERM
+E0711 03:33:49.497000 1100 torch/distributed/elastic/multiprocessing/api.py:988] failed (exitcode: -6) local_rank: 0 (pid: 1896) of binary: /workspace/submit-12dfaefe/builds/torchinferno/venv/bin/python
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1020, in <module>
+    main()
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 367, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1016, in main
+    run(args)
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/run.py", line 1007, in run
+    elastic_launch(
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 191, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/distributed/launcher/api.py", line 371, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+======================================================
+torchinferno.openai_server FAILED
+------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-07-11_03:33:49
+  host      : gpu-dev-12dfaefe
+  rank      : 1 (local_rank: 1)
+  exitcode  : -15 (pid: 1897)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1897
+[2]:
+  time      : 2026-07-11_03:33:49
+  host      : gpu-dev-12dfaefe
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 1898)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1898
+[3]:
+  time      : 2026-07-11_03:33:49
+  host      : gpu-dev-12dfaefe
+  rank      : 3 (local_rank: 3)
+  exitcode  : -15 (pid: 1899)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1899
+[4]:
+  time      : 2026-07-11_03:33:49
+  host      : gpu-dev-12dfaefe
+  rank      : 4 (local_rank: 4)
+  exitcode  : -15 (pid: 1900)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1900
+[5]:
+  time      : 2026-07-11_03:33:49
+  host      : gpu-dev-12dfaefe
+  rank      : 5 (local_rank: 5)
+  exitcode  : -15 (pid: 1901)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1901
+[6]:
+  time      : 2026-07-11_03:33:49
+  host      : gpu-dev-12dfaefe
+  rank      : 6 (local_rank: 6)
+  exitcode  : -15 (pid: 1902)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1902
+[7]:
+  time      : 2026-07-11_03:33:49
+  host      : gpu-dev-12dfaefe
+  rank      : 7 (local_rank: 7)
+  exitcode  : -15 (pid: 1903)  (SIGTERM)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 1903
+------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-07-11_03:33:44
+  host      : gpu-dev-12dfaefe
+  rank      : 0 (local_rank: 0)
+  exitcode  : -6 (pid: 1896)  (SIGABRT)
+  error_file: <N/A>
+  traceback : Signal 6 (SIGABRT) received by PID 1896
+======================================================
