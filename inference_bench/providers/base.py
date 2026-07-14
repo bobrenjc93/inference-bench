@@ -496,16 +496,29 @@ class Provider(ABC):
         if self._server_process is None:
             return
         port = getattr(self, "_port", None)
-        self._log(f"[{self.name}] Stopping server (pid={self._server_process.pid})")
+        process = self._server_process
+        cleanup_pids = self._server_process_group_pids()
+        self._log(f"[{self.name}] Stopping server (pid={process.pid})")
         try:
-            os.killpg(os.getpgid(self._server_process.pid), signal.SIGTERM)
-            self._server_process.wait(timeout=30)
+            pgid = os.getpgid(process.pid)
+        except ProcessLookupError:
+            pgid = None
+        try:
+            if pgid is not None:
+                os.killpg(pgid, signal.SIGTERM)
+            else:
+                self._signal_processes(cleanup_pids, signal.SIGTERM)
+            process.wait(timeout=30)
         except (ProcessLookupError, subprocess.TimeoutExpired):
             try:
-                os.killpg(os.getpgid(self._server_process.pid), signal.SIGKILL)
-                self._server_process.wait(timeout=10)
+                if pgid is not None:
+                    os.killpg(pgid, signal.SIGKILL)
+                else:
+                    self._signal_processes(cleanup_pids, signal.SIGKILL)
+                process.wait(timeout=10)
             except (ProcessLookupError, subprocess.TimeoutExpired):
                 pass
+        self._terminate_surviving_processes(cleanup_pids)
         self._server_process = None
         if hasattr(self, "_log_file") and self._log_file:
             self._log_file.close()
@@ -516,6 +529,62 @@ class Provider(ABC):
         if cleanup_wait_s > 0:
             self._log(f"[{self.name}] Waiting {cleanup_wait_s:.1f}s for provider cleanup")
             time.sleep(cleanup_wait_s)
+
+    def _terminate_surviving_processes(self, pids: set[int]) -> None:
+        live = self._wait_for_pids_exit(pids, timeout=5.0)
+        if not live:
+            return
+        self._log(
+            f"[{self.name}] Terminating surviving server processes: "
+            f"{', '.join(str(pid) for pid in sorted(live))}"
+        )
+        self._signal_processes(live, signal.SIGTERM)
+        live = self._wait_for_pids_exit(live, timeout=5.0)
+        if not live:
+            return
+        self._log(
+            f"[{self.name}] Killing surviving server processes: "
+            f"{', '.join(str(pid) for pid in sorted(live))}"
+        )
+        self._signal_processes(live, signal.SIGKILL)
+        self._wait_for_pids_exit(live, timeout=5.0)
+
+    @classmethod
+    def _wait_for_pids_exit(cls, pids: set[int], *, timeout: float) -> set[int]:
+        deadline = time.time() + max(0.0, timeout)
+        live = cls._live_pids(pids)
+        while live and time.time() < deadline:
+            time.sleep(min(0.2, max(0.0, deadline - time.time())))
+            live = cls._live_pids(live)
+        return live
+
+    @staticmethod
+    def _live_pids(pids: set[int]) -> set[int]:
+        current_pid = os.getpid()
+        live: set[int] = set()
+        for pid in pids:
+            if pid <= 0 or pid == current_pid:
+                continue
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                continue
+            except PermissionError:
+                live.add(pid)
+            else:
+                live.add(pid)
+        return live
+
+    @staticmethod
+    def _signal_processes(pids: set[int], signum: int) -> None:
+        current_pid = os.getpid()
+        for pid in sorted(pids):
+            if pid <= 0 or pid == current_pid:
+                continue
+            try:
+                os.kill(pid, signum)
+            except ProcessLookupError:
+                pass
 
     def _wait_for_port_release(self, port: int, timeout: int = 60) -> None:
         start = time.time()

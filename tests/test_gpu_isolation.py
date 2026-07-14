@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import signal
 import subprocess
 import time
 import types
@@ -74,6 +75,50 @@ class GpuIsolationTest(unittest.TestCase):
             mock.patch("inference_bench.providers.base.subprocess.run", side_effect=fake_run),
         ):
             self.assertEqual(provider._server_process_group_pids(), {100, 200, 201})
+
+    def test_stop_server_terminates_surviving_group_processes(self) -> None:
+        provider = FakeProvider(build_dir="/tmp/inference-bench-test")
+        process = mock.Mock()
+        process.pid = 100
+        provider._server_process = process
+        provider._port = 8001
+        provider._log_file = mock.Mock()
+
+        with (
+            mock.patch.object(provider, "_server_process_group_pids", return_value={100, 200}),
+            mock.patch.object(provider, "_terminate_surviving_processes") as terminate_survivors,
+            mock.patch.object(provider, "_wait_for_port_release"),
+            mock.patch.dict(os.environ, {"INFERENCE_BENCH_PROVIDER_CLEANUP_WAIT_S": "0"}),
+            mock.patch("inference_bench.providers.base.os.getpgid", return_value=999),
+            mock.patch("inference_bench.providers.base.os.killpg") as killpg,
+        ):
+            provider.stop_server()
+
+        killpg.assert_called_once_with(999, signal.SIGTERM)
+        process.wait.assert_called_once_with(timeout=30)
+        terminate_survivors.assert_called_once_with({100, 200})
+        self.assertIsNone(provider._server_process)
+
+    def test_terminate_surviving_processes_escalates_to_sigkill(self) -> None:
+        provider = FakeProvider(build_dir="/tmp/inference-bench-test")
+
+        with (
+            mock.patch.object(
+                provider,
+                "_wait_for_pids_exit",
+                side_effect=[{200}, {200}, set()],
+            ) as wait_for_pids,
+            mock.patch("inference_bench.providers.base.os.kill") as kill,
+        ):
+            provider._terminate_surviving_processes({200})
+
+        self.assertEqual(wait_for_pids.call_count, 3)
+        kill.assert_has_calls(
+            [
+                mock.call(200, signal.SIGTERM),
+                mock.call(200, signal.SIGKILL),
+            ]
+        )
 
     def test_wait_for_gpu_isolation_returns_after_clean_poll(self) -> None:
         provider = FakeProvider(build_dir="/tmp/inference-bench-test")
