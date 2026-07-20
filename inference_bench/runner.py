@@ -89,6 +89,7 @@ def run_all(
         model=config.model,
         tensor_parallel_size=config.tensor_parallel_size,
         hardware=config.hardware,
+        requested_providers=tuple(config.providers),
     )
     build_times = build_times or {}
     used_ports: set[int] = set()

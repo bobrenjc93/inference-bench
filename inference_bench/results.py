@@ -78,6 +78,7 @@ class RunResults:
     tensor_parallel_size: int
     hardware: str = ""
     timestamp: str = field(default_factory=_utc_now_isoformat)
+    requested_providers: tuple[str, ...] = ()
     providers: dict[str, ProviderResults] = field(default_factory=dict)
 
     def save(self, results_dir: str | Path) -> Path:
@@ -89,6 +90,7 @@ class RunResults:
             "tensor_parallel_size": self.tensor_parallel_size,
             "hardware": self.hardware,
             "timestamp": self.timestamp,
+            "requested_providers": list(self.requested_providers),
             "providers": {},
         }
         for pname, pr in self.providers.items():

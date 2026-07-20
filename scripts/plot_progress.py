@@ -54,9 +54,19 @@ def load_all_runs(model_dir: Path) -> list[dict]:
             continue
         with open(json_path) as f:
             data = json.load(f)
-        # Skip incomplete runs where the reservation expired mid-build
-        # and only a subset of providers finished.
-        if set(data.get("providers", {}).keys()) < EXPECTED_PROVIDERS:
+        present_providers = set(data.get("providers", {}))
+        requested_providers = data.get("requested_providers")
+        if isinstance(requested_providers, list) and requested_providers:
+            required_providers = {
+                provider
+                for provider in requested_providers
+                if isinstance(provider, str) and provider
+            }
+        else:
+            # Legacy results did not record the requested subset, so preserve
+            # the old fail-closed rule for those runs.
+            required_providers = EXPECTED_PROVIDERS
+        if not required_providers or not required_providers <= present_providers:
             continue
         data["_run_dir"] = str(run_dir.name)
         runs.append(data)
