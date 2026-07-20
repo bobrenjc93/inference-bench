@@ -40,7 +40,8 @@ class TorchInfernoProvider(Provider):
         super().clone()
 
     def _create_venv(self) -> None:
-        import subprocess, sys
+        import subprocess
+        import sys
         if not self.venv_dir.exists():
             self._log(f"[{self.name}] Creating virtualenv at {self.venv_dir}")
             subprocess.run(
@@ -52,13 +53,17 @@ class TorchInfernoProvider(Provider):
         self._create_venv()
         self._pip_install("--upgrade", "pip")
         explicit_extras = os.environ.get("INFERENCE_BENCH_TORCHINFERNO_EXTRAS")
+        h100_extras = "h100" in str(getattr(self, "hardware", "")).lower()
         default_flashinfer = (
             explicit_extras is None
             and _env_flag("INFERENCE_BENCH_TORCHINFERNO_FLASHINFER", True)
         )
-        extras = explicit_extras if explicit_extras is not None else (
-            "serve,flashinfer" if default_flashinfer else "serve"
-        )
+        default_extras = ["serve"]
+        if default_flashinfer:
+            default_extras.append("flashinfer")
+        if h100_extras:
+            default_extras.append("h100")
+        extras = explicit_extras if explicit_extras is not None else ",".join(default_extras)
         try:
             self._pip_install("-e", _editable_install_spec(extras), cwd=self.repo_dir)
         except subprocess.CalledProcessError:
@@ -66,9 +71,10 @@ class TorchInfernoProvider(Provider):
                 raise
             self._log(
                 "[torchinferno] FlashInfer extra install failed; "
-                "retrying with the plain serve extra"
+                "retrying without FlashInfer"
             )
-            self._pip_install("-e", ".[serve]", cwd=self.repo_dir)
+            fallback_extras = "serve,h100" if h100_extras else "serve"
+            self._pip_install("-e", _editable_install_spec(fallback_extras), cwd=self.repo_dir)
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
         server_model = self._server_model(model)

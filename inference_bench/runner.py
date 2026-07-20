@@ -98,6 +98,7 @@ def run_all(
 
         provider = get_provider(provider_name, build_dir=config.build_dir)
         provider.verbose = verbose
+        provider.hardware = config.hardware
         pr = ProviderResults(provider=provider_name)
         requested_port = config.server_port + provider_index
         provider_port = _next_provider_port(requested_port, used_ports)

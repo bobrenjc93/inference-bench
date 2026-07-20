@@ -115,6 +115,50 @@ class TorchInfernoProviderTest(unittest.TestCase):
             ]
         )
 
+    def test_build_installs_h100_runtime_extra_for_h100_hardware(self) -> None:
+        provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
+        provider.hardware = "8xH100"
+
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(provider, "_create_venv"),
+            mock.patch.object(provider, "_pip_install") as pip_install,
+        ):
+            provider.build()
+
+        pip_install.assert_has_calls(
+            [
+                mock.call("--upgrade", "pip"),
+                mock.call("-e", ".[serve,flashinfer,h100]", cwd=provider.repo_dir),
+            ]
+        )
+
+    def test_h100_build_fallback_keeps_required_runtime_extra(self) -> None:
+        provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
+        provider.hardware = "8xH100"
+        calls: list[tuple[tuple[str, ...], object]] = []
+
+        def fake_pip_install(*args: str, cwd=None) -> None:  # noqa: ANN001
+            calls.append((args, cwd))
+            if args == ("-e", ".[serve,flashinfer,h100]"):
+                raise subprocess.CalledProcessError(1, "pip")
+
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(provider, "_create_venv"),
+            mock.patch.object(provider, "_pip_install", side_effect=fake_pip_install),
+        ):
+            provider.build()
+
+        self.assertEqual(
+            calls,
+            [
+                (("--upgrade", "pip"), None),
+                (("-e", ".[serve,flashinfer,h100]"), provider.repo_dir),
+                (("-e", ".[serve,h100]"), provider.repo_dir),
+            ],
+        )
+
     def test_build_falls_back_to_serve_when_default_flashinfer_extra_fails(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
         calls: list[tuple[tuple[str, ...], object]] = []

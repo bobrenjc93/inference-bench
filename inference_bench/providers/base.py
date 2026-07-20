@@ -51,6 +51,7 @@ class Provider(ABC):
         self.repo_dir = self.build_dir / self.name
         self.venv_dir = self.repo_dir / "venv"
         self.verbose: bool = False
+        self.hardware: str = ""
         self._server_process: subprocess.Popen | None = None
 
     def _log(self, msg: str) -> None:
@@ -92,7 +93,22 @@ class Provider(ABC):
             capture_output=True,
             text=True,
         )
-        return result.stdout.strip() if result.returncode == 0 else ""
+        if result.returncode != 0:
+            return ""
+        commit = result.stdout.strip()
+        if not commit:
+            return ""
+        status = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=all"],
+            cwd=self.repo_dir,
+            capture_output=True,
+            text=True,
+        )
+        if status.returncode == 0 and status.stdout.strip():
+            return f"{commit}-dirty"
+        if status.returncode != 0:
+            return f"{commit}-status-unknown"
+        return commit
 
     def clone(self) -> None:
         if (self.repo_dir / ".git").exists():
