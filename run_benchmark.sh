@@ -4,7 +4,7 @@ trap '' PIPE
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOURS=2
-TIMEOUT=7200
+TIMEOUT=21600
 mkdir -p "$PROJECT_DIR/logs"
 LOGFILE="$PROJECT_DIR/logs/benchmark_$(date +%Y%m%d_%H%M%S).log"
 
