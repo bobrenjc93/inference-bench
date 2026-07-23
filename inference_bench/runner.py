@@ -106,20 +106,23 @@ def run_all(
         if provider_port != requested_port:
             print(f"[{provider_name}] Port {requested_port} unavailable; using {provider_port}")
 
-        if skip_build:
-            pr.build_time_s = build_times.get(provider_name, 0.0)
-        else:
-            provider.clone()
-            build_start = time.time()
-            provider.build()
-            pr.build_time_s = time.time() - build_start
-            print(f"[{provider_name}] Build completed in {pr.build_time_s:.1f}s")
-
-        pr.commit_hash = provider.get_commit_hash()
-        if pr.commit_hash:
-            print(f"[{provider_name}] Commit: {pr.commit_hash[:12]}")
-
+        # Build/clone/commit-hash run inside the try so a single provider's
+        # build failure is recorded and skipped instead of propagating out of
+        # run_all and discarding results from providers that already completed.
         try:
+            if skip_build:
+                pr.build_time_s = build_times.get(provider_name, 0.0)
+            else:
+                provider.clone()
+                build_start = time.time()
+                provider.build()
+                pr.build_time_s = time.time() - build_start
+                print(f"[{provider_name}] Build completed in {pr.build_time_s:.1f}s")
+
+            pr.commit_hash = provider.get_commit_hash()
+            if pr.commit_hash:
+                print(f"[{provider_name}] Commit: {pr.commit_hash[:12]}")
+
             provider.wait_for_gpu_isolation(config.tensor_parallel_size)
             provider.start_server(
                 model=config.model,
@@ -183,5 +186,12 @@ def run_all(
             time.sleep(5)
 
         results.providers[provider_name] = pr
+        # Persist after each provider so a later provider's failure can't
+        # discard results that already completed. save() is idempotent for a
+        # run: it rewrites the same timestamped run directory each call.
+        try:
+            results.save(config.results_dir)
+        except Exception as exc:
+            print(f"Warning: incremental results save failed: {exc}")
 
     return results
