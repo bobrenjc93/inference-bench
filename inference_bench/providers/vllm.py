@@ -86,6 +86,7 @@ class VllmProvider(Provider):
             self._configure_source_build_env()
         try:
             self._pip_install("-e", ".", cwd=self.repo_dir)
+            self._verify_precompiled_flash_attn_or_rebuild(precompiled_explicit)
         except subprocess.CalledProcessError:
             if _env_flag("VLLM_USE_PRECOMPILED", True):
                 if (
@@ -106,6 +107,39 @@ class VllmProvider(Provider):
                 return
             self._pip_install_source_with_retry()
         self._install_deepseek_v4_disaggregated_dependencies()
+
+    def _verify_precompiled_flash_attn_or_rebuild(self, precompiled_explicit: bool) -> None:
+        """Rebuild from source if a precompiled install lacks working flash-attn.
+
+        A precompiled wheel can `pip install` cleanly yet ship flash-attn CUDA
+        extensions (_vllm_fa2_C/_vllm_fa3_C) that don't match the runtime CUDA
+        (e.g. a cu12x wheel on a CUDA-13 image), so vllm.vllm_flash_attn only
+        ImportErrors at server start -- after build() has "succeeded". Detect
+        that here and fall back to the source build, which compiles matching
+        extensions. Skipped when precompiled was explicitly requested or the
+        source-build fallback is disabled.
+        """
+        if not _env_flag("VLLM_USE_PRECOMPILED", True):
+            return
+        if precompiled_explicit or not _env_flag(
+            "INFERENCE_BENCH_VLLM_FALLBACK_SOURCE_BUILD", True
+        ):
+            return
+        check = subprocess.run(
+            [self.venv_python, "-c", "import vllm.vllm_flash_attn"],
+            capture_output=True,
+            text=True,
+        )
+        if check.returncode == 0:
+            return
+        self._log(
+            "[vllm] precompiled install lacks working flash-attn extensions "
+            "(_vllm_fa2_C/_vllm_fa3_C); rebuilding from source with "
+            "VLLM_USE_PRECOMPILED=0"
+        )
+        os.environ["VLLM_USE_PRECOMPILED"] = "0"
+        self._configure_source_build_env()
+        self._pip_install_source_with_retry()
 
     def _configured_for_deepseek_v4(self) -> bool:
         model = str(getattr(self, "_configured_model", "") or "")
