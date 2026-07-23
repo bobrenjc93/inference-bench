@@ -11,10 +11,7 @@ LOGFILE="$PROJECT_DIR/logs/benchmark_$(date +%Y%m%d_%H%M%S).log"
 echo "Logging to $LOGFILE"
 
 {
-echo "=== $(date) Upgrading gpu-dev ==="
-HTTPS_PROXY=http://fwdproxy:8080 \
-  "$(dirname "$(command -v gpu-dev)")"/pip3 install \
-  --quiet --upgrade gpu-dev 2>&1 || true
+echo "=== $(date) gpu-dev provided by the osdc fork built in the cron wrapper ==="
 
 echo "=== $(date) Cleaning builds/ ==="
 rm -rf "$PROJECT_DIR/builds"
