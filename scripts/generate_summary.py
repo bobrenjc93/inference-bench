@@ -125,7 +125,16 @@ def generate(results_json: str | Path) -> str:
     summary_dir = results_json.resolve().parent
 
     model = data["model"]
+    model_revision = data.get("model_revision")
     tp = data["tensor_parallel_size"]
+    deployment_mode = data.get("deployment_mode", "standard")
+    prefill_tp = data.get("prefill_tensor_parallel_size")
+    decode_tp = data.get("decode_tensor_parallel_size")
+    gpu_count = data.get("gpu_count", tp)
+    metric_schema_version = data.get("metric_schema_version", 1)
+    output_token_count_method = data.get(
+        "output_token_count_method", "sse_content_chunks"
+    )
     hardware = data.get("hardware", "")
     timestamp = data.get("timestamp", "")
     providers_data = data["providers"]
@@ -138,12 +147,66 @@ def generate(results_json: str | Path) -> str:
                 benchmark_names.append(bn)
 
     lines: list[str] = []
-    lines.append(f"# Benchmark Summary")
+    lines.append("# Benchmark Summary")
     lines.append("")
     lines.append(f"- **Model:** {model}")
-    lines.append(f"- **TP:** {tp}")
+    if model_revision:
+        lines.append(f"- **Model revision:** `{model_revision}`")
+    harness = data.get("harness_provenance", {})
+    if isinstance(harness, dict) and harness.get("check") == "passed":
+        lines.append(f"- **Harness commit:** `{harness.get('commit', '')}`")
+    if deployment_mode == "disaggregated_prefill_decode":
+        lines.append("- **Deployment:** disaggregated prefill/decode")
+        lines.append(f"- **Prefill TP:** {prefill_tp}")
+        lines.append(f"- **Decode TP:** {decode_tp}")
+        lines.append(f"- **Total GPUs:** {gpu_count}")
+    else:
+        lines.append(f"- **TP:** {tp}")
     if hardware:
         lines.append(f"- **Hardware:** {hardware}")
+    lines.append(f"- **Metric schema:** v{metric_schema_version}")
+    lines.append(f"- **Output token count:** {output_token_count_method}")
+    minimum_correctness = data.get("minimum_correctness_rate")
+    if isinstance(minimum_correctness, (int, float)):
+        lines.append(f"- **Minimum correctness:** {minimum_correctness:.0%}")
+    output_tolerance = data.get("output_token_ratio_tolerance")
+    if isinstance(output_tolerance, (int, float)):
+        lines.append(f"- **Output token tolerance:** +/-{output_tolerance:.0%}")
+    coverage = []
+    gpu_products = []
+    for provider_name, provider_data in providers_data.items():
+        observation = provider_data.get("deployment_observation", {})
+        if observation.get("gpu_coverage_check") == "passed":
+            coverage.append(
+                f"{provider_name}={observation.get('observed_gpu_count')}/"
+                f"{observation.get('expected_gpu_count')}"
+            )
+            names = observation.get("observed_gpu_names", [])
+            if isinstance(names, list):
+                unique_names = sorted(
+                    {str(name) for name in names if isinstance(name, str) and name}
+                )
+                if unique_names:
+                    gpu_products.append(
+                        f"{provider_name}={', '.join(unique_names)}"
+                    )
+    if coverage:
+        lines.append(f"- **Observed GPU coverage:** {', '.join(coverage)}")
+    if gpu_products:
+        lines.append(f"- **Observed GPU products:** {'; '.join(gpu_products)}")
+    source_provenance = []
+    for provider_name, provider_data in providers_data.items():
+        observation = provider_data.get("deployment_observation", {})
+        if observation.get("source_provenance_check") != "passed":
+            continue
+        commit = str(observation.get("source_commit", ""))
+        detail = f"{provider_name}=`{commit}`"
+        if observation.get("source_dirty"):
+            patch_sha = str(observation.get("source_tracked_diff_sha256", ""))
+            detail += f" + build patch `{patch_sha}`"
+        source_provenance.append(detail)
+    if source_provenance:
+        lines.append(f"- **Provider source:** {'; '.join(source_provenance)}")
     if timestamp:
         try:
             dt = datetime.fromisoformat(timestamp)
@@ -157,12 +220,24 @@ def generate(results_json: str | Path) -> str:
     lines.append("")
 
     integrity_warnings: list[str] = []
+    non_comparable: set[str] = set()
     for pn in provider_names:
         provider_warnings = warnings_for_saved_provider(
             pn,
             providers_data[pn],
             run_dir=summary_dir,
         )
+        saved_warnings = providers_data[pn].get("integrity_warnings", [])
+        if isinstance(saved_warnings, list):
+            provider_warnings = list(
+                dict.fromkeys(
+                    [*provider_warnings, *(str(item) for item in saved_warnings)]
+                )
+            )
+        if provider_warnings or providers_data[pn].get("comparable") is False:
+            non_comparable.add(pn)
+        if providers_data[pn].get("comparable") is False and not provider_warnings:
+            provider_warnings = ["Provider was marked non-comparable by the runner."]
         for warning in provider_warnings:
             integrity_warnings.append(f"**{pn}:** {warning}")
     if integrity_warnings:
@@ -182,6 +257,8 @@ def generate(results_json: str | Path) -> str:
         for mk in SCORABLE_METRICS:
             values = {}
             for pn in provider_names:
+                if pn in non_comparable:
+                    continue
                 metrics = providers_data[pn].get("benchmarks", {}).get(bn, {}).get("metrics", {})
                 if mk in metrics:
                     values[pn] = metrics[mk]
@@ -193,9 +270,17 @@ def generate(results_json: str | Path) -> str:
     rows = []
     for bn in benchmark_names:
         row = [bn]
-        best_count = max(wins_by_bench[bn].values())
-        num_with_best = sum(1 for v in wins_by_bench[bn].values() if v == best_count)
+        comparable_wins = {
+            provider: wins
+            for provider, wins in wins_by_bench[bn].items()
+            if provider not in non_comparable
+        }
+        best_count = max(comparable_wins.values(), default=0)
+        num_with_best = sum(1 for v in comparable_wins.values() if v == best_count)
         for pn in provider_names:
+            if pn in non_comparable:
+                row.append("N/C")
+                continue
             w = wins_by_bench[bn][pn]
             total_wins[pn] += w
             cell = f"{w}/{len(SCORABLE_METRICS)}"
@@ -204,10 +289,18 @@ def generate(results_json: str | Path) -> str:
             row.append(cell)
         rows.append(row)
 
-    best_total = max(total_wins.values())
-    num_with_best_total = sum(1 for v in total_wins.values() if v == best_total)
+    comparable_totals = {
+        provider: wins
+        for provider, wins in total_wins.items()
+        if provider not in non_comparable
+    }
+    best_total = max(comparable_totals.values(), default=0)
+    num_with_best_total = sum(1 for v in comparable_totals.values() if v == best_total)
     total_row = ["**Total**"]
     for pn in provider_names:
+        if pn in non_comparable:
+            total_row.append("N/C")
+            continue
         t = total_wins[pn]
         cell = f"{t}/{len(SCORABLE_METRICS) * len(benchmark_names)}"
         if t == best_total and num_with_best_total == 1:
@@ -220,6 +313,10 @@ def generate(results_json: str | Path) -> str:
     lines.append(f"Each cell = metric wins out of {len(SCORABLE_METRICS)} "
                  f"(TTFT, TPOT, E2E, throughput). "
                  f"**Bold** = best in row.")
+    if non_comparable:
+        lines.append(
+            "N/C = excluded from scoring because integrity validation did not pass."
+        )
     lines.append("")
 
     # -- Build times --
@@ -276,7 +373,16 @@ def generate(results_json: str | Path) -> str:
             if not values:
                 continue
 
-            winner = _pick_winner(mk, values) if mk in SCORABLE_METRICS else None
+            comparable_values = {
+                provider: value
+                for provider, value in values.items()
+                if provider not in non_comparable
+            }
+            winner = (
+                _pick_winner(mk, comparable_values)
+                if mk in SCORABLE_METRICS
+                else None
+            )
             row = [METRIC_LABELS.get(mk, mk)]
             for pn in provider_names:
                 if pn in values:
@@ -320,7 +426,16 @@ def generate(results_json: str | Path) -> str:
                     vals.append(metrics[mk])
             if vals:
                 averages[pn] = sum(vals) / len(vals)
-        winner = _pick_winner(mk, averages) if mk in SCORABLE_METRICS and len(averages) >= 2 else None
+        comparable_averages = {
+            provider: value
+            for provider, value in averages.items()
+            if provider not in non_comparable
+        }
+        winner = (
+            _pick_winner(mk, comparable_averages)
+            if mk in SCORABLE_METRICS and len(comparable_averages) >= 2
+            else None
+        )
         for pn in provider_names:
             if pn in averages:
                 cell = _fmt(mk, averages[pn])

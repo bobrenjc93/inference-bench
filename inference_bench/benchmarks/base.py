@@ -8,6 +8,7 @@ import time
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
+from functools import lru_cache
 from urllib.parse import urljoin
 
 import httpx
@@ -34,10 +35,12 @@ class RequestMetrics:
     tpot_ms: float = 0.0
     e2e_latency_ms: float = 0.0
     output_tokens: int = 0
+    stream_content_chunks: int = 0
     throughput_tps: float = 0.0
     correct: bool | None = None
     response_text: str | None = None
     metadata: dict[str, int | float | str | bool] = field(default_factory=dict)
+    completion_text: str = field(default="", repr=False)
 
 
 @dataclass
@@ -46,9 +49,31 @@ class BenchmarkResult:
     metrics: dict[str, float] = field(default_factory=dict)
     raw_requests: list[RequestMetrics] = field(default_factory=list)
 
-    def summarize(self) -> dict[str, float]:
+    def summarize(
+        self,
+        *,
+        model: str | None = None,
+        model_revision: str | None = None,
+    ) -> dict[str, float]:
         if not self.raw_requests:
             return self.metrics
+        if model:
+            tokenizer = _tokenizer_for_model(model, model_revision)
+            for request in self.raw_requests:
+                request.output_tokens = len(
+                    tokenizer.encode(request.completion_text, add_special_tokens=False)
+                )
+                if request.output_tokens > 1 and request.ttft_ms > 0:
+                    decode_time_ms = request.e2e_latency_ms - request.ttft_ms
+                    request.tpot_ms = decode_time_ms / (request.output_tokens - 1)
+                else:
+                    request.tpot_ms = 0.0
+                if request.e2e_latency_ms > 0 and request.output_tokens > 0:
+                    request.throughput_tps = request.output_tokens / (
+                        request.e2e_latency_ms / 1000
+                    )
+                else:
+                    request.throughput_tps = 0.0
         ttfts = [r.ttft_ms for r in self.raw_requests if r.ttft_ms > 0]
         tpots = [r.tpot_ms for r in self.raw_requests if r.tpot_ms > 0]
         e2es = [r.e2e_latency_ms for r in self.raw_requests]
@@ -80,6 +105,9 @@ class BenchmarkResult:
             "e2e_p99_ms": _p99(e2es),
             "throughput_median_tps": _median(tps_list),
             "total_output_tokens": total_tokens,
+            "total_stream_content_chunks": sum(
+                request.stream_content_chunks for request in self.raw_requests
+            ),
             "num_requests": len(self.raw_requests),
         }
 
@@ -95,6 +123,9 @@ class Benchmark(ABC):
     description: str
     debug: bool = False
     verbose: bool = False
+    authoritative_output_token_count: bool = False
+    authoritative_tokenizer_path: str | None = None
+    model_revision: str | None = None
 
     @abstractmethod
     def run(self, api_base: str, model: str) -> BenchmarkResult:
@@ -126,6 +157,16 @@ class Benchmark(ABC):
             self._open_clients = open_clients
         open_clients.append(client)
         return client
+
+    def _summary_tokenizer_kwargs(self, model: str) -> dict[str, str | None]:
+        if not self.authoritative_output_token_count:
+            return {"model": None, "model_revision": None}
+        if self.authoritative_tokenizer_path:
+            return {
+                "model": self.authoritative_tokenizer_path,
+                "model_revision": None,
+            }
+        return {"model": model, "model_revision": self.model_revision}
 
     def _make_thread_local_client_factory(self, api_base: str) -> Callable[[], openai.OpenAI]:
         local = threading.local()
@@ -220,6 +261,7 @@ class Benchmark(ABC):
         end = done_seen_s if done_seen_s is not None else time.perf_counter()
         metrics.e2e_latency_ms = (end - start) * 1000
         metrics.output_tokens = len(chunks)
+        metrics.stream_content_chunks = len(chunks)
 
         if metrics.output_tokens > 1 and metrics.ttft_ms > 0:
             decode_time_ms = metrics.e2e_latency_ms - metrics.ttft_ms
@@ -229,10 +271,22 @@ class Benchmark(ABC):
             metrics.throughput_tps = metrics.output_tokens / (metrics.e2e_latency_ms / 1000)
 
         full_text = "".join(chunks)
+        metrics.completion_text = full_text
         if self.debug:
             metrics.response_text = full_text
 
         return full_text, metrics
+
+
+@lru_cache(maxsize=8)
+def _tokenizer_for_model(model: str, revision: str | None):
+    from transformers import AutoTokenizer, PreTrainedTokenizerFast
+
+    kwargs = {"revision": revision, "trust_remote_code": True}
+    try:
+        return AutoTokenizer.from_pretrained(model, **kwargs)
+    except (AttributeError, KeyError, ValueError):
+        return PreTrainedTokenizerFast.from_pretrained(model, **kwargs)
 
 
 def _openai_http_client(client: openai.OpenAI) -> httpx.Client:

@@ -135,6 +135,6 @@ class TreeOfThoughtBenchmark(Benchmark):
             f"  [{self.name}] Done: {len(result.raw_requests)} total requests, "
             f"{correct} correct"
         )
-        result.summarize()
+        result.summarize(**self._summary_tokenizer_kwargs(model))
         self._close_open_clients()
         return result

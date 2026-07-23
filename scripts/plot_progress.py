@@ -70,6 +70,20 @@ def load_all_runs(model_dir: Path) -> list[dict]:
             continue
         data["_run_dir"] = str(run_dir.name)
         runs.append(data)
+    if runs:
+        latest_schema = (
+            runs[-1].get("metric_schema_version", 1),
+            runs[-1].get("output_token_count_method", "sse_content_chunks"),
+        )
+        runs = [
+            run
+            for run in runs
+            if (
+                run.get("metric_schema_version", 1),
+                run.get("output_token_count_method", "sse_content_chunks"),
+            )
+            == latest_schema
+        ]
     return runs
 
 
@@ -89,6 +103,8 @@ def plot_metric_over_time(
     for run in runs:
         ts = parse_run_time(run)
         for pname, pdata in run["providers"].items():
+            if not pdata.get("comparable", True):
+                continue
             if benchmark not in pdata["benchmarks"]:
                 continue
             metrics = pdata["benchmarks"][benchmark].get("metrics", {})
@@ -192,6 +208,8 @@ def plot_cross_benchmark_averages(
         for run in runs:
             ts = parse_run_time(run)
             for pname, pdata in run["providers"].items():
+                if not pdata.get("comparable", True):
+                    continue
                 vals = []
                 for bdata in pdata["benchmarks"].values():
                     metrics = bdata.get("metrics", {})

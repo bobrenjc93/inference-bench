@@ -1,0 +1,27 @@
+# Evaluation v3: the v2 workload suite on disaggregated prefill/decode serving.
+model: meta-llama/Meta-Llama-3.1-70B-Instruct
+model_revision: 1605565b47bb9346c5515c34102e054115b4f98b
+tensor_parallel_size: 4
+deployment_mode: disaggregated_prefill_decode
+prefill_tensor_parallel_size: 4
+decode_tensor_parallel_size: 4
+hardware: 8xH100
+providers:
+  - torchinferno
+  - vllm
+  - sglang
+benchmarks:
+  - few_shot
+  - self_consistency
+  - multi_turn
+  - tree_of_thought
+  - long_output
+build_dir: ./builds/v3
+results_dir: ./results/v2
+server_port: 8001
+server_startup_timeout: 3600
+minimum_correctness_rate: 0.95
+require_request_count_parity: true
+output_token_ratio_tolerance: 0.10
+retain_response_text: true
+authoritative_output_token_count: true

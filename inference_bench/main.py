@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 from .config import Config
@@ -21,6 +20,12 @@ def parse_args() -> argparse.Namespace:
         help="Model name/path (e.g. meta-llama/Meta-Llama-3.1-70B-Instruct)",
     )
     p.add_argument(
+        "--model-revision",
+        type=str,
+        default=None,
+        help="Pinned 40-character Hugging Face revision for scored disaggregated runs",
+    )
+    p.add_argument(
         "--providers", nargs="+", default=None,
         help="Providers to benchmark (e.g. vllm sglang)",
     )
@@ -30,7 +35,19 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--tp", type=int, default=None,
-        help="Tensor parallel size (default: 8)",
+        help="Tensor parallel size per server role (default: 8)",
+    )
+    p.add_argument(
+        "--deployment-mode", type=str, default=None,
+        help="Deployment mode: standard or disaggregated_prefill_decode",
+    )
+    p.add_argument(
+        "--prefill-tp", type=int, default=None,
+        help="Prefill tensor parallel size for disaggregated deployment",
+    )
+    p.add_argument(
+        "--decode-tp", type=int, default=None,
+        help="Decode tensor parallel size for disaggregated deployment",
     )
     p.add_argument(
         "--port", type=int, default=None,
@@ -58,7 +75,10 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--build-times", type=str, default=None,
-        help="Comma-separated provider:seconds pairs for pre-recorded build times (e.g. vllm:868,sglang:221)",
+        help=(
+            "Comma-separated provider:seconds pairs for pre-recorded build times "
+            "(e.g. vllm:868,sglang:221)"
+        ),
     )
     p.add_argument(
         "--debug", action="store_true",
@@ -76,9 +96,13 @@ def main() -> None:
     config = Config.load(args.config)
     config.apply_overrides(
         model=args.model,
+        model_revision=args.model_revision,
         providers=args.providers,
         benchmarks=args.benchmarks,
         tp=args.tp,
+        deployment_mode=args.deployment_mode,
+        prefill_tp=args.prefill_tp,
+        decode_tp=args.decode_tp,
         hardware=args.hardware,
         build_dir=args.build_dir,
         results_dir=args.results_dir,
@@ -89,7 +113,8 @@ def main() -> None:
     print(
         f"inference-bench: {config.model} | "
         f"{', '.join(config.providers)} | "
-        f"{config.hardware or 'no-hw'}"
+        f"{config.hardware or 'no-hw'} | "
+        f"{config.deployment_mode} ({config.gpu_count} GPUs)"
     )
 
     build_times = {}
@@ -98,7 +123,13 @@ def main() -> None:
             name, secs = pair.split(":")
             build_times[name.strip()] = float(secs.strip())
 
-    results = run_all(config, skip_build=args.skip_build, build_times=build_times, debug=args.debug, verbose=args.verbose)
+    results = run_all(
+        config,
+        skip_build=args.skip_build,
+        build_times=build_times,
+        debug=args.debug,
+        verbose=args.verbose,
+    )
     results.print_comparison()
     json_path = results.save(config.results_dir)
     results.save_csv(config.results_dir)

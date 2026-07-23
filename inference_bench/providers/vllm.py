@@ -11,22 +11,51 @@ from pathlib import Path
 from urllib.parse import urljoin
 from urllib.request import urlopen
 
+import httpx
+
 from . import register
-from .base import Provider, _env_flag, _env_float, _visible_gpu_tokens
+from .base import (
+    Provider,
+    _env_flag,
+    _env_float,
+    _has_cli_option,
+    _verify_mooncake_rdma_logs,
+    _visible_gpu_tokens,
+)
 
 _DEFAULT_FLASHINFER_WORKSPACE_BUFFER_SIZE = 394 * 1024 * 1024
 _DEFAULT_COMPILATION_CONFIG = json.dumps(
     {"pass_config": {"fuse_allreduce_rms": False}},
     separators=(",", ":"),
 )
+_MOONCAKE_TRANSFER_ENGINE_VERSION = "0.3.11.post1"
 
 
 @register("vllm")
 class VllmProvider(Provider):
     name = "vllm"
     repo_url = "https://github.com/vllm-project/vllm.git"
+    runtime_import_names = ("vllm",)
 
     def build(self) -> None:
+        if self.is_disaggregated_prefill_decode:
+            prohibited_precompiled_overrides = (
+                "VLLM_PRECOMPILED_WHEEL_COMMIT",
+                "VLLM_PRECOMPILED_WHEEL_LOCATION",
+                "INFERENCE_BENCH_VLLM_PRECOMPILED_WHEEL_COMMIT",
+                "INFERENCE_BENCH_VLLM_FALLBACK_PRECOMPILED_WHEEL_LOCATION",
+            )
+            configured = [
+                name
+                for name in prohibited_precompiled_overrides
+                if os.environ.get(name, "").strip()
+            ]
+            if configured:
+                raise ValueError(
+                    "Precompiled vLLM commit/location overrides are prohibited "
+                    "in a scored disaggregated build: "
+                    + ", ".join(configured)
+                )
         self._create_venv()
         self._pip_install("--upgrade", "pip")
         self._disable_fastapi_metrics_middleware()
@@ -67,13 +96,31 @@ class VllmProvider(Provider):
                 if self._try_precompiled_nightly_retry(
                     precompiled_commit_explicit=precompiled_commit_explicit
                 ):
+                    self._install_deepseek_v4_disaggregated_dependencies()
                     return
                 self._log("[vllm] Precompiled wheel install failed; retrying with VLLM_USE_PRECOMPILED=0")
                 os.environ["VLLM_USE_PRECOMPILED"] = "0"
                 self._configure_source_build_env()
                 self._pip_install_source_with_retry()
+                self._install_deepseek_v4_disaggregated_dependencies()
                 return
             self._pip_install_source_with_retry()
+        self._install_deepseek_v4_disaggregated_dependencies()
+
+    def _configured_for_deepseek_v4(self) -> bool:
+        model = str(getattr(self, "_configured_model", "") or "")
+        return "deepseek-v4" in model.lower().replace("_", "-")
+
+    def _install_deepseek_v4_disaggregated_dependencies(self) -> None:
+        if not (
+            self.is_disaggregated_prefill_decode
+            and self._configured_for_deepseek_v4()
+        ):
+            return
+        package = "mooncake-transfer-engine"
+        if self._detect_precompiled_wheel_variant() == "cu130":
+            package = "mooncake-transfer-engine-cuda13"
+        self._pip_install(f"{package}=={_MOONCAKE_TRANSFER_ENGINE_VERSION}")
 
     def _pip_install_source_with_retry(self) -> None:
         self._configure_source_build_env()
@@ -187,7 +234,12 @@ class VllmProvider(Provider):
             return "cu" + main_cuda.replace(".", "")[:3]
         try:
             result = subprocess.run(
-                ["nvidia-smi"],
+                ["/usr/bin/nvidia-smi"],
+                env=(
+                    self._trusted_system_probe_env()
+                    if self.is_disaggregated_prefill_decode
+                    else None
+                ),
                 capture_output=True,
                 text=True,
                 check=False,
@@ -252,10 +304,15 @@ class VllmProvider(Provider):
         try:
             result = subprocess.run(
                 [
-                    "nvidia-smi",
+                    "/usr/bin/nvidia-smi",
                     "--query-gpu=index,uuid,compute_cap",
                     "--format=csv,noheader,nounits",
                 ],
+                env=(
+                    self._trusted_system_probe_env()
+                    if self.is_disaggregated_prefill_decode
+                    else None
+                ),
                 capture_output=True,
                 text=True,
                 check=False,
@@ -362,6 +419,19 @@ except ImportError:
                 break
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
+        if self.is_disaggregated_prefill_decode:
+            return self._disaggregated_server_cmd(model, port)
+        return self._server_instance_cmd(model, tp=tp, port=port)
+
+    def _server_instance_cmd(
+        self,
+        model: str,
+        *,
+        tp: int,
+        port: int,
+        kv_transfer_config: dict | None = None,
+        gpu_memory_utilization: str | None = None,
+    ) -> list[str]:
         server_model = self._server_model(model)
         cmd = [
             self.server_python, "-m", "vllm.entrypoints.openai.api_server",
@@ -370,22 +440,381 @@ except ImportError:
             "--port", str(port),
             "--trust-remote-code",
         ]
+        if server_model == model and self.model_revision:
+            cmd.extend(["--revision", self.model_revision])
         if server_model != model:
             cmd.extend(["--served-model-name", model])
-        gpu_memory_utilization = os.environ.get("INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION")
+        if gpu_memory_utilization is None:
+            gpu_memory_utilization = os.environ.get(
+                "INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION"
+            )
         if gpu_memory_utilization:
             cmd.extend(["--gpu-memory-utilization", gpu_memory_utilization])
         extra_args = os.environ.get("INFERENCE_BENCH_VLLM_SERVER_ARGS", "").strip()
         extra_cmd = shlex.split(extra_args) if extra_args else []
+        if kv_transfer_config is not None:
+            if extra_cmd:
+                raise ValueError(
+                    "INFERENCE_BENCH_VLLM_SERVER_ARGS is prohibited in the "
+                    "scored disaggregated evaluation"
+                )
+            cmd.extend(
+                [
+                    "--host",
+                    "127.0.0.1",
+                    "--kv-transfer-config",
+                    json.dumps(kv_transfer_config, separators=(",", ":")),
+                ]
+            )
         if self._should_disable_allreduce_rms_fusion(extra_cmd):
             cmd.extend(["--compilation-config", _DEFAULT_COMPILATION_CONFIG])
         cmd.extend(extra_cmd)
         return cmd
 
+    def _disaggregated_server_cmd(self, model: str, port: int) -> list[str]:
+        if self._configured_for_deepseek_v4():
+            return self._mooncake_disaggregated_server_cmd(model, port)
+        prefill_tp = int(self.prefill_tensor_parallel_size or 0)
+        decode_tp = int(self.decode_tensor_parallel_size or 0)
+        prefill_env, decode_env = self._disaggregated_gpu_envs()
+        prefill_env["VLLM_HOST_IP"] = "127.0.0.1"
+        decode_env["VLLM_HOST_IP"] = "127.0.0.1"
+        (
+            prefill_port,
+            decode_port,
+            registration_port,
+        ) = self._reserve_local_ports(3, excluded={port})
+        kv_port_base = self._reserve_local_port_block(
+            prefill_tp + decode_tp,
+            excluded={port, prefill_port, decode_port, registration_port},
+        )
+        prefill_kv_port = kv_port_base
+        decode_kv_port = kv_port_base + prefill_tp
+
+        def transfer_config(*, role: str, http_port: int, kv_port: int) -> dict:
+            return {
+                "kv_connector": "P2pNcclConnector",
+                "kv_role": role,
+                "kv_buffer_size": "1e1" if role == "kv_producer" else "8e9",
+                "kv_port": kv_port,
+                "kv_connector_extra_config": {
+                    "proxy_ip": "127.0.0.1",
+                    "proxy_port": registration_port,
+                    "http_ip": "127.0.0.1",
+                    "http_port": http_port,
+                    "send_type": "PUT_ASYNC",
+                    "nccl_num_channels": "16",
+                },
+            }
+
+        common_memory = os.environ.get("INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION")
+        prefill_memory = (
+            os.environ.get("INFERENCE_BENCH_VLLM_PREFILL_GPU_MEMORY_UTILIZATION")
+            or common_memory
+            or "0.90"
+        )
+        decode_memory = (
+            os.environ.get("INFERENCE_BENCH_VLLM_DECODE_GPU_MEMORY_UTILIZATION")
+            or common_memory
+            or "0.70"
+        )
+        prefill_cmd = self._server_instance_cmd(
+            model,
+            tp=prefill_tp,
+            port=prefill_port,
+            kv_transfer_config=transfer_config(
+                role="kv_producer",
+                http_port=prefill_port,
+                kv_port=prefill_kv_port,
+            ),
+            gpu_memory_utilization=prefill_memory,
+        )
+        decode_cmd = self._server_instance_cmd(
+            model,
+            tp=decode_tp,
+            port=decode_port,
+            kv_transfer_config=transfer_config(
+                role="kv_consumer",
+                http_port=decode_port,
+                kv_port=decode_kv_port,
+            ),
+            gpu_memory_utilization=decode_memory,
+        )
+        proxy_script = Path(__file__).resolve().parents[1] / "vllm_disagg_proxy.py"
+        proxy_cmd = [
+            self.server_python,
+            str(proxy_script),
+            "--host",
+            "127.0.0.1",
+            "--port",
+            str(port),
+            "--registration-host",
+            "127.0.0.1",
+            "--registration-port",
+            str(registration_port),
+        ]
+        spec = {
+            "schema_version": 1,
+            "provider": self.name,
+            "deployment_mode": self.deployment_mode,
+            "prefill_tensor_parallel_size": prefill_tp,
+            "decode_tensor_parallel_size": decode_tp,
+            "transport": "P2pNcclConnector",
+            "phases": [
+                {
+                    "settle_seconds": 1.0,
+                    "components": [
+                        {
+                            "name": "proxy",
+                            "command": proxy_cmd,
+                            "log_path": str(self.build_dir / "vllm_disagg_proxy.log"),
+                        }
+                    ],
+                },
+                {
+                    "components": [
+                        {
+                            "name": "prefill",
+                            "command": prefill_cmd,
+                            "env": prefill_env,
+                            "cwd": str(self.repo_dir),
+                            "ready_url": f"http://127.0.0.1:{prefill_port}/v1/models",
+                            "log_path": str(self.build_dir / "vllm_disagg_prefill.log"),
+                        },
+                        {
+                            "name": "decode",
+                            "command": decode_cmd,
+                            "env": decode_env,
+                            "cwd": str(self.repo_dir),
+                            "ready_url": f"http://127.0.0.1:{decode_port}/v1/models",
+                            "log_path": str(self.build_dir / "vllm_disagg_decode.log"),
+                        },
+                    ]
+                },
+            ],
+        }
+        self._disagg_connector = "P2pNcclConnector"
+        return self._disaggregated_supervisor_cmd(spec)
+
+    def _mooncake_disaggregated_server_cmd(
+        self,
+        model: str,
+        port: int,
+    ) -> list[str]:
+        prefill_tp = int(self.prefill_tensor_parallel_size or 0)
+        decode_tp = int(self.decode_tensor_parallel_size or 0)
+        prefill_env, decode_env = self._disaggregated_gpu_envs()
+        prefill_port, decode_port, bootstrap_port = self._reserve_local_ports(
+            3,
+            excluded={port},
+        )
+        for role_env in (prefill_env, decode_env):
+            role_env.update(
+                {
+                    "MC_FORCE_HCA": "1",
+                    "MC_LOG_LEVEL": "INFO",
+                    "MC_RPC_PROTOCOL": "tcp",
+                    "MOONCAKE_DEVICE": "",
+                    "MOONCAKE_PROTOCOL": "rdma",
+                }
+            )
+        prefill_env["VLLM_MOONCAKE_BOOTSTRAP_PORT"] = str(bootstrap_port)
+        common_memory = os.environ.get("INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION")
+        prefill_memory = (
+            os.environ.get("INFERENCE_BENCH_VLLM_PREFILL_GPU_MEMORY_UTILIZATION")
+            or common_memory
+            or "0.90"
+        )
+        decode_memory = (
+            os.environ.get("INFERENCE_BENCH_VLLM_DECODE_GPU_MEMORY_UTILIZATION")
+            or common_memory
+            or "0.70"
+        )
+        prefill_cmd = self._server_instance_cmd(
+            model,
+            tp=prefill_tp,
+            port=prefill_port,
+            kv_transfer_config={
+                "kv_connector": "MooncakeConnector",
+                "kv_role": "kv_producer",
+                "kv_connector_extra_config": {"mooncake_protocol": "rdma"},
+            },
+            gpu_memory_utilization=prefill_memory,
+        )
+        decode_cmd = self._server_instance_cmd(
+            model,
+            tp=decode_tp,
+            port=decode_port,
+            kv_transfer_config={
+                "kv_connector": "MooncakeConnector",
+                "kv_role": "kv_consumer",
+                "kv_connector_extra_config": {"mooncake_protocol": "rdma"},
+            },
+            gpu_memory_utilization=decode_memory,
+        )
+        proxy_script = Path(__file__).resolve().parents[1] / "vllm_mooncake_proxy.py"
+        proxy_cmd = [
+            self.server_python,
+            str(proxy_script),
+            "--host",
+            "127.0.0.1",
+            "--port",
+            str(port),
+            "--prefill-url",
+            f"http://127.0.0.1:{prefill_port}",
+            "--decode-url",
+            f"http://127.0.0.1:{decode_port}",
+            "--bootstrap-port",
+            str(bootstrap_port),
+        ]
+        spec = {
+            "schema_version": 1,
+            "provider": self.name,
+            "deployment_mode": self.deployment_mode,
+            "prefill_tensor_parallel_size": prefill_tp,
+            "decode_tensor_parallel_size": decode_tp,
+            "transport": "MooncakeConnector",
+            "mooncake_protocol": "rdma",
+            "mooncake_data_plane_transport": "rdma",
+            "mooncake_transfer_engine_version": _MOONCAKE_TRANSFER_ENGINE_VERSION,
+            "phases": [
+                {
+                    "components": [
+                        {
+                            "name": "prefill",
+                            "command": prefill_cmd,
+                            "env": prefill_env,
+                            "cwd": str(self.repo_dir),
+                            "ready_url": f"http://127.0.0.1:{prefill_port}/health",
+                            "log_path": str(
+                                self.build_dir / "vllm_disagg_prefill.log"
+                            ),
+                        },
+                        {
+                            "name": "decode",
+                            "command": decode_cmd,
+                            "env": decode_env,
+                            "cwd": str(self.repo_dir),
+                            "ready_url": f"http://127.0.0.1:{decode_port}/health",
+                            "log_path": str(
+                                self.build_dir / "vllm_disagg_decode.log"
+                            ),
+                        },
+                    ]
+                },
+                {
+                    "components": [
+                        {
+                            "name": "proxy",
+                            "command": proxy_cmd,
+                            "log_path": str(
+                                self.build_dir / "vllm_disagg_proxy.log"
+                            ),
+                        }
+                    ]
+                },
+            ],
+        }
+        self._disagg_connector = "MooncakeConnector"
+        return self._disaggregated_supervisor_cmd(spec)
+
     def _should_disable_allreduce_rms_fusion(self, extra_cmd: list[str]) -> bool:
+        if self.is_disaggregated_prefill_decode:
+            return False
         if not _env_flag("INFERENCE_BENCH_VLLM_DISABLE_ALLREDUCE_RMS_FUSION", True):
             return False
-        return "--compilation-config" not in extra_cmd
+        return not _has_cli_option(extra_cmd, "--compilation-config")
+
+    def verify_runtime_integrity(self) -> dict[str, object]:
+        if not self.is_disaggregated_prefill_decode:
+            return {}
+        response = httpx.get(f"http://127.0.0.1:{self._port}/health", timeout=10)
+        response.raise_for_status()
+        audit = response.json()
+        count_names = (
+            "request_pairs",
+            "prefill_completed",
+            "decode_started",
+            "decode_completed",
+        )
+        counts = {name: int(audit.get(name, 0)) for name in count_names}
+        if counts["request_pairs"] <= 0 or len(set(counts.values())) != 1:
+            raise RuntimeError(
+                "[vllm] Disaggregated proxy did not observe matching completed "
+                f"prefill/decode request pairs: {counts}"
+            )
+        if int(audit.get("decode_aborted", 0)) or int(audit.get("upstream_errors", 0)):
+            raise RuntimeError(f"[vllm] Disaggregated proxy reported errors: {audit}")
+        connector = str(
+            getattr(self, "_disagg_connector", "P2pNcclConnector")
+        )
+        observation = {
+            "kv_handoff_check": "passed",
+            "routed_request_pairs": counts["request_pairs"],
+            "registered_prefill_instances": int(audit.get("prefill_instances", 0)),
+            "registered_decode_instances": int(audit.get("decode_instances", 0)),
+            "transport": connector,
+        }
+        if connector == "MooncakeConnector":
+            observation.update(self._verify_mooncake_transfer_log())
+        return observation
+
+    def _verify_mooncake_transfer_log(self) -> dict[str, object]:
+        log_paths = {
+            "prefill": self.build_dir / "vllm_disagg_prefill.log",
+            "decode": self.build_dir / "vllm_disagg_decode.log",
+        }
+        observation = _verify_mooncake_rdma_logs(log_paths, provider=self.name)
+        rows: list[dict[str, float]] = []
+        for log_path in log_paths.values():
+            text = log_path.read_text(encoding="utf-8", errors="replace")
+            for line in text.splitlines():
+                marker = "KV Transfer metrics:"
+                if marker not in line:
+                    continue
+                fields: dict[str, float] = {}
+                for item in line.split(marker, 1)[1].split(","):
+                    name, separator, raw_value = item.partition("=")
+                    if not separator:
+                        continue
+                    try:
+                        fields[name.strip()] = float(raw_value.strip())
+                    except ValueError:
+                        continue
+                if fields:
+                    rows.append(fields)
+        successful = int(
+            sum(row.get("Num successful transfers", 0.0) for row in rows)
+        )
+        failed_transfers = int(
+            sum(row.get("Num failed transfers", 0.0) for row in rows)
+        )
+        failed_recvs = int(sum(row.get("Num failed recvs", 0.0) for row in rows))
+        expired = int(sum(row.get("Num KV expired reqs", 0.0) for row in rows))
+        transferred_mb = sum(
+            row.get("Num successful transfers", 0.0)
+            * row.get("Avg MB per transfer", 0.0)
+            for row in rows
+        )
+        if successful <= 0 or transferred_mb <= 0:
+            raise RuntimeError(
+                "[vllm] Mooncake reported no successful positive-byte KV transfers"
+            )
+        if failed_transfers or failed_recvs or expired:
+            raise RuntimeError(
+                "[vllm] Mooncake reported transfer failures: "
+                f"failed_transfers={failed_transfers}, failed_recvs={failed_recvs}, "
+                f"expired={expired}"
+            )
+        observation.update({
+            "native_kv_transfer_check": "passed",
+            "native_successful_transfers": successful,
+            "native_transferred_mb_estimate": transferred_mb,
+            "native_failed_transfers": failed_transfers,
+            "native_failed_recvs": failed_recvs,
+            "native_expired_requests": expired,
+        })
+        return observation
 
     def _server_env(self) -> dict[str, str]:
         env = super()._server_env()

@@ -113,8 +113,14 @@ def plot_summary_bars(plot_dir: Path, data: dict) -> None:
     summary_dir = plot_dir / "summary"
     summary_dir.mkdir(parents=True, exist_ok=True)
 
-    providers = data["providers"]
+    providers = {
+        name: provider
+        for name, provider in data["providers"].items()
+        if provider.get("comparable", True)
+    }
     pnames = list(providers.keys())
+    if not pnames:
+        return
     benchmarks = []
     for pdata in providers.values():
         for bname in pdata["benchmarks"]:
@@ -160,8 +166,14 @@ def plot_build_times(plot_dir: Path, data: dict) -> None:
     summary_dir = plot_dir / "summary"
     summary_dir.mkdir(parents=True, exist_ok=True)
 
-    providers = data["providers"]
+    providers = {
+        name: provider
+        for name, provider in data["providers"].items()
+        if provider.get("comparable", True)
+    }
     pnames = list(providers.keys())
+    if not pnames:
+        return
     build_times = [providers[p]["build_time_s"] for p in pnames]
 
     fig, ax = plt.subplots(figsize=(6, 4))
@@ -189,7 +201,11 @@ def main(json_path: str) -> None:
 
     run_dir = path.parent
     plot_dir = run_dir / "plots"
-    providers = data["providers"]
+    providers = {
+        name: provider
+        for name, provider in data["providers"].items()
+        if provider.get("comparable", True)
+    }
 
     benchmarks = []
     for pdata in providers.values():

@@ -93,6 +93,6 @@ class LongOutputBenchmark(Benchmark):
 
         correct = sum(1 for r in result.raw_requests if r.correct)
         print(f"  [{self.name}] Done: {correct}/{NUM_REQUESTS} correct")
-        result.summarize()
+        result.summarize(**self._summary_tokenizer_kwargs(model))
         self._close_open_clients()
         return result

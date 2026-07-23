@@ -159,6 +159,32 @@ class GpuIsolationTest(unittest.TestCase):
                     while not monitor._contaminating_apps and time.time() < deadline:
                         time.sleep(0.05)
 
+    def test_disaggregated_monitor_fails_closed_when_telemetry_drops(self) -> None:
+        provider = FakeProvider(build_dir="/tmp/inference-bench-test")
+        provider.configure_deployment(
+            deployment_mode="disaggregated_prefill_decode",
+            tensor_parallel_size=1,
+            prefill_tensor_parallel_size=1,
+            decode_tensor_parallel_size=1,
+        )
+        with (
+            mock.patch.dict(
+                os.environ,
+                {"INFERENCE_BENCH_GPU_ISOLATION_MONITOR_POLL_S": "0.25"},
+            ),
+            mock.patch.object(
+                provider,
+                "_external_gpu_apps",
+                side_effect=RuntimeError("nvidia-smi unavailable"),
+            ),
+        ):
+            monitor = provider.gpu_isolation_monitor(tp=2)
+            with self.assertRaisesRegex(RuntimeError, "could not be verified"):
+                with monitor:
+                    deadline = time.time() + 2.0
+                    while monitor._monitor_error is None and time.time() < deadline:
+                        time.sleep(0.05)
+
     def test_gpu_memory_ready_reports_blocking_gpus_first(self) -> None:
         provider = FakeProvider(build_dir="/tmp/inference-bench-test")
         gpu_rows = [

@@ -86,7 +86,7 @@ class MultiTurnBenchmark(Benchmark):
                 all_conv_metrics.append(conv_metrics)
                 result.raw_requests.extend(conv_metrics)
 
-        result.summarize()
+        result.summarize(**self._summary_tokenizer_kwargs(model))
 
         first_turns = [cm[0].ttft_ms for cm in all_conv_metrics if cm]
         last_turns = [cm[-1].ttft_ms for cm in all_conv_metrics if cm]

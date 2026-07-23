@@ -51,7 +51,7 @@ class SelfConsistencyBenchmark(Benchmark):
                 result.raw_requests.append(metrics)
 
         unique_answers = len(set(r.strip().split("\n")[-1] for r in responses))
-        result.summarize()
+        result.summarize(**self._summary_tokenizer_kwargs(model))
         result.metrics["unique_final_answers"] = unique_answers
         correct_count = sum(1 for r in result.raw_requests if r.correct)
         print(
