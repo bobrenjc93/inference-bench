@@ -267,6 +267,35 @@ def test_scored_runtime_imports_ignore_python_path_and_stay_in_checkout(
     assert git_env["GIT_ALLOW_PROTOCOL"] == "https"
 
 
+def test_scored_server_env_scrubs_inherited_cpu_runtime_tuning(
+    tmp_path: Path,
+) -> None:
+    provider, _ = _init_scored_provider(tmp_path)
+    with mock.patch.dict(
+        os.environ,
+        {
+            "GOMP_CPU_AFFINITY": "0",
+            "KMP_AFFINITY": "compact",
+            "MKL_NUM_THREADS": "8",
+            "NUMEXPR_NUM_THREADS": "8",
+            "OMP_NUM_THREADS": "8",
+            "TBB_NUM_THREADS": "8",
+        },
+        clear=False,
+    ):
+        env = provider._server_env()
+
+    for name in (
+        "GOMP_CPU_AFFINITY",
+        "KMP_AFFINITY",
+        "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+        "OMP_NUM_THREADS",
+        "TBB_NUM_THREADS",
+    ):
+        assert name not in env
+
+
 def test_scored_runtime_rejects_python_and_model_overrides(tmp_path: Path) -> None:
     provider, _ = _init_scored_provider(tmp_path)
     with (

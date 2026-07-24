@@ -16,7 +16,12 @@ _MOONCAKE_TRANSFER_ENGINE_VERSION = "0.3.11.post1"
 class SglangProvider(Provider):
     name = "sglang"
     repo_url = "https://github.com/sgl-project/sglang.git"
-    runtime_import_names = ("sglang", "sglang_router")
+
+    @property
+    def runtime_import_names(self) -> tuple[str, ...]:
+        if self.is_disaggregated_prefill_decode:
+            return ("sglang", "sglang_router")
+        return ("sglang",)
 
     @property
     def _python_dir(self):

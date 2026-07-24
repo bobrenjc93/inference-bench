@@ -6,10 +6,35 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from inference_bench.deployment import DISAGGREGATED_PREFILL_DECODE
 from inference_bench.providers.sglang import SglangProvider
 
 
 class SglangProviderTest(unittest.TestCase):
+    def test_runtime_imports_match_version_derived_topology(self) -> None:
+        standard = SglangProvider(build_dir="/tmp/inference-bench-test")
+        standard.configure_deployment(
+            deployment_mode="standard",
+            tensor_parallel_size=8,
+            model_revision="a" * 40,
+            evaluation_version=3,
+        )
+        disaggregated = SglangProvider(build_dir="/tmp/inference-bench-test")
+        disaggregated.configure_deployment(
+            deployment_mode=DISAGGREGATED_PREFILL_DECODE,
+            tensor_parallel_size=4,
+            prefill_tensor_parallel_size=4,
+            decode_tensor_parallel_size=4,
+            model_revision="a" * 40,
+            evaluation_version=4,
+        )
+
+        self.assertEqual(standard.runtime_import_names, ("sglang",))
+        self.assertEqual(
+            disaggregated.runtime_import_names,
+            ("sglang", "sglang_router"),
+        )
+
     def test_server_cmd_uses_current_tensor_parallel_flag(self) -> None:
         provider = SglangProvider(build_dir="/tmp/inference-bench-test")
 

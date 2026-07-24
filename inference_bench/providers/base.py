@@ -896,6 +896,11 @@ print(json.dumps({
                 }:
                     env.pop(name, None)
             for name in tuple(env):
+                if name.startswith(
+                    ("GOMP_", "KMP_", "MKL_", "NUMEXPR_", "OMP_", "TBB_")
+                ):
+                    env.pop(name, None)
+            for name in tuple(env):
                 if name == "USE_BAREX" or name.startswith(
                     ("MC_", "MOONCAKE_", "VLLM_MOONCAKE_", "SGLANG_MOONCAKE_")
                 ):
@@ -1121,7 +1126,7 @@ print(json.dumps({
             env=env,
             stdout=self._log_file,
             stderr=subprocess.STDOUT,
-            preexec_fn=os.setsid,
+            start_new_session=True,
         )
 
         self._wait_for_health(timeout)

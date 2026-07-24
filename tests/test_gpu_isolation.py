@@ -6,6 +6,7 @@ import subprocess
 import time
 import types
 import unittest
+from tempfile import TemporaryDirectory
 from unittest import mock
 
 from inference_bench.providers.base import Provider
@@ -23,6 +24,24 @@ class FakeProvider(Provider):
 
 
 class GpuIsolationTest(unittest.TestCase):
+    def test_server_launch_uses_safe_session_creation(self) -> None:
+        with TemporaryDirectory() as tmp:
+            provider = FakeProvider(build_dir=tmp)
+            process = mock.Mock()
+            with (
+                mock.patch.object(provider, "_wait_for_gpu_memory_ready"),
+                mock.patch.object(provider, "_wait_for_health"),
+                mock.patch(
+                    "inference_bench.providers.base.subprocess.Popen",
+                    return_value=process,
+                ) as popen,
+            ):
+                provider.start_server("model", tp=1, port=8001)
+            provider._log_file.close()
+
+        self.assertTrue(popen.call_args.kwargs["start_new_session"])
+        self.assertNotIn("preexec_fn", popen.call_args.kwargs)
+
     def test_external_gpu_apps_ignores_server_process_group(self) -> None:
         provider = FakeProvider(build_dir="/tmp/inference-bench-test")
         gpu_rows = [
