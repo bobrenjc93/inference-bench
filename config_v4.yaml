@@ -1,5 +1,8 @@
-evaluation_version: 2
+# Evaluation v4: the v3 workload suite on disaggregated prefill/decode serving.
+evaluation_version: 4
 model: meta-llama/Meta-Llama-3.1-70B-Instruct
+model_revision: 1605565b47bb9346c5515c34102e054115b4f98b
+hardware: 8xH100
 providers:
   - torchinferno
   - vllm
@@ -10,6 +13,6 @@ benchmarks:
   - multi_turn
   - tree_of_thought
   - long_output
-build_dir: ./builds
-server_port: 8000
+build_dir: ./builds/v4
+server_port: 8001
 server_startup_timeout: 3600

@@ -35,6 +35,39 @@ def test_run_dir_uses_utc_timestamp(tmp_path) -> None:
     assert results_path.parent.name == "20260624_175245"
 
 
+@pytest.mark.parametrize(
+    ("model", "hardware"),
+    [
+        ("..", "8xH100"),
+        ("org--model", "8xH100"),
+        ("org/model", "/tmp/escaped"),
+        ("org/model", "../escaped"),
+    ],
+)
+def test_run_dir_rejects_unsafe_path_components(
+    tmp_path, model: str, hardware: str
+) -> None:
+    results = RunResults(
+        model=model,
+        tensor_parallel_size=8,
+        hardware=hardware,
+    )
+
+    with pytest.raises(ValueError, match="Unsafe|must not contain"):
+        results.save(tmp_path / "results")
+
+
+def test_run_dir_rejects_symlinked_results_root(tmp_path) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    results_root = tmp_path / "results"
+    results_root.symlink_to(target, target_is_directory=True)
+    results = RunResults(model="org/model", tensor_parallel_size=8)
+
+    with pytest.raises(ValueError, match="must not contain symlinks"):
+        results.save(results_root)
+
+
 def test_save_copies_provider_logs(tmp_path) -> None:
     source_log = tmp_path / "torchinferno_server.log"
     source_log.write_text("server tail\n")
@@ -62,6 +95,7 @@ def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
     results = RunResults(
         model="model",
         tensor_parallel_size=4,
+        evaluation_version=4,
         deployment_mode="disaggregated_prefill_decode",
         prefill_tensor_parallel_size=4,
         decode_tensor_parallel_size=4,
@@ -71,6 +105,7 @@ def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
             "commit": "a" * 40,
             "worktree_clean": True,
         },
+        finalized=True,
     )
     results.providers["torchinferno"] = ProviderResults(
         provider="torchinferno",
@@ -84,6 +119,8 @@ def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
     path = results.save(tmp_path / "results")
     data = json.loads(path.read_text())
 
+    assert data["evaluation_version"] == 4
+    assert data["finalized"] is True
     assert data["deployment_mode"] == "disaggregated_prefill_decode"
     assert data["prefill_tensor_parallel_size"] == 4
     assert data["decode_tensor_parallel_size"] == 4
@@ -96,6 +133,8 @@ def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
         "observed_gpu_count": 8,
     }
     markdown = generate(path)
+    assert "**Evaluation:** v4" in markdown
+    assert "**Finalized:** true" in markdown
     assert "**Deployment:** disaggregated prefill/decode" in markdown
     assert "**Prefill TP:** 4" in markdown
     assert "**Decode TP:** 4" in markdown
@@ -103,6 +142,18 @@ def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
     assert "**Observed GPU coverage:** torchinferno=8/8" in markdown
     assert f"**Harness commit:** `{'a' * 40}`" in markdown
     assert "**TP:** 4" not in markdown
+
+
+def test_summary_rejects_unfinalized_scored_result(tmp_path) -> None:
+    results = RunResults(
+        model="org/model",
+        tensor_parallel_size=8,
+        evaluation_version=3,
+    )
+    path = results.save(tmp_path / "results")
+
+    with pytest.raises(ValueError, match="not finalized"):
+        generate(path)
 
 
 def test_v3_result_eligibility_fails_closed_for_invalid_outputs() -> None:

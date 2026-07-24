@@ -15,8 +15,9 @@ from unittest import mock
 import httpx
 import pytest
 
-from inference_bench.config import Config
+from inference_bench.config import Config, SCORED_BENCHMARKS, SCORED_PROVIDERS
 from inference_bench.deployment import DISAGGREGATED_PREFILL_DECODE
+from inference_bench.integrity import REQUIRED_RUNTIME_COUNTERS
 from inference_bench.disaggregated_launcher import _Component
 from inference_bench.providers.sglang import SglangProvider
 from inference_bench.providers.torchinferno import TorchInfernoProvider
@@ -70,14 +71,32 @@ def _write_mooncake_rdma_logs(
     (build_dir / f"{provider}_disagg_decode.log").write_text(common)
 
 
-def test_v3_config_uses_two_tp4_roles_and_eight_gpus() -> None:
-    config = Config.load(Path(__file__).parents[1] / "config_v3_disagg.yaml")
+def test_v3_config_uses_standard_tp8_and_results_v2() -> None:
+    config = Config.load(Path(__file__).parents[1] / "config_v3.yaml")
 
+    assert config.evaluation_version == 3
+    assert config.deployment_mode == "standard"
+    assert config.role_tensor_parallel_sizes == (None, None)
+    assert config.tensor_parallel_size == 8
+    assert config.gpu_count == 8
+    assert config.results_dir == "./results/v2"
+    assert config.minimum_correctness_rate == 0.95
+    assert config.require_request_count_parity
+    assert config.output_token_ratio_tolerance == 0.10
+    assert config.retain_response_text
+    assert config.authoritative_output_token_count
+    assert config.model_revision == "1605565b47bb9346c5515c34102e054115b4f98b"
+
+
+def test_v4_config_uses_two_tp4_roles_and_results_v3() -> None:
+    config = Config.load(Path(__file__).parents[1] / "config_v4.yaml")
+
+    assert config.evaluation_version == 4
     assert config.deployment_mode == DISAGGREGATED_PREFILL_DECODE
     assert config.role_tensor_parallel_sizes == (4, 4)
     assert config.tensor_parallel_size == 4
     assert config.gpu_count == 8
-    assert config.results_dir == "./results/v2"
+    assert config.results_dir == "./results/v3"
     assert config.minimum_correctness_rate == 0.95
     assert config.require_request_count_parity
     assert config.output_token_ratio_tolerance == 0.10
@@ -89,10 +108,7 @@ def test_v3_config_uses_two_tp4_roles_and_eight_gpus() -> None:
 def test_disaggregated_config_requires_pinned_model_revision() -> None:
     with pytest.raises(ValueError, match="requires a pinned 40-character"):
         Config(
-            deployment_mode=DISAGGREGATED_PREFILL_DECODE,
-            tensor_parallel_size=4,
-            prefill_tensor_parallel_size=4,
-            decode_tensor_parallel_size=4,
+            evaluation_version=4,
         )
 
 
@@ -180,9 +196,145 @@ def test_vllm_model_probe_does_not_count_as_prefill_decode_pair() -> None:
     assert audit.snapshot()["request_pairs"] == 0
 
 
-def test_standard_config_rejects_role_specific_tp() -> None:
-    with pytest.raises(ValueError, match="require deployment_mode"):
-        Config(prefill_tensor_parallel_size=4)
+def test_config_rejects_role_specific_tp_fields(tmp_path: Path) -> None:
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        "evaluation_version: 4\n"
+        f"model_revision: {'a' * 40}\n"
+        "prefill_tensor_parallel_size: 1\n"
+    )
+
+    with pytest.raises(ValueError, match="prefill_tensor_parallel_size"):
+        Config.load(path)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "tensor_parallel_size: 4",
+        "results_dir: ./results/v3",
+        "minimum_correctness_rate: null",
+        "require_request_count_parity: false",
+        "output_token_ratio_tolerance: null",
+        "retain_response_text: false",
+        "authoritative_output_token_count: false",
+    ],
+)
+def test_scored_config_rejects_version_derived_fields(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        "evaluation_version: 4\n"
+        f"model_revision: {'a' * 40}\n"
+        f"{field}\n"
+    )
+
+    with pytest.raises(ValueError, match="version-derived"):
+        Config.load(path)
+
+
+def test_config_rejects_explicit_deployment_mode(tmp_path: Path) -> None:
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        "evaluation_version: 4\n"
+        f"model_revision: {'a' * 40}\n"
+        "deployment_mode: standard\n"
+    )
+
+    with pytest.raises(ValueError, match="deployment_mode"):
+        Config.load(path)
+
+
+def test_config_rejects_missing_explicit_path(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError, match="does not exist"):
+        Config.load(tmp_path / "config_v4.yam")
+
+
+@pytest.mark.parametrize("version", [3.9, 4.1, "4", True])
+def test_config_rejects_non_integer_evaluation_versions(version) -> None:
+    with pytest.raises(ValueError, match="must be an integer"):
+        Config(evaluation_version=version)
+
+
+def test_scored_version_rejects_mismatched_results_namespace() -> None:
+    with pytest.raises(ValueError, match="results must be written to ./results/v2"):
+        Config(
+            evaluation_version=3,
+            model_revision="a" * 40,
+            results_dir="./results/v3",
+        )
+
+
+def test_scored_results_root_is_anchored_to_harness_checkout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = Config.load(Path(__file__).parents[1] / "config_v3.yaml")
+    monkeypatch.chdir(tmp_path)
+
+    assert Path(config.resolved_results_dir) == (
+        Path(__file__).parents[1] / "results" / "v2"
+    ).resolve()
+
+
+def test_scored_version_rejects_tensor_parallel_override() -> None:
+    config = Config(
+        evaluation_version=3,
+        model_revision="a" * 40,
+        hardware="8xH100",
+        providers=list(SCORED_PROVIDERS),
+        benchmarks=list(SCORED_BENCHMARKS),
+    )
+
+    with pytest.raises(ValueError, match="topology is implicit"):
+        config.apply_overrides(tp=4)
+
+
+@pytest.mark.parametrize(("version", "tp"), [(3, 4), (4, 1)])
+def test_scored_version_rejects_noncanonical_topology(version: int, tp: int) -> None:
+    with pytest.raises(ValueError, match="requires tensor parallel size"):
+        Config(
+            evaluation_version=version,
+            model_revision="a" * 40,
+            tensor_parallel_size=tp,
+            hardware="8xH100",
+            providers=list(SCORED_PROVIDERS),
+            benchmarks=list(SCORED_BENCHMARKS),
+        )
+
+
+def test_scored_version_rejects_provider_or_benchmark_subsets() -> None:
+    config = Config(
+        evaluation_version=3,
+        model_revision="a" * 40,
+        hardware="8xH100",
+        providers=list(SCORED_PROVIDERS),
+        benchmarks=list(SCORED_BENCHMARKS),
+    )
+
+    with pytest.raises(ValueError, match="requires providers"):
+        config.apply_overrides(providers=["torchinferno"])
+
+    config = Config(
+        evaluation_version=3,
+        model_revision="a" * 40,
+        hardware="8xH100",
+        providers=list(SCORED_PROVIDERS),
+        benchmarks=list(SCORED_BENCHMARKS),
+    )
+    with pytest.raises(ValueError, match="complete canonical benchmark suite"):
+        config.apply_overrides(benchmarks=["multi_turn"])
+
+
+def test_scored_version_rejects_http_concurrency_overrides(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("INFERENCE_BENCH_HTTP_MAX_CONNECTIONS", "1")
+
+    with pytest.raises(ValueError, match="HTTP concurrency overrides"):
+        Config.load(Path(__file__).parents[1] / "config_v3.yaml")
 
 
 def test_gpu_roles_use_disjoint_visible_device_sets(tmp_path: Path) -> None:
@@ -404,7 +556,7 @@ def test_torchinferno_v4_rejects_external_artifact_paths(tmp_path: Path) -> None
             {"TORCHINFERNO_V4_KERNEL_ARTIFACT_DIR": "/tmp/unverified"},
             clear=True,
         ),
-        pytest.raises(ValueError, match="External DeepSeek V4 artifact paths"),
+        pytest.raises(ValueError, match="override is prohibited"),
     ):
         provider.prepare_model_assets("deepseek-ai/DeepSeek-V4-Flash")
 
@@ -457,7 +609,7 @@ def test_scored_disaggregated_mode_rejects_local_torchinferno_repo(
             provider.clone()
 
 
-def test_scored_server_env_scrubs_inherited_mooncake_transport_selectors(
+def test_scored_server_env_rejects_inherited_transport_selectors(
     tmp_path: Path,
 ) -> None:
     provider = SglangProvider(build_dir=str(tmp_path))
@@ -471,10 +623,60 @@ def test_scored_server_env_scrubs_inherited_mooncake_transport_selectors(
         "USE_BAREX": "1",
     }
 
-    with mock.patch.dict(os.environ, inherited, clear=True):
+    with (
+        mock.patch.dict(os.environ, inherited, clear=True),
+        pytest.raises(ValueError, match="Environment override is prohibited"),
+    ):
+        provider._server_env()
+
+
+@pytest.mark.parametrize(
+    ("provider_cls", "env_name"),
+    [
+        (VllmProvider, "INFERENCE_BENCH_VLLM_GPU_MEMORY_UTILIZATION"),
+        (SglangProvider, "INFERENCE_BENCH_SGLANG_MEM_FRACTION_STATIC"),
+        (SglangProvider, "SGLANG_ATTENTION_BACKEND"),
+        (TorchInfernoProvider, "TORCHINFERNO_OPENAI_TP_ONLINE_CONTINUOUS"),
+    ],
+)
+def test_standard_v3_rejects_runtime_environment_overrides(
+    tmp_path: Path,
+    provider_cls,
+    env_name: str,
+) -> None:
+    provider = provider_cls(build_dir=str(tmp_path))
+    provider.configure_deployment(
+        deployment_mode="standard",
+        tensor_parallel_size=8,
+        model_revision="a" * 40,
+        model="model",
+        evaluation_version=3,
+    )
+
+    with (
+        mock.patch.dict(os.environ, {env_name: "1"}, clear=True),
+        pytest.raises(ValueError, match="Environment override is prohibited"),
+    ):
+        if provider_cls is TorchInfernoProvider:
+            provider._server_env()
+        else:
+            provider._server_cmd("model", tp=8, port=8001)
+
+
+def test_standard_v3_scrubs_native_vllm_runtime_environment(tmp_path: Path) -> None:
+    provider = VllmProvider(build_dir=str(tmp_path))
+    provider.configure_deployment(
+        deployment_mode="standard",
+        tensor_parallel_size=8,
+        model_revision="a" * 40,
+        model="model",
+        evaluation_version=3,
+    )
+
+    with mock.patch.dict(os.environ, {"VLLM_USE_V1": "0"}, clear=True):
         env = provider._server_env()
 
-    assert not inherited.keys() & env.keys()
+    assert "VLLM_USE_V1" not in env
 
 
 def test_torchinferno_attestation_is_provenance_not_runtime_evidence(
@@ -492,6 +694,35 @@ def test_torchinferno_attestation_is_provenance_not_runtime_evidence(
     assert attestation["expected_world_size"] == 8
     assert attestation["configured_disaggregated_max_batch_size"] == 128
     assert not any(key.startswith("runtime_") for key in attestation)
+
+
+def test_standard_v3_requires_and_accepts_runtime_cache_counters(
+    tmp_path: Path,
+) -> None:
+    provider = TorchInfernoProvider(build_dir=str(tmp_path))
+    provider.configure_deployment(
+        deployment_mode="standard",
+        tensor_parallel_size=8,
+        model_revision="a" * 40,
+        model="model",
+        evaluation_version=3,
+    )
+    profile_path = tmp_path / "queue_profile.jsonl"
+    profile_path.write_text(
+        json.dumps(
+            {
+                "event": "stream_group",
+                **{name: 0 for name in REQUIRED_RUNTIME_COUNTERS},
+            }
+        )
+        + "\n"
+    )
+    provider._extra_log_paths["queue_profile"] = str(profile_path)
+
+    assert provider.verify_runtime_integrity() == {
+        "cache_integrity_check": "passed",
+        "runtime_shortcut_counters": "zero",
+    }
 
 
 @pytest.mark.parametrize(

@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from .config import Config
+from .results import model_result_slug
 from .runner import run_all
 
 
@@ -23,7 +24,7 @@ def parse_args() -> argparse.Namespace:
         "--model-revision",
         type=str,
         default=None,
-        help="Pinned 40-character Hugging Face revision for scored disaggregated runs",
+        help="Pinned 40-character Hugging Face revision for scored evaluations",
     )
     p.add_argument(
         "--providers", nargs="+", default=None,
@@ -36,18 +37,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--tp", type=int, default=None,
         help="Tensor parallel size per server role (default: 8)",
-    )
-    p.add_argument(
-        "--deployment-mode", type=str, default=None,
-        help="Deployment mode: standard or disaggregated_prefill_decode",
-    )
-    p.add_argument(
-        "--prefill-tp", type=int, default=None,
-        help="Prefill tensor parallel size for disaggregated deployment",
-    )
-    p.add_argument(
-        "--decode-tp", type=int, default=None,
-        help="Decode tensor parallel size for disaggregated deployment",
     )
     p.add_argument(
         "--port", type=int, default=None,
@@ -67,7 +56,10 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--results-dir", type=str, default=None,
-        help="Directory for result JSON files (default: ./results)",
+        help=(
+            "Directory for result files (version-derived and fixed for scored "
+            "evaluations)"
+        ),
     )
     p.add_argument(
         "--skip-build", action="store_true",
@@ -100,9 +92,6 @@ def main() -> None:
         providers=args.providers,
         benchmarks=args.benchmarks,
         tp=args.tp,
-        deployment_mode=args.deployment_mode,
-        prefill_tp=args.prefill_tp,
-        decode_tp=args.decode_tp,
         hardware=args.hardware,
         build_dir=args.build_dir,
         results_dir=args.results_dir,
@@ -111,7 +100,7 @@ def main() -> None:
     )
 
     print(
-        f"inference-bench: {config.model} | "
+        f"inference-bench v{config.evaluation_version}: {config.model} | "
         f"{', '.join(config.providers)} | "
         f"{config.hardware or 'no-hw'} | "
         f"{config.deployment_mode} ({config.gpu_count} GPUs)"
@@ -131,8 +120,8 @@ def main() -> None:
         verbose=args.verbose,
     )
     results.print_comparison()
-    json_path = results.save(config.results_dir)
-    results.save_csv(config.results_dir)
+    json_path = results.save(config.resolved_results_dir)
+    results.save_csv(config.resolved_results_dir)
 
     try:
         from scripts.generate_summary import main as summary_main
@@ -148,8 +137,8 @@ def main() -> None:
 
     try:
         from scripts.plot_progress import main as progress_main
-        model_slug = config.model.replace("/", "--")
-        progress_dir = Path(config.results_dir) / model_slug
+        model_slug = model_result_slug(config.model)
+        progress_dir = Path(config.resolved_results_dir) / model_slug
         if config.hardware:
             progress_dir = progress_dir / config.hardware
         progress_main(str(progress_dir))

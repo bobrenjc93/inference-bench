@@ -198,6 +198,8 @@ def main(json_path: str) -> None:
 
     with open(path) as f:
         data = json.load(f)
+    if data.get("evaluation_version", 2) >= 3 and data.get("finalized") is not True:
+        raise ValueError("Scored evaluation result is not finalized")
 
     run_dir = path.parent
     plot_dir = run_dir / "plots"

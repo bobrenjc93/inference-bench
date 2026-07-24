@@ -11,6 +11,91 @@ from inference_bench.providers.vllm import VllmProvider
 
 
 class VllmProviderTest(unittest.TestCase):
+    def test_failed_forced_flash_attn_rebuild_does_not_fall_back_to_plain_install(
+        self,
+    ) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        installs: list[tuple[str, ...]] = []
+
+        def fake_pip_install(*args, cwd=None):  # noqa: ANN001
+            del cwd
+            if args == ("--upgrade", "pip"):
+                return None
+            installs.append(args)
+            if "--force-reinstall" in args:
+                raise subprocess.CalledProcessError(1, ["pip", *args])
+
+        failed_probe = subprocess.CompletedProcess(
+            args=["python", "-c", "import vllm.vllm_flash_attn"],
+            returncode=1,
+            stdout="",
+            stderr="bad extension",
+        )
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(provider, "_create_venv"),
+            mock.patch.object(provider, "_disable_fastapi_metrics_middleware"),
+            mock.patch.object(provider, "_harden_optional_torchcodec_import"),
+            mock.patch.object(provider, "_configure_cuda_arch_list"),
+            mock.patch.object(provider, "_configure_conservative_source_build_retry"),
+            mock.patch.object(provider, "_probe_flash_attn", return_value=failed_probe),
+            mock.patch.object(provider, "_pip_install", side_effect=fake_pip_install),
+            self.assertRaises(subprocess.CalledProcessError),
+        ):
+            provider.build()
+
+        self.assertEqual(
+            installs,
+            [
+                ("-e", "."),
+                ("-e", ".", "--force-reinstall", "--no-deps"),
+                ("-e", ".", "--force-reinstall", "--no-deps"),
+            ],
+        )
+
+    def test_flash_attn_is_rechecked_after_forced_rebuild(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        failed_probe = subprocess.CompletedProcess(
+            args=["python", "-c", "import vllm.vllm_flash_attn"],
+            returncode=1,
+            stdout="",
+            stderr="bad extension",
+        )
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(provider, "_create_venv"),
+            mock.patch.object(provider, "_disable_fastapi_metrics_middleware"),
+            mock.patch.object(provider, "_harden_optional_torchcodec_import"),
+            mock.patch.object(provider, "_configure_cuda_arch_list"),
+            mock.patch.object(provider, "_pip_install"),
+            mock.patch.object(
+                provider,
+                "_probe_flash_attn",
+                side_effect=[failed_probe, failed_probe],
+            ) as probe,
+            self.assertRaises(subprocess.CalledProcessError),
+        ):
+            provider.build()
+
+        self.assertEqual(probe.call_count, 2)
+
+    def test_flash_attn_probe_uses_scored_server_environment(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        completed = subprocess.CompletedProcess(
+            args=["python"],
+            returncode=0,
+            stdout="",
+            stderr="",
+        )
+        with (
+            mock.patch.object(provider, "_server_env", return_value={"CLEAN": "1"}),
+            mock.patch("inference_bench.providers.vllm.subprocess.run", return_value=completed) as run,
+        ):
+            provider._probe_flash_attn()
+
+        self.assertEqual(run.call_args.kwargs["cwd"], provider.repo_dir)
+        self.assertEqual(run.call_args.kwargs["env"], {"CLEAN": "1"})
+
     def test_precompiled_failure_retries_nightly_before_source(self) -> None:
         provider = VllmProvider(build_dir="/tmp/inference-bench-test")
         install_envs: list[dict[str, str]] = []
@@ -43,6 +128,16 @@ class VllmProviderTest(unittest.TestCase):
                 provider,
                 "_resolve_precompiled_nightly_wheel_location",
                 return_value="https://wheels.vllm.ai/nightly/cu130/vllm/vllm.whl",
+            ),
+            mock.patch.object(
+                provider,
+                "_probe_flash_attn",
+                return_value=subprocess.CompletedProcess(
+                    args=["python"],
+                    returncode=0,
+                    stdout="",
+                    stderr="",
+                ),
             ),
             mock.patch.object(provider, "_pip_install", side_effect=fake_pip_install),
         ):
@@ -189,6 +284,22 @@ class VllmProviderTest(unittest.TestCase):
             os.environ,
             {"INFERENCE_BENCH_VLLM_DISABLE_ALLREDUCE_RMS_FUSION": "0"},
             clear=True,
+        ):
+            cmd = provider._server_cmd("model", tp=8, port=9000)
+
+        self.assertNotIn("--compilation-config", cmd)
+
+    def test_v3_standard_keeps_upstream_allreduce_rms_fusion(self) -> None:
+        provider = VllmProvider(build_dir="/tmp/inference-bench-test")
+        provider.configure_deployment(
+            deployment_mode="standard",
+            tensor_parallel_size=8,
+            model_revision="a" * 40,
+            evaluation_version=3,
+        )
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(provider, "_server_model", return_value="model"),
         ):
             cmd = provider._server_cmd("model", tp=8, port=9000)
 

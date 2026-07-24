@@ -39,10 +39,10 @@ class TorchInfernoProvider(Provider):
 
     def clone(self) -> None:
         if os.environ.get("TORCHINFERNO_LOCAL_REPO"):
-            if self.is_disaggregated_prefill_decode:
+            if self.is_scored_evaluation:
                 raise RuntimeError(
                     "TORCHINFERNO_LOCAL_REPO is prohibited in a scored "
-                    "disaggregated run"
+                    "evaluation"
                 )
             return
         super().clone()
@@ -58,10 +58,19 @@ class TorchInfernoProvider(Provider):
             )
 
     def build(self) -> None:
+        self._reject_scored_environment_overrides(
+            names=("TORCHINFERNO_LOCAL_REPO",),
+            prefixes=("INFERENCE_BENCH_TORCHINFERNO_", "TORCHINFERNO_"),
+        )
         is_deepseek_v4 = self._configured_for_deepseek_v4()
         self._create_venv()
         self._pip_install("--upgrade", "pip")
         explicit_extras = os.environ.get("INFERENCE_BENCH_TORCHINFERNO_EXTRAS")
+        if self.is_scored_evaluation and explicit_extras is not None:
+            raise ValueError(
+                "INFERENCE_BENCH_TORCHINFERNO_EXTRAS is prohibited in a scored "
+                "evaluation"
+            )
         h100_extras = "h100" in str(getattr(self, "hardware", "")).lower()
         default_flashinfer = (
             explicit_extras is None
@@ -114,6 +123,9 @@ class TorchInfernoProvider(Provider):
         return str(config.get("model_type", "")).lower() == "deepseek_v4"
 
     def prepare_model_assets(self, model: str) -> None:
+        self._reject_scored_environment_overrides(
+            prefixes=("INFERENCE_BENCH_TORCHINFERNO_", "TORCHINFERNO_"),
+        )
         if not self.is_disaggregated_prefill_decode or not self._configured_for_deepseek_v4():
             return
         forbidden = [
@@ -160,6 +172,10 @@ class TorchInfernoProvider(Provider):
         self._v4_artifact_root = artifact_root
 
     def _server_cmd(self, model: str, tp: int, port: int) -> list[str]:
+        self._reject_scored_environment_overrides(
+            names=("TORCHINFERNO_SERVER_ARGS",),
+            prefixes=("INFERENCE_BENCH_TORCHINFERNO_",),
+        )
         if self.is_disaggregated_prefill_decode:
             prefill_tp = int(self.prefill_tensor_parallel_size or 0)
             decode_tp = int(self.decode_tensor_parallel_size or 0)
@@ -186,12 +202,11 @@ class TorchInfernoProvider(Provider):
             cmd.extend(["--revision", self.model_revision])
         extra_args = os.environ.get("TORCHINFERNO_SERVER_ARGS", "").strip()
         extra_cmd = shlex.split(extra_args) if extra_args else []
+        if self.is_scored_evaluation and extra_cmd:
+            raise ValueError(
+                "TORCHINFERNO_SERVER_ARGS is prohibited in a scored evaluation"
+            )
         if self.is_disaggregated_prefill_decode:
-            if extra_cmd:
-                raise ValueError(
-                    "TORCHINFERNO_SERVER_ARGS is prohibited in the scored "
-                    "disaggregated evaluation"
-                )
             cmd.extend(["--disaggregation-mode", "prefill-decode"])
         cmd.extend(extra_cmd)
         if self.is_disaggregated_prefill_decode:
@@ -209,6 +224,9 @@ class TorchInfernoProvider(Provider):
         return cmd
 
     def _server_env(self) -> dict[str, str]:
+        self._reject_scored_environment_overrides(
+            prefixes=("INFERENCE_BENCH_TORCHINFERNO_", "TORCHINFERNO_"),
+        )
         env = super()._server_env()
         self._extra_log_paths = {}
         is_deepseek_v4 = self._configured_for_deepseek_v4()
@@ -227,7 +245,7 @@ class TorchInfernoProvider(Provider):
             )
             env["TVM_FFI_CACHE_DIR"] = str(artifact_root / "marlin")
             env["CUDA_HOME"] = "/does/not/exist"
-        if self.is_disaggregated_prefill_decode or _env_flag(
+        if self.is_scored_evaluation or _env_flag(
             "INFERENCE_BENCH_TORCHINFERNO_PROFILE", True
         ):
             self._set_profile_env_default(
@@ -270,10 +288,10 @@ class TorchInfernoProvider(Provider):
         allow_logits_caches = _env_flag(
             "INFERENCE_BENCH_TORCHINFERNO_ALLOW_LOGITS_CACHES", False
         )
-        if self.is_disaggregated_prefill_decode and allow_logits_caches:
+        if self.is_scored_evaluation and allow_logits_caches:
             raise ValueError(
-                "Logits and prompt-result caches are prohibited in the scored "
-                "disaggregated evaluation"
+                "Logits and prompt-result caches are prohibited in scored "
+                "evaluations"
             )
         if not allow_logits_caches:
             for name in TORCHINFERNO_PROHIBITED_CACHE_ENV_VARS:
@@ -317,7 +335,7 @@ class TorchInfernoProvider(Provider):
             handle.write(json.dumps(record, sort_keys=True) + "\n")
 
     def verify_runtime_integrity(self) -> dict[str, object]:
-        if not self.is_disaggregated_prefill_decode:
+        if not self.is_scored_evaluation:
             return {}
         queue_profile = self._extra_log_paths.get("queue_profile")
         if not queue_profile:
@@ -325,6 +343,11 @@ class TorchInfernoProvider(Provider):
         warnings = torchinferno_logits_cache_warnings(queue_profile)
         if warnings:
             raise RuntimeError("[torchinferno] " + " ".join(warnings))
+        if not self.is_disaggregated_prefill_decode:
+            return {
+                "cache_integrity_check": "passed",
+                "runtime_shortcut_counters": "zero",
+            }
         handoff_groups = 0
         transferred_bytes = 0
         transferred_caches = 0

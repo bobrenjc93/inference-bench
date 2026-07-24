@@ -125,31 +125,39 @@ Expect several hours for a full run (builds ~15 min each, then 5 benchmarks ×
 The package also installs an `inference-bench` console entry point, so after
 `pip install -e .` you can run `inference-bench --help` directly.
 
-### Evaluation v3: disaggregated prefill/decode
+### Evaluation v3: strict standard serving
 
-Evaluation v3 reruns the v2 high-volume workloads with a 4-GPU prefill role and
-a separate 4-GPU decode role for every provider. It is intentionally manual and
-is not called by `run_benchmark.sh`.
+Evaluation v3 reruns the v2 workloads with one TP8 server per provider. It adds
+pinned model/source provenance, GPU coverage and isolation, full response
+retention, authoritative client-side token counts, and result eligibility gates.
 
 ```bash
 python -m inference_bench \
-  --config config_v3_disagg.yaml
+  --config config_v3.yaml
 ```
 
-The run uses TorchInferno's native prefill/decode mode, vLLM's
-`P2pNcclConnector`, and SGLang's Mooncake backend and model gateway. Results go
-to `results/v2/`; the output JSON records the deployment mode, both role TP
-sizes, observed GPU identity/coverage, runtime KV-handoff evidence, full
-responses, pinned model revision, provider source/import provenance, component
-commands, and component logs. V3 excludes a provider from winners when
-correctness, request parity, output volume, GPU isolation, source provenance,
-or runtime integrity checks fail. See
-[`docs/V3_DISAGGREGATED_EVAL.md`](docs/V3_DISAGGREGATED_EVAL.md) for the exact
-topology and manual smoke commands.
+Results go to `results/v2/`. Evaluation v3 is standard serving by definition;
+deployment topology is derived from the evaluation version and is not a config
+toggle.
 
-Scored v3 runs require an unused build directory and a complete local copy of
-the pinned model revision. They reject `--skip-build`, local provider checkouts,
-and arbitrary provider server-argument environment variables.
+### Evaluation v4: disaggregated prefill/decode
+
+Evaluation v4 uses a 4-GPU prefill role and a separate 4-GPU decode role for
+every provider. `evaluation_version: 4` selects the topology automatically.
+
+```bash
+python -m inference_bench \
+  --config config_v4.yaml
+```
+
+The run uses TorchInferno's native prefill/decode mode, vLLM's upstream KV
+connector, and SGLang's Mooncake backend and model gateway. Results go to
+`results/v3/`; the output records both role TP sizes and runtime KV-handoff
+evidence. See [`docs/V4_DISAGGREGATED_EVAL.md`](docs/V4_DISAGGREGATED_EVAL.md).
+
+Scored v3 and v4 runs require an unused build directory and a complete local
+copy of the pinned model revision. They reject `--skip-build`, local provider
+checkouts, and arbitrary provider server-argument environment variables.
 
 ### Run remotely (via gpu-dev)
 
@@ -247,14 +255,11 @@ All flags override the corresponding value in [`config.yaml`](config.yaml).
 | `--model` | `meta-llama/Meta-Llama-3.1-70B-Instruct` | [HuggingFace](https://huggingface.co/) model name or path |
 | `--providers` | all from config | Space-separated provider names (e.g. `vllm sglang`) |
 | `--benchmarks` | all from config | Space-separated benchmark names (e.g. `few_shot multi_turn`) |
-| `--tp` | `8` | Tensor parallel size per server role |
-| `--deployment-mode` | `standard` | `standard` or `disaggregated_prefill_decode` |
-| `--prefill-tp` | value of `--tp` | Prefill TP size in disaggregated mode |
-| `--decode-tp` | value of `--tp` | Decode TP size in disaggregated mode |
+| `--tp` | `8` | Tensor parallel size for legacy v2 runs; fixed by version for scored runs |
 | `--port` | `8000` | Server port |
 | `--hardware` | _(none)_ | Hardware label (e.g. `8xH100`); used in results directory path |
 | `--build-dir` | `./builds` | Directory for cloned repos and virtualenvs |
-| `--results-dir` | `./results/v1` | Base directory for result files |
+| `--results-dir` | version-derived | Base directory for legacy runs; scored versions use their canonical namespace |
 | `--server-startup-timeout` | config value | Maximum seconds to wait for each provider server to become ready |
 | `--skip-build` | `false` | Skip clone + build; assumes builds already exist |
 | `--build-times` | _(none)_ | Pre-recorded build times, e.g. `vllm:808,sglang:88,torchinferno:38` |
@@ -267,9 +272,8 @@ All flags override the corresponding value in [`config.yaml`](config.yaml).
 [`config.yaml`](config.yaml) sets defaults for every run. CLI flags take precedence.
 
 ```yaml
+evaluation_version: 2
 model: meta-llama/Meta-Llama-3.1-70B-Instruct
-tensor_parallel_size: 8
-deployment_mode: standard
 providers:
   - vllm
   - sglang
@@ -281,7 +285,6 @@ benchmarks:
   - tree_of_thought
   - long_output
 build_dir: ./builds
-results_dir: ./results/v1
 server_port: 8000
 server_startup_timeout: 1800    # seconds; SGLang can take ~20 min to load
 ```
@@ -293,8 +296,8 @@ server_startup_timeout: 1800    # seconds; SGLang can take ~20 min to load
 Results are versioned. **`v0/`** contains legacy low-volume latency-focused runs
 (8–16 requests per benchmark). **`v1/`** scales every benchmark to ~10,000
 requests with high concurrency for realistic throughput measurement.
-**`v2/`** is evaluation v3: the same high-volume workloads with separate
-prefill and decode GPU roles.
+**`v2/`** is evaluation v3: strict, pinned standard TP8 serving. **`v3/`** is
+evaluation v4: the same workloads with separate TP4 prefill and decode roles.
 
 ### Output files
 
@@ -310,8 +313,8 @@ for example `results/v1/<model>/<hardware>/runs/<timestamp>/` or `results/v2/...
 
 > [!TIP]
 > Pass `--debug` to include full response text in `results.json` and
-> `results.csv` for manual correctness auditing. Evaluation v3 enables this
-> automatically.
+> `results.csv` for manual correctness auditing. Evaluations v3 and v4 enable
+> this automatically.
 
 ### Post-processing scripts
 

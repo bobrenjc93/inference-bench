@@ -13,11 +13,15 @@ def _write_run(
     requested_providers=None,
     metric_schema_version=None,
     output_token_count_method=None,
+    evaluation_version=2,
+    finalized=None,
+    requested_benchmarks=None,
 ) -> None:
     run_dir = model_dir / "runs" / name
     run_dir.mkdir(parents=True)
     data = {
         "model": "model",
+        "evaluation_version": evaluation_version,
         "tensor_parallel_size": 1,
         "providers": {provider: {"benchmarks": {}} for provider in providers},
     }
@@ -27,6 +31,10 @@ def _write_run(
         data["metric_schema_version"] = metric_schema_version
     if output_token_count_method is not None:
         data["output_token_count_method"] = output_token_count_method
+    if finalized is not None:
+        data["finalized"] = finalized
+    if requested_benchmarks is not None:
+        data["requested_benchmarks"] = requested_benchmarks
     (run_dir / "results.json").write_text(json.dumps(data))
 
 
@@ -75,3 +83,34 @@ def test_load_all_runs_does_not_mix_output_token_schemas(tmp_path) -> None:
         "20260720_020000",
         "20260720_030000",
     ]
+
+
+def test_load_all_runs_rejects_unfinalized_or_partial_scored_runs(tmp_path) -> None:
+    benchmarks = [
+        "few_shot",
+        "self_consistency",
+        "multi_turn",
+        "tree_of_thought",
+        "long_output",
+    ]
+    providers = ("torchinferno", "vllm", "sglang")
+    _write_run(
+        tmp_path,
+        "20260720_010000",
+        providers=providers,
+        requested_providers=list(providers),
+        requested_benchmarks=benchmarks,
+        evaluation_version=3,
+        finalized=False,
+    )
+    _write_run(
+        tmp_path,
+        "20260720_020000",
+        providers=("torchinferno",),
+        requested_providers=["torchinferno"],
+        requested_benchmarks=["multi_turn"],
+        evaluation_version=3,
+        finalized=True,
+    )
+
+    assert load_all_runs(tmp_path) == []

@@ -4,6 +4,7 @@ import csv
 import io
 import json
 import math
+import re
 import shutil
 import statistics
 from dataclasses import dataclass, field
@@ -22,6 +23,40 @@ SUMMARY_SCORABLE_METRICS = (
     "e2e_median_ms",
     "throughput_median_tps",
 )
+
+_SAFE_RESULT_COMPONENT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
+
+
+def _safe_result_component(value: str, *, field_name: str) -> str:
+    component = str(value)
+    if (
+        component in {"", ".", ".."}
+        or not _SAFE_RESULT_COMPONENT.fullmatch(component)
+    ):
+        raise ValueError(f"Unsafe {field_name} result path component: {value!r}")
+    return component
+
+
+def model_result_slug(model: str) -> str:
+    parts = str(model).split("/")
+    if not parts:
+        raise ValueError("Model identifier is empty")
+    if any("--" in part for part in parts):
+        raise ValueError("Model result path components must not contain '--'")
+    return "--".join(
+        _safe_result_component(part, field_name="model") for part in parts
+    )
+
+
+def _reject_symlink_components(path: Path) -> None:
+    current = Path(path.anchor) if path.is_absolute() else Path.cwd()
+    parts = path.parts[1:] if path.is_absolute() else path.parts
+    for part in parts:
+        if part in {"", "."}:
+            continue
+        current = current / part
+        if current.is_symlink():
+            raise ValueError(f"Result path must not contain symlinks: {current}")
 
 
 def _utc_now_isoformat() -> str:
@@ -95,6 +130,7 @@ class ProviderResults:
 class RunResults:
     model: str
     tensor_parallel_size: int
+    evaluation_version: int = 2
     model_revision: str | None = None
     deployment_mode: str = "standard"
     prefill_tensor_parallel_size: int | None = None
@@ -110,6 +146,7 @@ class RunResults:
     retain_response_text: bool = False
     output_token_count_method: str = "sse_content_chunks"
     harness_provenance: dict[str, object] = field(default_factory=dict)
+    finalized: bool = False
     providers: dict[str, ProviderResults] = field(default_factory=dict)
 
     def save(self, results_dir: str | Path) -> Path:
@@ -118,6 +155,8 @@ class RunResults:
         path = run_dir / "results.json"
 
         data = {
+            "evaluation_version": self.evaluation_version,
+            "finalized": self.finalized,
             "model": self.model,
             "model_revision": self.model_revision,
             "tensor_parallel_size": self.tensor_parallel_size,
@@ -232,6 +271,8 @@ class RunResults:
         buf = io.StringIO()
         w = csv.writer(buf)
 
+        w.writerow(["evaluation_version", self.evaluation_version])
+        w.writerow(["finalized", str(self.finalized).lower()])
         w.writerow(["model", self.model])
         if self.model_revision:
             w.writerow(["model_revision", self.model_revision])
@@ -356,13 +397,29 @@ class RunResults:
     def _run_dir(self, results_dir: str | Path) -> Path:
         if not hasattr(self, "_cached_run_dir"):
             ts = _utc_timestamp(self.timestamp).strftime("%Y%m%d_%H%M%S")
-            model_slug = self.model.replace("/", "--")
-            base = Path(results_dir) / model_slug
+            model_slug = model_result_slug(self.model)
+            results_root = Path(results_dir)
+            _reject_symlink_components(results_root)
+            base = results_root / model_slug
             if self.hardware:
-                base = base / self.hardware
-            self._cached_run_dir = base / "runs" / ts
+                base = base / _safe_result_component(
+                    self.hardware,
+                    field_name="hardware",
+                )
+            run_dir = base / "runs" / ts
+            root_resolved = results_root.resolve(strict=False)
+            try:
+                run_dir.resolve(strict=False).relative_to(root_resolved)
+            except ValueError as exc:
+                raise ValueError("Result run directory escapes its version root") from exc
+            _reject_symlink_components(run_dir.parent)
+            self._cached_run_dir = run_dir
         self._cached_run_dir.mkdir(parents=True, exist_ok=True)
+        _reject_symlink_components(self._cached_run_dir)
         return self._cached_run_dir
+
+    def run_dir(self, results_dir: str | Path) -> Path:
+        return self._run_dir(results_dir)
 
     def print_comparison(self) -> None:
         self._refresh_integrity_status()
@@ -380,7 +437,8 @@ class RunResults:
                 f"Decode TP: {self.decode_tensor_parallel_size}"
             )
         print(
-            f"Model: {self.model}  |  {allocation}  |  "
+            f"Evaluation: v{self.evaluation_version}  |  Model: {self.model}  |  "
+            f"{allocation}  |  "
             f"Deployment: {self.deployment_mode}"
         )
         print("=" * 80)
@@ -462,7 +520,7 @@ class RunResults:
             if provider.errors:
                 warnings.append(
                     "Provider reported benchmark or deployment errors under the "
-                    "v3 result eligibility policy."
+                    "result eligibility policy."
                 )
             for benchmark_name in benchmark_names:
                 result = provider.benchmarks.get(benchmark_name)

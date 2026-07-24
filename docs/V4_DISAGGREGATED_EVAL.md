@@ -1,14 +1,16 @@
-# Evaluation v3: disaggregated prefill/decode
+# Evaluation v4: disaggregated prefill/decode
 
-Evaluation v3 keeps the v2 prompts, request counts, concurrency, and correctness
+Evaluation v4 keeps the v3 prompts, request counts, concurrency, and correctness
 checks. The deployment changes to four H100s for prefill and four H100s for
-decode. V3 also closes scoring loopholes exposed during adversarial review:
+decode. V4 also closes scoring loopholes exposed during adversarial review:
 completed text is retokenized by the model tokenizer after timing, full
 responses are retained, and correctness/request/output eligibility gates run
 before any provider can win a metric.
 
-The checked-in configuration is [`config_v3_disagg.yaml`](../config_v3_disagg.yaml).
-Evaluation v2 writes `results/v1`, so evaluation v3 writes `results/v2`.
+The checked-in configuration is [`config_v4.yaml`](../config_v4.yaml).
+Evaluation v3 writes `results/v2`, so evaluation v4 writes `results/v3`.
+The deployment mode is derived from `evaluation_version: 4`; it is not a
+configuration toggle.
 `run_benchmark.sh` does not invoke this configuration.
 
 ## Run
@@ -16,15 +18,7 @@ Evaluation v2 writes `results/v1`, so evaluation v3 writes `results/v2`.
 Run the complete suite manually from the repository root:
 
 ```bash
-python -m inference_bench --config config_v3_disagg.yaml
-```
-
-Run a short deployment smoke before committing several hours to the full suite:
-
-```bash
-python -m inference_bench \
-  --config config_v3_disagg.yaml \
-  --benchmarks few_shot
+python -m inference_bench --config config_v4.yaml
 ```
 
 Every scored run builds the providers from fresh source in an unused build
@@ -78,7 +72,7 @@ run's `provider_logs/` directory.
   benchmarking. Python path and interpreter overrides are rejected or removed
   in scored runs.
 - Arbitrary provider server-argument strings are rejected. Scored topology,
-  model, transport, and runtime options come only from the audited v3 provider
+  model, transport, and runtime options come only from the audited v4 provider
   launchers and explicit configuration fields.
 
 ## Score eligibility
@@ -94,13 +88,9 @@ The same policy fails closed when runtime handoff evidence, GPU telemetry,
 benchmark markers, or cache-integrity counters are missing or malformed.
 
 SGLang keeps its documented CUDA-resident handoff-metadata setting, but the
-pinned Mooncake wheel transfers KV payloads over RDMA. NIXL can be selected for
-a separately provisioned environment:
-
-```bash
-INFERENCE_BENCH_SGLANG_DISAGG_TRANSFER_BACKEND=nixl \
-  python -m inference_bench --config config_v3_disagg.yaml
-```
+pinned Mooncake wheel transfers KV payloads over RDMA. Scored v4 fixes this
+backend as part of the version contract; environment-selected alternatives are
+rejected.
 
 Component startup has the same 3600-second default as the public server. It can
 be overridden independently with `INFERENCE_BENCH_DISAGG_COMPONENT_TIMEOUT_S`.

@@ -38,7 +38,21 @@ class VllmProvider(Provider):
     runtime_import_names = ("vllm",)
 
     def build(self) -> None:
-        if self.is_disaggregated_prefill_decode:
+        self._reject_scored_environment_overrides(
+            names=(
+                "CMAKE_ARGS",
+                "CMAKE_BUILD_TYPE",
+                "MAX_JOBS",
+                "TORCH_CUDA_ARCH_LIST",
+                "VLLM_MAIN_CUDA_VERSION",
+                "VLLM_PRECOMPILED_WHEEL_COMMIT",
+                "VLLM_PRECOMPILED_WHEEL_LOCATION",
+                "VLLM_PRECOMPILED_WHEEL_VARIANT",
+                "VLLM_USE_PRECOMPILED",
+            ),
+            prefixes=("INFERENCE_BENCH_VLLM_", "VLLM_"),
+        )
+        if self.is_scored_evaluation:
             prohibited_precompiled_overrides = (
                 "VLLM_PRECOMPILED_WHEEL_COMMIT",
                 "VLLM_PRECOMPILED_WHEEL_LOCATION",
@@ -53,7 +67,7 @@ class VllmProvider(Provider):
             if configured:
                 raise ValueError(
                     "Precompiled vLLM commit/location overrides are prohibited "
-                    "in a scored disaggregated build: "
+                    "in a scored build: "
                     + ", ".join(configured)
                 )
         self._create_venv()
@@ -86,7 +100,6 @@ class VllmProvider(Provider):
             self._configure_source_build_env()
         try:
             self._pip_install("-e", ".", cwd=self.repo_dir)
-            self._verify_precompiled_flash_attn_or_rebuild(precompiled_explicit)
         except subprocess.CalledProcessError:
             if _env_flag("VLLM_USE_PRECOMPILED", True):
                 if (
@@ -97,6 +110,7 @@ class VllmProvider(Provider):
                 if self._try_precompiled_nightly_retry(
                     precompiled_commit_explicit=precompiled_commit_explicit
                 ):
+                    self._verify_precompiled_flash_attn_or_rebuild(False)
                     self._install_deepseek_v4_disaggregated_dependencies()
                     return
                 self._log("[vllm] Precompiled wheel install failed; retrying with VLLM_USE_PRECOMPILED=0")
@@ -106,6 +120,11 @@ class VllmProvider(Provider):
                 self._install_deepseek_v4_disaggregated_dependencies()
                 return
             self._pip_install_source_with_retry()
+        else:
+            # Keep this outside the install exception handler. A forced rebuild
+            # failure must propagate instead of falling through to a plain
+            # editable install that can reuse the broken precompiled extension.
+            self._verify_precompiled_flash_attn_or_rebuild(precompiled_explicit)
         self._install_deepseek_v4_disaggregated_dependencies()
 
     def _verify_precompiled_flash_attn_or_rebuild(self, precompiled_explicit: bool) -> None:
@@ -125,11 +144,7 @@ class VllmProvider(Provider):
             "INFERENCE_BENCH_VLLM_FALLBACK_SOURCE_BUILD", True
         ):
             return
-        check = subprocess.run(
-            [self.venv_python, "-c", "import vllm.vllm_flash_attn"],
-            capture_output=True,
-            text=True,
-        )
+        check = self._probe_flash_attn()
         if check.returncode == 0:
             return
         self._log(
@@ -150,6 +165,23 @@ class VllmProvider(Provider):
         # installed, so force pip to re-run the build backend (which recompiles
         # the extensions under VLLM_USE_PRECOMPILED=0).
         self._pip_install_source_with_retry("--force-reinstall", "--no-deps")
+        rebuilt_check = self._probe_flash_attn()
+        if rebuilt_check.returncode != 0:
+            raise subprocess.CalledProcessError(
+                rebuilt_check.returncode,
+                rebuilt_check.args,
+                output=rebuilt_check.stdout,
+                stderr=rebuilt_check.stderr,
+            )
+
+    def _probe_flash_attn(self) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [self.venv_python, "-c", "import vllm.vllm_flash_attn"],
+            cwd=self.repo_dir,
+            env=self._server_env(),
+            capture_output=True,
+            text=True,
+        )
 
     def _configured_for_deepseek_v4(self) -> bool:
         model = str(getattr(self, "_configured_model", "") or "")
@@ -281,7 +313,7 @@ class VllmProvider(Provider):
                 ["/usr/bin/nvidia-smi"],
                 env=(
                     self._trusted_system_probe_env()
-                    if self.is_disaggregated_prefill_decode
+                    if self.is_scored_evaluation
                     else None
                 ),
                 capture_output=True,
@@ -354,7 +386,7 @@ class VllmProvider(Provider):
                 ],
                 env=(
                     self._trusted_system_probe_env()
-                    if self.is_disaggregated_prefill_decode
+                    if self.is_scored_evaluation
                     else None
                 ),
                 capture_output=True,
@@ -476,6 +508,9 @@ except ImportError:
         kv_transfer_config: dict | None = None,
         gpu_memory_utilization: str | None = None,
     ) -> list[str]:
+        self._reject_scored_environment_overrides(
+            prefixes=("INFERENCE_BENCH_VLLM_",),
+        )
         server_model = self._server_model(model)
         cmd = [
             self.server_python, "-m", "vllm.entrypoints.openai.api_server",
@@ -496,12 +531,12 @@ except ImportError:
             cmd.extend(["--gpu-memory-utilization", gpu_memory_utilization])
         extra_args = os.environ.get("INFERENCE_BENCH_VLLM_SERVER_ARGS", "").strip()
         extra_cmd = shlex.split(extra_args) if extra_args else []
+        if self.is_scored_evaluation and extra_cmd:
+            raise ValueError(
+                "INFERENCE_BENCH_VLLM_SERVER_ARGS is prohibited in a scored "
+                "evaluation"
+            )
         if kv_transfer_config is not None:
-            if extra_cmd:
-                raise ValueError(
-                    "INFERENCE_BENCH_VLLM_SERVER_ARGS is prohibited in the "
-                    "scored disaggregated evaluation"
-                )
             cmd.extend(
                 [
                     "--host",
@@ -763,7 +798,7 @@ except ImportError:
         return self._disaggregated_supervisor_cmd(spec)
 
     def _should_disable_allreduce_rms_fusion(self, extra_cmd: list[str]) -> bool:
-        if self.is_disaggregated_prefill_decode:
+        if self.is_scored_evaluation:
             return False
         if not _env_flag("INFERENCE_BENCH_VLLM_DISABLE_ALLREDUCE_RMS_FUSION", True):
             return False
@@ -861,14 +896,26 @@ except ImportError:
         return observation
 
     def _server_env(self) -> dict[str, str]:
-        env = super()._server_env()
-        env.setdefault(
-            "VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE",
-            env.get(
-                "INFERENCE_BENCH_VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE",
-                str(_DEFAULT_FLASHINFER_WORKSPACE_BUFFER_SIZE),
-            ),
+        self._reject_scored_environment_overrides(
+            names=("VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE",),
+            prefixes=("INFERENCE_BENCH_VLLM_",),
         )
+        env = super()._server_env()
+        if self.is_scored_evaluation:
+            for name in tuple(env):
+                if name.startswith("VLLM_"):
+                    env.pop(name, None)
+            env["VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE"] = str(
+                _DEFAULT_FLASHINFER_WORKSPACE_BUFFER_SIZE
+            )
+        else:
+            env.setdefault(
+                "VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE",
+                env.get(
+                    "INFERENCE_BENCH_VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE",
+                    str(_DEFAULT_FLASHINFER_WORKSPACE_BUFFER_SIZE),
+                ),
+            )
         libstdcxx_dir = self._find_compatible_libstdcxx_dir(env)
         if libstdcxx_dir:
             self._prepend_env_path(env, "LD_LIBRARY_PATH", libstdcxx_dir)

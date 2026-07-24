@@ -10,7 +10,10 @@ from unittest import mock
 
 import pytest
 
-from inference_bench.deployment import DISAGGREGATED_PREFILL_DECODE
+from inference_bench.deployment import (
+    DISAGGREGATED_PREFILL_DECODE,
+    STANDARD_DEPLOYMENT,
+)
 from inference_bench.providers.base import Provider, _git_blob_sha1_file
 
 
@@ -92,6 +95,19 @@ def test_provider_commit_hash_marks_dirty_worktree(tmp_path) -> None:
 
     assert len(clean_hash) == 40
     assert provider.get_commit_hash() == f"{clean_hash}-dirty"
+
+
+def test_standard_v3_is_a_scored_evaluation(tmp_path: Path) -> None:
+    provider = _TestProvider(build_dir=str(tmp_path))
+    provider.configure_deployment(
+        deployment_mode=STANDARD_DEPLOYMENT,
+        tensor_parallel_size=8,
+        model_revision="a" * 40,
+        evaluation_version=3,
+    )
+
+    assert provider.is_scored_evaluation
+    assert not provider.is_disaggregated_prefill_decode
 
 
 def test_scored_source_manifest_records_build_patch_and_untracked_files(

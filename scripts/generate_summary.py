@@ -120,6 +120,8 @@ def generate(results_json: str | Path) -> str:
     results_json = Path(results_json)
     with open(results_json) as f:
         data = json.load(f)
+    if data.get("evaluation_version", 2) >= 3 and data.get("finalized") is not True:
+        raise ValueError("Scored evaluation result is not finalized")
 
     repo_root = _find_repo_root(results_json)
     summary_dir = results_json.resolve().parent
@@ -149,6 +151,8 @@ def generate(results_json: str | Path) -> str:
     lines: list[str] = []
     lines.append("# Benchmark Summary")
     lines.append("")
+    lines.append(f"- **Evaluation:** v{data.get('evaluation_version', 2)}")
+    lines.append(f"- **Finalized:** {str(data.get('finalized', True)).lower()}")
     lines.append(f"- **Model:** {model}")
     if model_revision:
         lines.append(f"- **Model revision:** `{model_revision}`")

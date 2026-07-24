@@ -19,6 +19,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
+from inference_bench.results import model_result_slug
+
 PROVIDER_COLORS = {
     "vllm": "#1f77b4",
     "sglang": "#ff7f0e",
@@ -41,6 +43,13 @@ TRACKED_METRICS = [
 
 
 EXPECTED_PROVIDERS = {"torchinferno", "vllm", "sglang"}
+EXPECTED_BENCHMARKS = {
+    "few_shot",
+    "self_consistency",
+    "multi_turn",
+    "tree_of_thought",
+    "long_output",
+}
 
 
 def load_all_runs(model_dir: Path) -> list[dict]:
@@ -54,6 +63,25 @@ def load_all_runs(model_dir: Path) -> list[dict]:
             continue
         with open(json_path) as f:
             data = json.load(f)
+        evaluation_version = data.get("evaluation_version", 2)
+        if evaluation_version >= 3:
+            hardware = str(data.get("hardware", ""))
+            expected_model_slug = (
+                model_dir.parent.name
+                if hardware and model_dir.name == hardware
+                else model_dir.name
+            )
+            try:
+                if model_result_slug(str(data.get("model", ""))) != expected_model_slug:
+                    continue
+            except ValueError:
+                continue
+            if data.get("finalized") is not True:
+                continue
+            if set(data.get("requested_providers", ())) != EXPECTED_PROVIDERS:
+                continue
+            if set(data.get("requested_benchmarks", ())) != EXPECTED_BENCHMARKS:
+                continue
         present_providers = set(data.get("providers", {}))
         requested_providers = data.get("requested_providers")
         if isinstance(requested_providers, list) and requested_providers:
@@ -66,6 +94,13 @@ def load_all_runs(model_dir: Path) -> list[dict]:
             # Legacy results did not record the requested subset, so preserve
             # the old fail-closed rule for those runs.
             required_providers = EXPECTED_PROVIDERS
+        if evaluation_version >= 3 and any(
+            not EXPECTED_BENCHMARKS
+            <= set(data["providers"][provider].get("benchmarks", {}))
+            for provider in EXPECTED_PROVIDERS
+            if provider in data.get("providers", {})
+        ):
+            continue
         if not required_providers or not required_providers <= present_providers:
             continue
         data["_run_dir"] = str(run_dir.name)

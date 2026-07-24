@@ -51,9 +51,10 @@ class RunnerHarnessProvenanceTest(unittest.TestCase):
             ("remote", "get-url", "origin"): (
                 "https://github.com/bobrenjc93/inference-bench.git"
             ),
-            ("status", "--porcelain", "--untracked-files=all"): (
+            ("status", "--porcelain", "--untracked-files=no"): (
                 " M inference_bench/runner.py" if dirty else ""
             ),
+            ("ls-files", "--others", "--exclude-standard", "-z"): "",
             (
                 "ls-remote",
                 "https://github.com/bobrenjc93/inference-bench.git",
@@ -85,6 +86,63 @@ class RunnerHarnessProvenanceTest(unittest.TestCase):
             self.assertRaisesRegex(RuntimeError, "clean worktree"),
         ):
             _capture_harness_provenance(verify_remote=True)
+
+    def test_final_recheck_allows_only_current_run_artifacts(self) -> None:
+        root = Path(__file__).parents[1]
+        allowed = root / "results" / "v2" / "model" / "runs" / "run"
+        outputs = {
+            ("rev-parse", "HEAD"): "a" * 40,
+            ("rev-parse", "origin/main"): "a" * 40,
+            ("remote", "get-url", "origin"): (
+                "https://github.com/bobrenjc93/inference-bench.git"
+            ),
+            ("status", "--porcelain", "--untracked-files=no"): "",
+            (
+                "ls-files",
+                "--others",
+                "--exclude-standard",
+                "-z",
+            ): "results/v2/model/runs/run/results.json\0",
+        }
+        with mock.patch(
+            "inference_bench.runner._harness_git",
+            side_effect=lambda _root, *args: outputs[args],
+        ):
+            provenance = _capture_harness_provenance(
+                verify_remote=False,
+                allowed_untracked_root=allowed,
+            )
+
+        self.assertTrue(provenance["worktree_clean"])
+
+    def test_final_recheck_rejects_other_untracked_files(self) -> None:
+        root = Path(__file__).parents[1]
+        allowed = root / "results" / "v2" / "model" / "runs" / "run"
+        outputs = {
+            ("rev-parse", "HEAD"): "a" * 40,
+            ("rev-parse", "origin/main"): "a" * 40,
+            ("remote", "get-url", "origin"): (
+                "https://github.com/bobrenjc93/inference-bench.git"
+            ),
+            ("status", "--porcelain", "--untracked-files=no"): "",
+            (
+                "ls-files",
+                "--others",
+                "--exclude-standard",
+                "-z",
+            ): "inference_bench/injected.py\0",
+        }
+        with (
+            mock.patch(
+                "inference_bench.runner._harness_git",
+                side_effect=lambda _root, *args: outputs[args],
+            ),
+            self.assertRaisesRegex(RuntimeError, "unexpected untracked"),
+        ):
+            _capture_harness_provenance(
+                verify_remote=False,
+                allowed_untracked_root=allowed,
+            )
 
 
 class RunnerQueueProfileMarkerTest(unittest.TestCase):
@@ -213,7 +271,9 @@ class _SuccessfulProvider(_IntegrityFailingProvider):
         return {}
 
 
-def test_runner_passes_verified_snapshot_to_authoritative_tokenizer() -> None:
+def test_runner_passes_verified_snapshot_to_authoritative_tokenizer(
+    tmp_path: Path,
+) -> None:
     provider = _SuccessfulProvider()
     benchmark = _SuccessfulBenchmark()
     config = Config(
@@ -221,6 +281,7 @@ def test_runner_passes_verified_snapshot_to_authoritative_tokenizer() -> None:
         tensor_parallel_size=1,
         providers=["vllm"],
         benchmarks=["bench"],
+        results_dir=str(tmp_path / "results"),
         authoritative_output_token_count=True,
     )
     with (
@@ -235,7 +296,7 @@ def test_runner_passes_verified_snapshot_to_authoritative_tokenizer() -> None:
     assert benchmark.authoritative_tokenizer_path == "/verified/pinned-snapshot"
 
 
-def test_post_benchmark_integrity_failure_is_non_comparable() -> None:
+def test_post_benchmark_integrity_failure_is_non_comparable(tmp_path: Path) -> None:
     provider = _IntegrityFailingProvider()
     config = Config(
         model="model",
@@ -245,6 +306,7 @@ def test_post_benchmark_integrity_failure_is_non_comparable() -> None:
         minimum_correctness_rate=0.95,
         require_request_count_parity=True,
         output_token_ratio_tolerance=0.10,
+        results_dir=str(tmp_path / "results"),
     )
     with (
         mock.patch("inference_bench.runner.get_provider", return_value=provider),

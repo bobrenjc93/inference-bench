@@ -23,12 +23,15 @@ class SglangProvider(Provider):
         return self.repo_dir / "python"
 
     def build(self) -> None:
+        self._reject_scored_environment_overrides(
+            prefixes=("INFERENCE_BENCH_SGLANG_", "SGLANG_"),
+        )
         self._create_venv()
         self._pip_install("--upgrade", "pip")
         try:
             self._pip_install("-e", ".", cwd=self._python_dir)
         except subprocess.CalledProcessError:
-            if self.is_disaggregated_prefill_decode or not _env_flag(
+            if self.is_scored_evaluation or not _env_flag(
                 "INFERENCE_BENCH_SGLANG_FALLBACK_BINARY_WHEEL", True
             ):
                 raise
@@ -95,6 +98,12 @@ class SglangProvider(Provider):
             return self._disaggregated_server_cmd(model, port)
         return self._server_instance_cmd(model, tp=tp, port=port)
 
+    def _server_env(self) -> dict[str, str]:
+        self._reject_scored_environment_overrides(
+            prefixes=("INFERENCE_BENCH_SGLANG_", "SGLANG_"),
+        )
+        return super()._server_env()
+
     def _server_instance_cmd(
         self,
         model: str,
@@ -105,6 +114,9 @@ class SglangProvider(Provider):
         bootstrap_port: int | None = None,
         transfer_backend: str | None = None,
     ) -> list[str]:
+        self._reject_scored_environment_overrides(
+            prefixes=("INFERENCE_BENCH_SGLANG_", "SGLANG_"),
+        )
         server_model = self._server_model(model)
         cmd = [
             self.server_python, "-m", "sglang.launch_server",
@@ -122,12 +134,12 @@ class SglangProvider(Provider):
             cmd.extend(["--mem-fraction-static", mem_fraction])
         extra_args = os.environ.get("INFERENCE_BENCH_SGLANG_SERVER_ARGS", "").strip()
         extra_cmd = shlex.split(extra_args) if extra_args else []
+        if self.is_scored_evaluation and extra_cmd:
+            raise ValueError(
+                "INFERENCE_BENCH_SGLANG_SERVER_ARGS is prohibited in a scored "
+                "evaluation"
+            )
         if role is not None:
-            if extra_cmd:
-                raise ValueError(
-                    "INFERENCE_BENCH_SGLANG_SERVER_ARGS is prohibited in the "
-                    "scored disaggregated evaluation"
-                )
             cmd.extend(
                 [
                     "--host",

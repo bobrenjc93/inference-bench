@@ -19,6 +19,7 @@ import httpx
 from ..deployment import (
     DISAGGREGATED_PREFILL_DECODE,
     STANDARD_DEPLOYMENT,
+    deployment_mode_for_evaluation,
     normalize_deployment_mode,
     resolve_role_tensor_parallel_sizes,
 )
@@ -112,6 +113,7 @@ class Provider(ABC):
         self._deployment_observation: dict[str, object] = {}
         self.model_revision: str | None = None
         self._resolved_server_model: str = ""
+        self.evaluation_version = 2
 
     def configure_deployment(
         self,
@@ -122,6 +124,7 @@ class Provider(ABC):
         decode_tensor_parallel_size: int | None = None,
         model_revision: str | None = None,
         model: str | None = None,
+        evaluation_version: int | None = None,
     ) -> None:
         mode = normalize_deployment_mode(deployment_mode)
         prefill_tp, decode_tp = resolve_role_tensor_parallel_sizes(
@@ -135,10 +138,50 @@ class Provider(ABC):
         self.decode_tensor_parallel_size = decode_tp
         self.model_revision = model_revision
         self._configured_model = model
+        configured_version = (
+            evaluation_version
+            if evaluation_version is not None
+            else (4 if mode == DISAGGREGATED_PREFILL_DECODE else 2)
+        )
+        if isinstance(configured_version, bool) or not isinstance(
+            configured_version,
+            int,
+        ):
+            raise ValueError("evaluation_version must be an integer")
+        expected_mode = deployment_mode_for_evaluation(configured_version)
+        if mode != expected_mode:
+            raise ValueError(
+                f"evaluation v{configured_version} requires deployment mode "
+                f"{expected_mode}"
+            )
+        self.evaluation_version = configured_version
 
     @property
     def is_disaggregated_prefill_decode(self) -> bool:
         return self.deployment_mode == DISAGGREGATED_PREFILL_DECODE
+
+    @property
+    def is_scored_evaluation(self) -> bool:
+        return self.evaluation_version >= 3
+
+    def _reject_scored_environment_overrides(
+        self,
+        *,
+        names: tuple[str, ...] = (),
+        prefixes: tuple[str, ...] = (),
+    ) -> None:
+        if not self.is_scored_evaluation:
+            return
+        configured = sorted(
+            name
+            for name in os.environ
+            if name in names or any(name.startswith(prefix) for prefix in prefixes)
+        )
+        if configured:
+            raise ValueError(
+                f"[{self.name}] Environment override is prohibited in a scored "
+                "evaluation: " + ", ".join(configured)
+            )
 
     def _disaggregated_gpu_envs(self) -> tuple[dict[str, str], dict[str, str]]:
         if not self.is_disaggregated_prefill_decode:
@@ -271,10 +314,10 @@ class Provider(ABC):
     @property
     def server_python(self) -> str:
         override = self._server_python_override()
-        if self.is_disaggregated_prefill_decode and override:
+        if self.is_scored_evaluation and override:
             raise ValueError(
                 f"[{self.name}] Server Python overrides are prohibited in a "
-                "scored disaggregated run"
+                "scored evaluation"
             )
         return override if override else self.venv_python
 
@@ -322,22 +365,22 @@ class Provider(ABC):
         return commit
 
     def prepare_source_provenance(self, *, skip_build: bool) -> dict[str, object]:
-        if not self.is_disaggregated_prefill_decode:
+        if not self.is_scored_evaluation:
             return {}
         if skip_build:
             raise RuntimeError(
                 f"[{self.name}] --skip-build is prohibited for scored "
-                "disaggregated runs; use a fresh build"
+                "evaluations; use a fresh build"
             )
         if self.venv_dir.exists():
             raise RuntimeError(
-                f"[{self.name}] Scored disaggregated builds require a fresh "
+                f"[{self.name}] Scored evaluations require a fresh "
                 "provider environment; remove the existing venv or use a fresh "
                 "build directory"
             )
         if not getattr(self, "_fresh_scored_clone", False):
             raise RuntimeError(
-                f"[{self.name}] Scored disaggregated runs require a checkout "
+                f"[{self.name}] Scored evaluations require a checkout "
                 "freshly cloned during this invocation"
             )
         state = self._source_state()
@@ -360,7 +403,7 @@ class Provider(ABC):
         return {}
 
     def finalize_source_provenance(self) -> dict[str, object]:
-        if not self.is_disaggregated_prefill_decode:
+        if not self.is_scored_evaluation:
             return {}
         prebuild = getattr(self, "_source_prebuild_state", None)
         if not isinstance(prebuild, dict):
@@ -412,7 +455,7 @@ class Provider(ABC):
         )
 
     def verify_source_provenance(self) -> dict[str, object]:
-        if not self.is_disaggregated_prefill_decode:
+        if not self.is_scored_evaluation:
             return {}
         expected_source = getattr(self, "_finalized_source_state", None)
         expected_imports = getattr(self, "_finalized_runtime_import_state", None)
@@ -700,14 +743,14 @@ print(json.dumps({
         return self._git_output_bytes(command).decode().strip()
 
     def _git_output_bytes(self, command: list[str]) -> bytes:
-        if self.is_disaggregated_prefill_decode and command[0] == "git":
+        if self.is_scored_evaluation and command[0] == "git":
             command = ["/usr/bin/git", *command[1:]]
         result = subprocess.run(
             command,
             cwd=self.repo_dir,
             env=(
                 self._scored_git_env()
-                if self.is_disaggregated_prefill_decode
+                if self.is_scored_evaluation
                 else None
             ),
             capture_output=True,
@@ -720,9 +763,9 @@ print(json.dumps({
 
     def clone(self) -> None:
         if (self.repo_dir / ".git").exists():
-            if self.is_disaggregated_prefill_decode:
+            if self.is_scored_evaluation:
                 raise RuntimeError(
-                    f"[{self.name}] Scored disaggregated runs require a fresh "
+                    f"[{self.name}] Scored evaluations require a fresh "
                     "build directory; refusing to reuse an existing checkout"
                 )
             self._log(f"[{self.name}] Repo already cloned at {self.repo_dir}, pulling latest...")
@@ -736,19 +779,19 @@ print(json.dumps({
         self._log(f"[{self.name}] Cloning {self.repo_url} -> {self.repo_dir}")
         subprocess.run(
             [
-                "/usr/bin/git" if self.is_disaggregated_prefill_decode else "git",
+                "/usr/bin/git" if self.is_scored_evaluation else "git",
                 "clone",
                 self.repo_url,
                 str(self.repo_dir),
             ],
             env=(
                 self._scored_git_env()
-                if self.is_disaggregated_prefill_decode
+                if self.is_scored_evaluation
                 else None
             ),
             check=True,
         )
-        if self.is_disaggregated_prefill_decode:
+        if self.is_scored_evaluation:
             head = self._git_output(["git", "rev-parse", "HEAD"])
             remote_main = self._remote_main_commit()
             if head != remote_main:
@@ -834,8 +877,24 @@ print(json.dumps({
         ...
 
     def _server_env(self) -> dict[str, str]:
+        self._reject_scored_environment_overrides(
+            names=(
+                "CUDA_LAUNCH_BLOCKING",
+                "PYTORCH_CUDA_ALLOC_CONF",
+                "USE_BAREX",
+            ),
+            prefixes=("MC_", "MOONCAKE_", "NCCL_", "TORCH_NCCL_"),
+        )
         env = os.environ.copy()
-        if self.is_disaggregated_prefill_decode:
+        if self.is_scored_evaluation:
+            for name in tuple(env):
+                if name.startswith(("SGLANG_", "TORCHINFERNO_", "VLLM_")) or name in {
+                    "CMAKE_ARGS",
+                    "CMAKE_BUILD_TYPE",
+                    "MAX_JOBS",
+                    "TORCH_CUDA_ARCH_LIST",
+                }:
+                    env.pop(name, None)
             for name in tuple(env):
                 if name == "USE_BAREX" or name.startswith(
                     ("MC_", "MOONCAKE_", "VLLM_MOONCAKE_", "SGLANG_MOONCAKE_")
@@ -876,32 +935,32 @@ print(json.dumps({
         return env
 
     def _server_model(self, model: str) -> str:
-        if self.is_disaggregated_prefill_decode:
+        if self.is_scored_evaluation:
             if not _env_flag("INFERENCE_BENCH_USE_CACHED_HF_SNAPSHOT", True):
                 raise ValueError(
                     "INFERENCE_BENCH_USE_CACHED_HF_SNAPSHOT=0 is prohibited in "
-                    "a scored disaggregated run"
+                    "a scored evaluation"
                 )
             if os.environ.get("INFERENCE_BENCH_SERVER_MODEL", "").strip():
                 raise ValueError(
                     "INFERENCE_BENCH_SERVER_MODEL is prohibited in a scored "
-                    "disaggregated run"
+                    "evaluation"
                 )
             if Path(model).expanduser().exists():
                 raise ValueError(
-                    "Local model paths are prohibited in a scored disaggregated run"
+                    "Local model paths are prohibited in a scored evaluation"
                 )
         resolved = _server_model_path(model, revision=self.model_revision)
-        if self.is_disaggregated_prefill_decode and resolved == model:
+        if self.is_scored_evaluation and resolved == model:
             raise RuntimeError(
-                f"[{self.name}] Scored disaggregated runs require the complete "
+                f"[{self.name}] Scored evaluations require the complete "
                 "pinned checkpoint snapshot before server startup"
             )
         self._resolved_server_model = resolved
         return resolved
 
     def verify_model_provenance(self, model: str) -> dict[str, object]:
-        if not self.is_disaggregated_prefill_decode:
+        if not self.is_scored_evaluation:
             return {}
         revision = str(self.model_revision or "")
         snapshot = _cached_hf_snapshot(model, revision=revision)
@@ -998,10 +1057,10 @@ print(json.dumps({
 
     def wait_for_gpu_isolation(self, tp: int) -> None:
         if not _env_flag("INFERENCE_BENCH_GPU_ISOLATION_CHECK", True):
-            if self.is_disaggregated_prefill_decode:
+            if self.is_scored_evaluation:
                 raise RuntimeError(
                     f"[{self.name}] GPU isolation checks cannot be disabled for "
-                    "a scored disaggregated run"
+                    "a scored evaluation"
                 )
             return
         timeout_s = _env_float("INFERENCE_BENCH_GPU_ISOLATION_TIMEOUT_S", 900.0, minimum=0.0)
@@ -1058,7 +1117,7 @@ print(json.dumps({
         self._log(f"[{self.name}] Server log: {self._log_path}")
         self._server_process = subprocess.Popen(
             cmd,
-            cwd=self.repo_dir if self.is_disaggregated_prefill_decode else None,
+            cwd=self.repo_dir if self.is_scored_evaluation else None,
             env=env,
             stdout=self._log_file,
             stderr=subprocess.STDOUT,
@@ -1138,7 +1197,7 @@ print(json.dumps({
                 cmd,
                 env=(
                     self._trusted_system_probe_env()
-                    if self.is_disaggregated_prefill_decode
+                    if self.is_scored_evaluation
                     else None
                 ),
                 capture_output=True,
@@ -1146,17 +1205,17 @@ print(json.dumps({
                 check=False,
             )
         except FileNotFoundError:
-            if self.is_disaggregated_prefill_decode:
+            if self.is_scored_evaluation:
                 raise RuntimeError(
                     f"[{self.name}] nvidia-smi is required for scored "
-                    "disaggregated GPU isolation"
+                    "GPU isolation"
                 )
             return []
         if result.returncode != 0:
-            if self.is_disaggregated_prefill_decode:
+            if self.is_scored_evaluation:
                 raise RuntimeError(
                     f"[{self.name}] nvidia-smi GPU query failed during scored "
-                    f"disaggregated GPU isolation: {result.stderr.strip()}"
+                    f"GPU isolation: {result.stderr.strip()}"
                 )
             return []
         rows: list[dict[str, int | str]] = []
@@ -1176,10 +1235,10 @@ print(json.dumps({
                 )
             except ValueError:
                 continue
-        if not rows and self.is_disaggregated_prefill_decode:
+        if not rows and self.is_scored_evaluation:
             raise RuntimeError(
                 f"[{self.name}] nvidia-smi returned no parseable GPU inventory "
-                "for scored disaggregated GPU isolation"
+                "for scored GPU isolation"
             )
         return rows
 
@@ -1197,7 +1256,7 @@ print(json.dumps({
                 cmd,
                 env=(
                     self._trusted_system_probe_env()
-                    if self.is_disaggregated_prefill_decode
+                    if self.is_scored_evaluation
                     else None
                 ),
                 capture_output=True,
@@ -1205,17 +1264,17 @@ print(json.dumps({
                 check=False,
             )
         except FileNotFoundError:
-            if self.is_disaggregated_prefill_decode:
+            if self.is_scored_evaluation:
                 raise RuntimeError(
                     f"[{self.name}] nvidia-smi is required for scored "
-                    "disaggregated GPU process monitoring"
+                    "GPU process monitoring"
                 )
             return []
         if result.returncode != 0:
-            if self.is_disaggregated_prefill_decode:
+            if self.is_scored_evaluation:
                 raise RuntimeError(
                     f"[{self.name}] nvidia-smi process query failed during scored "
-                    f"disaggregated GPU monitoring: {result.stderr.strip()}"
+                    f"GPU monitoring: {result.stderr.strip()}"
                 )
             return []
         rows: list[dict[str, int | str]] = []
@@ -1289,19 +1348,19 @@ print(json.dumps({
 
     def verify_gpu_coverage(self, expected_gpu_count: int) -> dict[str, object]:
         if not _env_flag("INFERENCE_BENCH_GPU_COVERAGE_CHECK", True):
-            if self.is_disaggregated_prefill_decode:
+            if self.is_scored_evaluation:
                 raise RuntimeError(
                     f"[{self.name}] GPU coverage checks cannot be disabled for "
-                    "a scored disaggregated run"
+                    "a scored evaluation"
                 )
             self._deployment_observation = {"gpu_coverage_check": "disabled"}
             return dict(self._deployment_observation)
         rows = self._query_gpu_memory()
         if not rows:
-            if self.is_disaggregated_prefill_decode:
+            if self.is_scored_evaluation:
                 raise RuntimeError(
                     f"[{self.name}] nvidia-smi GPU coverage data is required for "
-                    "a scored disaggregated run"
+                    "a scored evaluation"
                 )
             self._deployment_observation = {"gpu_coverage_check": "unavailable"}
             return dict(self._deployment_observation)
@@ -1859,10 +1918,10 @@ class _GpuIsolationMonitor:
 
     def __enter__(self) -> "_GpuIsolationMonitor":
         if not _env_flag("INFERENCE_BENCH_GPU_ISOLATION_CHECK", True):
-            if self.provider.is_disaggregated_prefill_decode:
+            if self.provider.is_scored_evaluation:
                 raise RuntimeError(
                     f"[{self.provider.name}] GPU isolation monitoring cannot be "
-                    "disabled for a scored disaggregated run"
+                    "disabled for a scored evaluation"
                 )
             return self
         poll_s = _env_float("INFERENCE_BENCH_GPU_ISOLATION_MONITOR_POLL_S", 1.0, minimum=0.25)

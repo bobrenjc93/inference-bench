@@ -10,7 +10,6 @@ from pathlib import Path
 
 from .benchmarks import get_benchmark
 from .config import Config
-from .deployment import DISAGGREGATED_PREFILL_DECODE
 from .providers import get_provider
 from .results import ProviderResults, RunResults
 
@@ -66,22 +65,58 @@ def _harness_git_env() -> dict[str, str]:
     return env
 
 
-def _capture_harness_provenance(*, verify_remote: bool) -> dict[str, object]:
+def _capture_harness_provenance(
+    *,
+    verify_remote: bool,
+    allowed_untracked_root: Path | None = None,
+) -> dict[str, object]:
     root = Path(__file__).resolve().parents[1]
     if not (root / ".git").is_dir():
         raise RuntimeError("Scored inference-bench harness must run from a Git checkout")
     commit = _harness_git(root, "rev-parse", "HEAD")
     origin_main = _harness_git(root, "rev-parse", "origin/main")
     remote = _harness_git(root, "remote", "get-url", "origin")
-    status = _harness_git(root, "status", "--porcelain", "--untracked-files=all")
+    tracked_status = _harness_git(
+        root,
+        "status",
+        "--porcelain",
+        "--untracked-files=no",
+    )
+    untracked = [
+        path
+        for path in _harness_git(
+            root,
+            "ls-files",
+            "--others",
+            "--exclude-standard",
+            "-z",
+        ).split("\0")
+        if path
+    ]
     if commit != origin_main:
         raise RuntimeError("Scored inference-bench harness must be exactly origin/main")
     normalized_remote = remote.strip().removesuffix(".git").rstrip("/").lower()
     expected_remote = _HARNESS_REPO_URL.removesuffix(".git").lower()
     if normalized_remote != expected_remote:
         raise RuntimeError("Scored inference-bench harness remote is not canonical")
-    if status:
+    if tracked_status:
         raise RuntimeError("Scored inference-bench harness must have a clean worktree")
+    if allowed_untracked_root is None:
+        unexpected_untracked = untracked
+    else:
+        allowed = allowed_untracked_root.resolve(strict=False)
+        unexpected_untracked = []
+        for relative in untracked:
+            candidate = (root / relative).resolve(strict=False)
+            try:
+                candidate.relative_to(allowed)
+            except ValueError:
+                unexpected_untracked.append(relative)
+    if unexpected_untracked:
+        raise RuntimeError(
+            "Scored inference-bench harness has unexpected untracked files: "
+            + ", ".join(unexpected_untracked)
+        )
     if verify_remote:
         remote_main = _harness_git(
             root,
@@ -186,11 +221,12 @@ def run_all(
     config.validate()
     harness_provenance = (
         _capture_harness_provenance(verify_remote=True)
-        if config.deployment_mode == DISAGGREGATED_PREFILL_DECODE
+        if config.evaluation_version >= 3
         else {}
     )
     prefill_tp, decode_tp = config.role_tensor_parallel_sizes
     results = RunResults(
+        evaluation_version=config.evaluation_version,
         model=config.model,
         model_revision=config.model_revision,
         tensor_parallel_size=config.tensor_parallel_size,
@@ -228,6 +264,7 @@ def run_all(
             decode_tensor_parallel_size=config.decode_tensor_parallel_size,
             model_revision=config.model_revision,
             model=config.model,
+            evaluation_version=config.evaluation_version,
         )
         pr = ProviderResults(provider=provider_name)
         requested_port = config.server_port + provider_index
@@ -304,10 +341,10 @@ def run_all(
                 except Exception as exc:
                     bench_error = str(exc)
                     pr.errors[bench_name] = str(exc)
-                    if getattr(provider, "is_disaggregated_prefill_decode", False):
+                    if getattr(provider, "is_scored_evaluation", False):
                         pr.comparable = False
                         warning = (
-                            f"Disaggregated benchmark {bench_name!r} failed and "
+                            f"Scored benchmark {bench_name!r} failed and "
                             "cannot be scored."
                         )
                         if warning not in pr.integrity_warnings:
@@ -341,7 +378,7 @@ def run_all(
 
         except Exception as exc:
             pr.errors["_server"] = str(exc)
-            if getattr(provider, "is_disaggregated_prefill_decode", False):
+            if getattr(provider, "is_scored_evaluation", False):
                 pr.comparable = False
             print(f"[{provider_name}] Server error: {exc}")
         finally:
@@ -364,13 +401,18 @@ def run_all(
         # discard results that already completed. save() is idempotent for a
         # run: it rewrites the same timestamped run directory each call.
         try:
-            results.save(config.results_dir)
+            results.save(config.resolved_results_dir)
         except Exception as exc:
             print(f"Warning: incremental results save failed: {exc}")
 
     if harness_provenance:
-        final_harness = _capture_harness_provenance(verify_remote=False)
+        final_harness = _capture_harness_provenance(
+            verify_remote=False,
+            allowed_untracked_root=results.run_dir(config.resolved_results_dir),
+        )
         if final_harness != harness_provenance:
             raise RuntimeError("Inference-bench harness changed during the scored run")
 
+    results.finalized = True
+    results.save(config.resolved_results_dir)
     return results
