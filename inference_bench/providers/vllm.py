@@ -138,8 +138,18 @@ class VllmProvider(Provider):
             "VLLM_USE_PRECOMPILED=0"
         )
         os.environ["VLLM_USE_PRECOMPILED"] = "0"
-        self._configure_source_build_env()
-        self._pip_install_source_with_retry()
+        # Drop the stale precompiled extensions so the source build recompiles
+        # them against the venv's torch/CUDA instead of reusing the mismatched
+        # wheel .so left in the editable tree.
+        for stale in self.repo_dir.glob("vllm/vllm_flash_attn/_vllm_fa*_C*.so"):
+            try:
+                stale.unlink()
+            except OSError:
+                pass
+        # A plain `pip install -e .` is a no-op once the precompiled wheel is
+        # installed, so force pip to re-run the build backend (which recompiles
+        # the extensions under VLLM_USE_PRECOMPILED=0).
+        self._pip_install_source_with_retry("--force-reinstall", "--no-deps")
 
     def _configured_for_deepseek_v4(self) -> bool:
         model = str(getattr(self, "_configured_model", "") or "")
@@ -156,15 +166,15 @@ class VllmProvider(Provider):
             package = "mooncake-transfer-engine-cuda13"
         self._pip_install(f"{package}=={_MOONCAKE_TRANSFER_ENGINE_VERSION}")
 
-    def _pip_install_source_with_retry(self) -> None:
+    def _pip_install_source_with_retry(self, *extra_pip_args: str) -> None:
         self._configure_source_build_env()
         try:
-            self._pip_install("-e", ".", cwd=self.repo_dir)
+            self._pip_install("-e", ".", *extra_pip_args, cwd=self.repo_dir)
         except subprocess.CalledProcessError:
             if not _env_flag("INFERENCE_BENCH_VLLM_RETRY_CONSERVATIVE_SOURCE_BUILD", True):
                 raise
             self._configure_conservative_source_build_retry()
-            self._pip_install("-e", ".", cwd=self.repo_dir)
+            self._pip_install("-e", ".", *extra_pip_args, cwd=self.repo_dir)
 
     def _configure_source_build_env(self) -> None:
         if "CMAKE_BUILD_TYPE" not in os.environ:
