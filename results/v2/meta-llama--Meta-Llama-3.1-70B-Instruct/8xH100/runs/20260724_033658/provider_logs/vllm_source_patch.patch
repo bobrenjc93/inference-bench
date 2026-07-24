@@ -1,0 +1,48 @@
+diff --git a/vllm/entrypoints/serve/instrumentator/metrics.py b/vllm/entrypoints/serve/instrumentator/metrics.py
+index 5cba364f5..898fb8de7 100644
+--- a/vllm/entrypoints/serve/instrumentator/metrics.py
++++ b/vllm/entrypoints/serve/instrumentator/metrics.py
+@@ -62,17 +62,11 @@ def attach_router(app: FastAPI):
+     # with header "Content-Type: text/plain; version=0.0.4; charset=utf-8"
+     # instead of the default "application/json" which is incorrect.
+     # See https://github.com/trallnag/prometheus-fastapi-instrumentator/issues/163#issue-1296092364
+-    Instrumentator(
+-        excluded_handlers=[
+-            "/metrics",
+-            "/health",
+-            "/load",
+-            "/ping",
+-            "/version",
+-            "/server_info",
+-        ],
+-        registry=registry,
+-    ).add().instrument(app).expose(app, response_class=PrometheusResponse)
++    # The request-metrics middleware from prometheus-fastapi-instrumentator
++    # has broken against recent FastAPI/Starlette route objects in fresh vLLM
++    # installs, causing every health probe to return HTTP 500. The benchmark only
++    # needs the OpenAI API, so keep the /metrics ASGI mount below and skip the
++    # middleware until vLLM or the dependency restores compatibility.
+ 
+     # Add prometheus asgi middleware to route /metrics requests
+     metrics_route = Mount("/metrics", make_asgi_app(registry=registry))
+diff --git a/vllm/multimodal/video.py b/vllm/multimodal/video.py
+index d28997234..03a63f065 100644
+--- a/vllm/multimodal/video.py
++++ b/vllm/multimodal/video.py
+@@ -32,7 +32,15 @@ except ImportError:
+     av = PlaceholderModule("av")  # type: ignore[assignment]
+ 
+ try:
+-    from torchcodec.decoders import VideoDecoder
++    try:
++        from torchcodec.decoders import VideoDecoder
++    except (ImportError, OSError, RuntimeError):
++        # TorchCodec can be installed but unusable when FFmpeg shared libraries
++        # are absent or incompatible with the installed PyTorch. Treat that like a
++        # missing optional video backend; text-only OpenAI serving does not need it.
++        VideoDecoder = PlaceholderModule("torchcodec").placeholder_attr(  # type: ignore[assignment]
++            "decoders.VideoDecoder",
++        )
+ except (ImportError, RuntimeError):
+     VideoDecoder = PlaceholderModule("torchcodec").placeholder_attr(  # type: ignore[assignment]
+         "decoders.VideoDecoder"
