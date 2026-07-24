@@ -266,7 +266,7 @@ class TorchInfernoProvider(Provider):
         # TorchInferno use its portable checkpoint loading default unless a run
         # explicitly opts into rank-0 checkpoint tensor broadcast.
         env.setdefault("NCCL_CUMEM_ENABLE", "0")
-        # Public 8xH100 runs are single-node. Avoid cloud RDMA/OFI plugin probes
+        # Public H100 runs are single-node. Avoid cloud RDMA/OFI plugin probes
         # for TorchInferno's auto-launched tensor-parallel workers unless the
         # caller explicitly requests a different NCCL transport.
         env.setdefault("NCCL_NET", "Socket")
@@ -277,7 +277,7 @@ class TorchInfernoProvider(Provider):
         # server on its standard decode graph path unless a run explicitly opts
         # back into FlashInfer decode graphs.
         env.setdefault("TORCHINFERNO_FI_DECODE_GRAPH", "off")
-        # TorchInferno launches eight worker processes before it can bind /health.
+        # TorchInferno launches multiple workers before it can bind /health.
         # Inherited NCCL INFO logging can dominate startup logs on public runners
         # and obscure readiness failures. Keep the default quiet; set
         # INFERENCE_BENCH_TORCHINFERNO_NCCL_DEBUG=INFO for transport debugging.

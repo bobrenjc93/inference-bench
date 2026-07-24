@@ -11,7 +11,7 @@ _EVALUATION_DEPLOYMENTS = {
 
 _EVALUATION_TENSOR_PARALLEL_SIZES = {
     2: 8,
-    3: 8,
+    3: 4,
     4: 4,
 }
 

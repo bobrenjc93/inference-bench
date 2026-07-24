@@ -34,9 +34,9 @@ This takes several hours total (builds ~15 min each, server startup, 5 benchmark
 bash run_benchmark.sh
 ```
 
-This reserves 8xH100 for 8 hours via `gpu-dev submit`, runs `_remote_benchmark.sh`
-on the remote node (which installs deps including protoc, creates a venv, and
-runs the benchmark), syncs results back, commits, and pushes.
+This reserves 4xH100 for 6 hours via `gpu-dev submit`, runs the standard
+evaluation v3 configuration into `results/v2`, syncs results back, commits,
+and pushes.
 
 ### Skip build (reuse existing builds)
 

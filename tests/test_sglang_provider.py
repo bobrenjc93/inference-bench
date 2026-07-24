@@ -43,7 +43,7 @@ class SglangProviderTest(unittest.TestCase):
         standard = SglangProvider(build_dir="/tmp/inference-bench-test")
         standard.configure_deployment(
             deployment_mode="standard",
-            tensor_parallel_size=8,
+            tensor_parallel_size=4,
             model_revision="a" * 40,
             evaluation_version=3,
         )
@@ -68,7 +68,7 @@ class SglangProviderTest(unittest.TestCase):
             provider = SglangProvider(build_dir=tmp)
             provider.configure_deployment(
                 deployment_mode="standard",
-                tensor_parallel_size=8,
+                tensor_parallel_size=4,
                 model_revision="a" * 40,
                 evaluation_version=3,
             )
@@ -87,7 +87,7 @@ class SglangProviderTest(unittest.TestCase):
             provider = SglangProvider(build_dir=tmp)
             provider.configure_deployment(
                 deployment_mode="standard",
-                tensor_parallel_size=8,
+                tensor_parallel_size=4,
                 model_revision="a" * 40,
                 evaluation_version=3,
             )
@@ -104,7 +104,7 @@ class SglangProviderTest(unittest.TestCase):
             provider = SglangProvider(build_dir=tmp)
             provider.configure_deployment(
                 deployment_mode="standard",
-                tensor_parallel_size=8,
+                tensor_parallel_size=4,
                 model_revision="a" * 40,
                 evaluation_version=3,
             )

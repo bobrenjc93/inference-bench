@@ -147,7 +147,7 @@ def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
 def test_summary_rejects_unfinalized_scored_result(tmp_path) -> None:
     results = RunResults(
         model="org/model",
-        tensor_parallel_size=8,
+        tensor_parallel_size=4,
         evaluation_version=3,
     )
     path = results.save(tmp_path / "results")

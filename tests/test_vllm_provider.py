@@ -293,7 +293,7 @@ class VllmProviderTest(unittest.TestCase):
         provider = VllmProvider(build_dir="/tmp/inference-bench-test")
         provider.configure_deployment(
             deployment_mode="standard",
-            tensor_parallel_size=8,
+            tensor_parallel_size=4,
             model_revision="a" * 40,
             evaluation_version=3,
         )
@@ -301,7 +301,7 @@ class VllmProviderTest(unittest.TestCase):
             mock.patch.dict(os.environ, {}, clear=True),
             mock.patch.object(provider, "_server_model", return_value="model"),
         ):
-            cmd = provider._server_cmd("model", tp=8, port=9000)
+            cmd = provider._server_cmd("model", tp=4, port=9000)
 
         self.assertNotIn("--compilation-config", cmd)
 

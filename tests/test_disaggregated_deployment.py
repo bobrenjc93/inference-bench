@@ -73,14 +73,14 @@ def _write_mooncake_rdma_logs(
     (build_dir / f"{provider}_disagg_decode.log").write_text(common)
 
 
-def test_v3_config_uses_standard_tp8_and_results_v2() -> None:
+def test_v3_config_uses_standard_tp4_and_results_v2() -> None:
     config = Config.load(Path(__file__).parents[1] / "config_v3.yaml")
 
     assert config.evaluation_version == 3
     assert config.deployment_mode == "standard"
     assert config.role_tensor_parallel_sizes == (None, None)
-    assert config.tensor_parallel_size == 8
-    assert config.gpu_count == 8
+    assert config.tensor_parallel_size == 4
+    assert config.gpu_count == 4
     assert config.results_dir == "./results/v2"
     assert config.minimum_correctness_rate == 0.95
     assert config.require_request_count_parity
@@ -285,16 +285,16 @@ def test_scored_version_rejects_tensor_parallel_override() -> None:
     config = Config(
         evaluation_version=3,
         model_revision="a" * 40,
-        hardware="8xH100",
+        hardware="4xH100",
         providers=list(SCORED_PROVIDERS),
         benchmarks=list(SCORED_BENCHMARKS),
     )
 
     with pytest.raises(ValueError, match="topology is implicit"):
-        config.apply_overrides(tp=4)
+        config.apply_overrides(tp=8)
 
 
-@pytest.mark.parametrize(("version", "tp"), [(3, 4), (4, 1)])
+@pytest.mark.parametrize(("version", "tp"), [(3, 8), (4, 1)])
 def test_scored_version_rejects_noncanonical_topology(version: int, tp: int) -> None:
     with pytest.raises(ValueError, match="requires tensor parallel size"):
         Config(
@@ -311,7 +311,7 @@ def test_scored_version_rejects_provider_or_benchmark_subsets() -> None:
     config = Config(
         evaluation_version=3,
         model_revision="a" * 40,
-        hardware="8xH100",
+        hardware="4xH100",
         providers=list(SCORED_PROVIDERS),
         benchmarks=list(SCORED_BENCHMARKS),
     )
@@ -322,7 +322,7 @@ def test_scored_version_rejects_provider_or_benchmark_subsets() -> None:
     config = Config(
         evaluation_version=3,
         model_revision="a" * 40,
-        hardware="8xH100",
+        hardware="4xH100",
         providers=list(SCORED_PROVIDERS),
         benchmarks=list(SCORED_BENCHMARKS),
     )
@@ -649,7 +649,7 @@ def test_standard_v3_rejects_runtime_environment_overrides(
     provider = provider_cls(build_dir=str(tmp_path))
     provider.configure_deployment(
         deployment_mode="standard",
-        tensor_parallel_size=8,
+        tensor_parallel_size=4,
         model_revision="a" * 40,
         model="model",
         evaluation_version=3,
@@ -662,14 +662,14 @@ def test_standard_v3_rejects_runtime_environment_overrides(
         if provider_cls is TorchInfernoProvider:
             provider._server_env()
         else:
-            provider._server_cmd("model", tp=8, port=8001)
+            provider._server_cmd("model", tp=4, port=8001)
 
 
 def test_standard_v3_scrubs_native_vllm_runtime_environment(tmp_path: Path) -> None:
     provider = VllmProvider(build_dir=str(tmp_path))
     provider.configure_deployment(
         deployment_mode="standard",
-        tensor_parallel_size=8,
+        tensor_parallel_size=4,
         model_revision="a" * 40,
         model="model",
         evaluation_version=3,
@@ -704,7 +704,7 @@ def test_standard_v3_requires_and_accepts_runtime_cache_counters(
     provider = TorchInfernoProvider(build_dir=str(tmp_path))
     provider.configure_deployment(
         deployment_mode="standard",
-        tensor_parallel_size=8,
+        tensor_parallel_size=4,
         model_revision="a" * 40,
         model="model",
         evaluation_version=3,

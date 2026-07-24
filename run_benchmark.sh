@@ -21,30 +21,28 @@ if [ -f "$HOME/.cache/huggingface/token" ]; then
 fi
 trap 'rm -f "$PROJECT_DIR/.hf_token"' EXIT
 
-echo "=== $(date) Submitting benchmark job to 8xH100 (timeout=${TIMEOUT}s) ==="
+echo "=== $(date) Submitting results/v2 benchmark to 4xH100 (timeout=${TIMEOUT}s) ==="
 } >> "$LOGFILE" 2>&1
 
-# gpu-dev rsyncs the entire --runtime directory with no exclude support.
-# .git/ (1.4GB) and results/ (2GB+) were breaking the SSH tunnel during
-# upload. Stage only the files the remote needs (~600KB) in a temp dir.
+# Scored results/v2 runs require a clean canonical Git checkout. A filtered
+# sparse clone keeps that provenance while excluding the large results tree
+# from gpu-dev's runtime upload.
 STAGE_DIR="$(mktemp -d)"
 trap 'rm -rf "$STAGE_DIR"; rm -f "$PROJECT_DIR/.hf_token"' EXIT
-rsync -a \
-  --exclude='.git' \
-  --exclude='results' \
-  --exclude='logs' \
-  --exclude='builds' \
-  --exclude='.venv' \
-  --exclude='__pycache__' \
-  "$PROJECT_DIR/" "$STAGE_DIR/"
+git clone --quiet --depth 1 --filter=blob:none --sparse \
+  https://github.com/bobrenjc93/inference-bench.git "$STAGE_DIR"
+git -C "$STAGE_DIR" sparse-checkout set --no-cone '/*' '!/results/'
+if [ -f "$PROJECT_DIR/.hf_token" ]; then
+    cp "$PROJECT_DIR/.hf_token" "$STAGE_DIR/.hf_token"
+fi
 
 set +e
 timeout "$TIMEOUT" gpu-dev submit \
   --gpu-type h100 \
-  --gpus 8 \
+  --gpus 4 \
   --hours "$HOURS" \
   --runtime "$STAGE_DIR" \
-  -- bash _remote_benchmark.sh \
+  -- bash _remote_benchmark.sh config_v3.yaml \
   >> "$LOGFILE" 2>&1
 GPU_EXIT=$?
 set -e
@@ -69,7 +67,7 @@ echo "=== $(date) Job complete, results synced back ==="
 echo "=== $(date) Regenerating progress plots locally ==="
 cd "$PROJECT_DIR"
 PYTHONPATH=. python3 scripts/plot_progress.py \
-  results/v1/meta-llama--Meta-Llama-3.1-70B-Instruct/8xH100 2>&1 || true
+  results/v2/meta-llama--Meta-Llama-3.1-70B-Instruct/4xH100 2>&1 || true
 
 (
     flock -w 300 9 || { echo "=== $(date) Could not acquire git lock ==="; exit 1; }

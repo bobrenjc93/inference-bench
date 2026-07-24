@@ -101,7 +101,7 @@ def test_standard_v3_is_a_scored_evaluation(tmp_path: Path) -> None:
     provider = _TestProvider(build_dir=str(tmp_path))
     provider.configure_deployment(
         deployment_mode=STANDARD_DEPLOYMENT,
-        tensor_parallel_size=8,
+        tensor_parallel_size=4,
         model_revision="a" * 40,
         evaluation_version=3,
     )

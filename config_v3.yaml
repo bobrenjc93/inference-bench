@@ -1,8 +1,8 @@
-# Evaluation v3: strict standard serving on all eight GPUs.
+# Evaluation v3 (results/v2): strict standard serving on four GPUs.
 evaluation_version: 3
 model: meta-llama/Meta-Llama-3.1-70B-Instruct
 model_revision: 1605565b47bb9346c5515c34102e054115b4f98b
-hardware: 8xH100
+hardware: 4xH100
 providers:
   - torchinferno
   - vllm

@@ -2,6 +2,8 @@
 set -euo pipefail
 trap '' PIPE
 
+CONFIG_PATH="${1:-config.yaml}"
+
 echo "=== Remote benchmark starting ==="
 echo "Host: $(hostname)"
 echo "GPUs: $(nvidia-smi -L 2>/dev/null | wc -l)"
@@ -57,12 +59,12 @@ source "$HOME/.cargo/env" 2>/dev/null || true
 echo "=== Setting up Python environment ==="
 if command -v conda &>/dev/null; then
     echo "Conda detected, using conda python directly"
-    pip install -q openai httpx pyyaml tabulate matplotlib
+    pip install -q -e . matplotlib
 else
     echo "No conda, creating venv"
     python3 -m venv --system-site-packages /tmp/bench-venv
     source /tmp/bench-venv/bin/activate
-    pip install -q openai httpx pyyaml tabulate matplotlib
+    pip install -q -e . matplotlib
 fi
 
 GPU_COUNT=$(nvidia-smi -L 2>/dev/null | wc -l)
@@ -70,16 +72,18 @@ GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -1 | \
   sed 's/NVIDIA //' | sed 's/ .*//')
 HARDWARE="${GPU_COUNT}x${GPU_NAME}"
 echo "=== Detected hardware: ${HARDWARE} ==="
+if [ "$CONFIG_PATH" = "config_v3.yaml" ] && [ "$GPU_COUNT" -ne 4 ]; then
+    echo "results/v2 requires exactly 4 GPUs; detected ${GPU_COUNT}" >&2
+    exit 1
+fi
 
 echo "=== Running full benchmark (clone + build + bench) ==="
-python -m inference_bench --port 8001 --hardware "$HARDWARE"
+python -m inference_bench \
+  --config "$CONFIG_PATH" \
+  --port 8001 \
+  --hardware "$HARDWARE"
 
-echo "=== Preserving server logs, cleaning builds/ ==="
-LATEST_RUN_DIR="$(find results/v1 -name results.json -type f -printf '%h\n' 2>/dev/null | sort | tail -1)"
-if [ -n "$LATEST_RUN_DIR" ]; then
-    mkdir -p "$LATEST_RUN_DIR/provider_logs"
-    cp builds/*_server.log "$LATEST_RUN_DIR/provider_logs/" 2>/dev/null || true
-fi
+echo "=== Cleaning builds/ ==="
 rm -rf builds/
 
 echo "=== Benchmark complete ==="

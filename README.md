@@ -127,8 +127,8 @@ The package also installs an `inference-bench` console entry point, so after
 
 ### Evaluation v3: strict standard serving
 
-Evaluation v3 reruns the v2 workloads with one TP8 server per provider. It adds
-pinned model/source provenance, GPU coverage and isolation, full response
+Evaluation v3 reruns the v2 workloads with one TP4 server per provider on four
+H100s. It adds pinned model/source provenance, GPU coverage and isolation, full response
 retention, authoritative client-side token counts, and result eligibility gates.
 
 ```bash
@@ -166,10 +166,12 @@ checkouts, and arbitrary provider server-argument environment variables.
 bash run_benchmark.sh
 ```
 
-Reserves 8×H100 for 8 hours via `gpu-dev submit`, runs
-[`_remote_benchmark.sh`](_remote_benchmark.sh) on the remote node (installs all
+Reserves 4×H100 for 6 hours via `gpu-dev submit`, then runs
+[`_remote_benchmark.sh`](_remote_benchmark.sh) with the standard evaluation v3
+configuration on the remote node (installs all
 dependencies, creates a venv, runs the full benchmark), then syncs results back,
-commits, and pushes. See [`run_benchmark.sh`](run_benchmark.sh) for details.
+commits, and pushes to `results/v2/`. See
+[`run_benchmark.sh`](run_benchmark.sh) for details.
 
 ### Skip builds (reuse existing)
 
@@ -297,7 +299,7 @@ server_startup_timeout: 1800    # seconds; SGLang can take ~20 min to load
 Results are versioned. **`v0/`** contains legacy low-volume latency-focused runs
 (8–16 requests per benchmark). **`v1/`** scales every benchmark to ~10,000
 requests with high concurrency for realistic throughput measurement.
-**`v2/`** is evaluation v3: strict, pinned standard TP8 serving. **`v3/`** is
+**`v2/`** is evaluation v3: strict, pinned standard TP4 serving. **`v3/`** is
 evaluation v4: the same workloads with separate TP4 prefill and decode roles.
 
 ### Output files
