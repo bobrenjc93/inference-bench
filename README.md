@@ -325,7 +325,7 @@ Three scripts run automatically at the end of each benchmark:
 |--------|--------|-------------|
 | [`generate_summary.py`](scripts/generate_summary.py) | `summary.md` | Markdown scorecard with per-benchmark tables and cross-benchmark averages |
 | [`plot_results.py`](scripts/plot_results.py) | `plots/` (per-run) | Line charts per request and summary bar charts |
-| [`plot_progress.py`](scripts/plot_progress.py) | `plots/` (cross-run) | Time-series charts tracking metrics across runs (requires ≥ 2 runs) |
+| [`plot_progress.py`](scripts/plot_progress.py) | `plots/` (cross-run) | Metric history charts, generated starting with the first completed run |
 
 ### Directory structure
 

@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import matplotlib
 matplotlib.use("Agg")
@@ -126,6 +126,21 @@ def parse_run_time(run: dict) -> datetime:
     return datetime.strptime(run["_run_dir"], "%Y%m%d_%H%M%S")
 
 
+def _format_run_axis(
+    ax,
+    providers_data: dict[str, list[tuple[datetime, float]]],
+) -> None:
+    timestamps = {
+        timestamp
+        for points in providers_data.values()
+        for timestamp, _ in points
+    }
+    if len(timestamps) == 1:
+        timestamp = next(iter(timestamps))
+        ax.set_xlim(timestamp - timedelta(hours=6), timestamp + timedelta(hours=6))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M"))
+
+
 def plot_metric_over_time(
     plot_dir: Path,
     runs: list[dict],
@@ -174,7 +189,7 @@ def plot_metric_over_time(
     ax.legend(fontsize=11)
     ax.grid(True, alpha=0.3)
 
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M"))
+    _format_run_axis(ax, providers_data)
     fig.autofmt_xdate(rotation=30)
     fig.tight_layout()
 
@@ -218,7 +233,7 @@ def plot_build_times_over_time(plot_dir: Path, runs: list[dict]) -> Path | None:
     ax.legend(fontsize=11)
     ax.grid(True, alpha=0.3)
 
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M"))
+    _format_run_axis(ax, providers_data)
     fig.autofmt_xdate(rotation=30)
     fig.tight_layout()
 
@@ -278,7 +293,7 @@ def plot_cross_benchmark_averages(
         ax.legend(fontsize=11)
         ax.grid(True, alpha=0.3)
 
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M"))
+        _format_run_axis(ax, providers_data)
         fig.autofmt_xdate(rotation=30)
         fig.tight_layout()
 
@@ -293,8 +308,8 @@ def plot_cross_benchmark_averages(
 def main(model_dir: str) -> None:
     model_path = Path(model_dir)
     runs = load_all_runs(model_path)
-    if len(runs) < 2:
-        print(f"Need at least 2 runs for progress charts (found {len(runs)})")
+    if not runs:
+        print("No completed runs found for progress charts")
         return
 
     plot_dir = model_path / "plots"

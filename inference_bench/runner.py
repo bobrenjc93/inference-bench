@@ -384,9 +384,6 @@ def run_all(
             print(f"[{provider_name}] Server error: {exc}")
         finally:
             provider.stop_server()
-            log_path = getattr(provider, "_log_path", None)
-            if log_path is not None:
-                pr.server_log_path = str(log_path)
             extra_log_paths = getattr(provider, "extra_log_paths", None)
             if callable(extra_log_paths):
                 pr.extra_log_paths = {

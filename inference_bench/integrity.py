@@ -424,12 +424,26 @@ def warnings_for_saved_provider(
     if provider_name != "torchinferno":
         return []
     extra_logs = provider_data.get("extra_logs")
-    if not isinstance(extra_logs, dict):
-        return _integrity_unavailable("saved provider has no extra logs")
-    queue_profile = extra_logs.get("queue_profile")
-    if not isinstance(queue_profile, str) or not queue_profile:
-        return _integrity_unavailable("saved provider has no queue profile")
-    return torchinferno_logits_cache_warnings(Path(run_dir) / queue_profile)
+    if isinstance(extra_logs, dict):
+        queue_profile = extra_logs.get("queue_profile")
+        if isinstance(queue_profile, str) and queue_profile:
+            return torchinferno_logits_cache_warnings(Path(run_dir) / queue_profile)
+
+    observation = provider_data.get("deployment_observation")
+    if isinstance(observation, dict) and (
+        observation.get("cache_integrity_check") == "passed"
+        and observation.get("runtime_shortcut_counters") == "zero"
+    ):
+        return []
+
+    saved_warnings = provider_data.get("integrity_warnings")
+    if isinstance(saved_warnings, list) and saved_warnings:
+        return []
+    if provider_data.get("comparable") is False:
+        return []
+    return _integrity_unavailable(
+        "saved provider has no passed cache-integrity attestation"
+    )
 
 
 def warnings_for_live_provider(

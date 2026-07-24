@@ -40,8 +40,9 @@ variant when needed).
 
 vLLM and SGLang run under a small supervisor so process cleanup and GPU
 isolation cover every component. The supervisor writes a JSON launch spec and
-separate prefill, decode, and frontend logs. These files are copied into the
-run's `provider_logs/` directory.
+separate prefill, decode, and frontend logs in the transient build directory.
+The harness checks those logs during the run and records only compact integrity
+verdicts and source hashes in `results.json`.
 
 ## Integrity constraints
 

@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 import pytest
 
 from inference_bench.benchmarks.base import BenchmarkResult, RequestMetrics
+from inference_bench.integrity import warnings_for_saved_provider
 from inference_bench.results import ProviderResults, RunResults
 from scripts.generate_summary import generate
 
@@ -68,27 +69,23 @@ def test_run_dir_rejects_symlinked_results_root(tmp_path) -> None:
         results.save(results_root)
 
 
-def test_save_copies_provider_logs(tmp_path) -> None:
-    source_log = tmp_path / "torchinferno_server.log"
-    source_log.write_text("server tail\n")
+def test_save_uses_established_run_directory_layout(tmp_path) -> None:
     results = RunResults(
         model="meta-llama/Meta-Llama-3.1-70B-Instruct",
         tensor_parallel_size=8,
         hardware="8xH100",
     )
-    results.providers["torchinferno"] = ProviderResults(
-        provider="torchinferno",
+    results.providers["vllm"] = ProviderResults(
+        provider="vllm",
         commit_hash="abc123",
-        server_log_path=str(source_log),
     )
 
     results_path = results.save(tmp_path / "results")
 
     data = json.loads(results_path.read_text())
-    provider = data["providers"]["torchinferno"]
-    assert provider["server_log"] == "provider_logs/torchinferno.log"
-    copied_log = results_path.parent / provider["server_log"]
-    assert copied_log.read_text() == "server tail\n"
+    provider = data["providers"]["vllm"]
+    assert "server_log" not in provider
+    assert {path.name for path in results_path.parent.iterdir()} == {"results.json"}
 
 
 def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
@@ -317,14 +314,14 @@ def test_authoritative_tokenizer_falls_back_to_fast_tokenizer_for_new_model_conf
     _tokenizer_for_model.cache_clear()
 
 
-def test_save_copies_extra_provider_logs(tmp_path) -> None:
+def test_save_does_not_publish_extra_provider_logs(tmp_path) -> None:
     queue_log = tmp_path / "torchinferno_queue_profile.jsonl"
     http_log = tmp_path / "torchinferno_fast_http_profile.jsonl"
     queue_log.write_text('{"queue": 1}\n')
     http_log.write_text('{"http": 1}\n')
     results = RunResults(model="model", tensor_parallel_size=1)
-    results.providers["torchinferno"] = ProviderResults(
-        provider="torchinferno",
+    results.providers["vllm"] = ProviderResults(
+        provider="vllm",
         extra_log_paths={
             "queue_profile": str(queue_log),
             "fast_http_profile": str(http_log),
@@ -334,17 +331,53 @@ def test_save_copies_extra_provider_logs(tmp_path) -> None:
     results_path = results.save(tmp_path / "results")
 
     data = json.loads(results_path.read_text())
-    provider = data["providers"]["torchinferno"]
-    assert provider["extra_logs"] == {
-        "queue_profile": "provider_logs/torchinferno_queue_profile.jsonl",
-        "fast_http_profile": "provider_logs/torchinferno_fast_http_profile.jsonl",
+    provider = data["providers"]["vllm"]
+    assert "extra_logs" not in provider
+    assert not (results_path.parent / "provider_logs").exists()
+
+
+def test_save_compacts_deployment_observation(tmp_path) -> None:
+    results = RunResults(model="model", tensor_parallel_size=1)
+    results.providers["vllm"] = ProviderResults(
+        provider="vllm",
+        deployment_observation={
+            "source_provenance_check": "passed",
+            "source_commit": "a" * 40,
+            "runtime_import_provenance_check": "passed",
+            "runtime_import_state": {"vllm": {"path": "/tmp/vllm"}},
+            "runtime_environment_provenance_check": "passed",
+            "runtime_environment_state": {"pip_freeze": ["vllm==1.0"]},
+            "checkpoint_verified_files": [{"path": "weights.safetensors"}],
+            "source_ignored_runtime_artifacts": ["build/server.log"],
+        },
+    )
+
+    results_path = results.save(tmp_path / "results")
+
+    observation = json.loads(results_path.read_text())["providers"]["vllm"][
+        "deployment_observation"
+    ]
+    assert observation == {
+        "source_provenance_check": "passed",
+        "source_commit": "a" * 40,
+        "runtime_import_provenance_check": "passed",
+        "runtime_environment_provenance_check": "passed",
     }
-    assert (
-        results_path.parent / provider["extra_logs"]["queue_profile"]
-    ).read_text() == '{"queue": 1}\n'
-    assert (
-        results_path.parent / provider["extra_logs"]["fast_http_profile"]
-    ).read_text() == '{"http": 1}\n'
+
+
+def test_saved_integrity_accepts_compact_cache_attestation(tmp_path) -> None:
+    provider = {
+        "deployment_observation": {
+            "cache_integrity_check": "passed",
+            "runtime_shortcut_counters": "zero",
+        }
+    }
+
+    assert warnings_for_saved_provider(
+        "torchinferno",
+        provider,
+        run_dir=tmp_path,
+    ) == []
 
 
 def test_save_preserves_raw_request_metadata(tmp_path) -> None:

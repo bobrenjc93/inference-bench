@@ -5,7 +5,6 @@ import io
 import json
 import math
 import re
-import shutil
 import statistics
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -25,6 +24,13 @@ SUMMARY_SCORABLE_METRICS = (
 )
 
 _SAFE_RESULT_COMPONENT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
+
+_VERBOSE_DEPLOYMENT_OBSERVATION_FIELDS = {
+    "checkpoint_verified_files",
+    "runtime_environment_state",
+    "runtime_import_state",
+    "source_ignored_runtime_artifacts",
+}
 
 
 def _safe_result_component(value: str, *, field_name: str) -> str:
@@ -112,6 +118,17 @@ def _integer_metric(value: object) -> int | None:
     return int(numeric)
 
 
+def _published_deployment_observation(
+    observation: dict[str, object],
+) -> dict[str, object]:
+    """Keep attestation verdicts and hashes without publishing build inventories."""
+    return {
+        key: value
+        for key, value in observation.items()
+        if key not in _VERBOSE_DEPLOYMENT_OBSERVATION_FIELDS
+    }
+
+
 @dataclass
 class ProviderResults:
     provider: str
@@ -119,7 +136,6 @@ class ProviderResults:
     commit_hash: str = ""
     benchmarks: dict[str, BenchmarkResult] = field(default_factory=dict)
     errors: dict[str, str] = field(default_factory=dict)
-    server_log_path: str = ""
     extra_log_paths: dict[str, str] = field(default_factory=dict)
     deployment_observation: dict[str, object] = field(default_factory=dict)
     comparable: bool = True
@@ -221,24 +237,10 @@ class RunResults:
                     for bname, br in pr.benchmarks.items()
                 },
             }
-            server_log = self._copy_provider_log(run_dir, pname, pr.server_log_path)
-            if server_log:
-                prov_data["server_log"] = server_log
-            extra_logs = {
-                name: copied
-                for name, source_path in pr.extra_log_paths.items()
-                if (
-                    copied := self._copy_provider_log(
-                        run_dir,
-                        f"{pname}_{name}",
-                        source_path,
-                    )
-                )
-            }
-            if extra_logs:
-                prov_data["extra_logs"] = extra_logs
             if pr.deployment_observation:
-                prov_data["deployment_observation"] = pr.deployment_observation
+                prov_data["deployment_observation"] = (
+                    _published_deployment_observation(pr.deployment_observation)
+                )
             if pr.integrity_warnings:
                 prov_data["integrity_warnings"] = pr.integrity_warnings
             if pr.errors:
@@ -248,19 +250,6 @@ class RunResults:
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
         return path
-
-    def _copy_provider_log(self, run_dir: Path, provider_name: str, source_path: str) -> str:
-        if not source_path:
-            return ""
-        source = Path(source_path)
-        if not source.exists():
-            return ""
-        safe_name = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in provider_name)
-        rel_path = Path("provider_logs") / f"{safe_name}{source.suffix or '.log'}"
-        dest = run_dir / rel_path
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, dest)
-        return rel_path.as_posix()
 
     def save_csv(self, results_dir: str | Path) -> Path:
         self._refresh_integrity_status()
