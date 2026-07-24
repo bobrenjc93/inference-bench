@@ -12,10 +12,21 @@ nvidia-smi
 echo "=== Network interfaces ==="
 ip -brief addr show | grep UP || true
 
-# gpu-dev may inherit NCCL_SOCKET_IFNAME from the local
-# machine, but the remote has different interface names.
-unset NCCL_SOCKET_IFNAME
-export NCCL_SOCKET_IFNAME=eth0
+# gpu-dev injects cluster tuning variables into the job. Scored evaluations
+# reject those overrides and let each provider construct its canonical runtime
+# environment instead.
+SCRUBBED_ENV=()
+while IFS= read -r name; do
+    case "$name" in
+        NCCL_*|TORCH_NCCL_*|MC_*|MOONCAKE_*|INFERENCE_BENCH_*|\
+        TORCHINFERNO_*|VLLM_*|SGLANG_*|MAX_JOBS|CMAKE_ARGS|CMAKE_BUILD_TYPE|\
+        TORCH_CUDA_ARCH_LIST|CUDA_LAUNCH_BLOCKING|PYTORCH_CUDA_ALLOC_CONF|USE_BAREX)
+            unset "$name"
+            SCRUBBED_ENV+=("$name")
+            ;;
+    esac
+done < <(compgen -e)
+echo "Scrubbed scheduler tuning variables: ${SCRUBBED_ENV[*]:-none}"
 
 # HuggingFace token for gated model access (Llama etc.).
 # run_benchmark.sh copies the token into .hf_token before syncing.

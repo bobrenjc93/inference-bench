@@ -27,3 +27,6 @@ def test_remote_launcher_rejects_wrong_results_v2_gpu_count() -> None:
     assert '--config "$CONFIG_PATH"' in launcher
     assert "pip install -q -e . matplotlib" in launcher
     assert "provider_logs" not in launcher
+    assert "NCCL_*|TORCH_NCCL_*" in launcher
+    assert "TORCHINFERNO_*|VLLM_*|SGLANG_*|MAX_JOBS" in launcher
+    assert "export NCCL_SOCKET_IFNAME" not in launcher
