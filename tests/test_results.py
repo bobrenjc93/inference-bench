@@ -105,6 +105,7 @@ def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
             "commit": "a" * 40,
             "worktree_clean": True,
         },
+        sampling_top_p=1.0,
         finalized=True,
     )
     results.providers["torchinferno"] = ProviderResults(
@@ -126,6 +127,7 @@ def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
     assert data["decode_tensor_parallel_size"] == 4
     assert data["tensor_parallel_size"] == 4
     assert data["gpu_count"] == 8
+    assert data["sampling_top_p"] == 1.0
     assert data["harness_provenance"]["commit"] == "a" * 40
     assert data["providers"]["torchinferno"]["deployment_observation"] == {
         "gpu_coverage_check": "passed",
@@ -139,6 +141,7 @@ def test_save_records_disaggregated_resource_allocation(tmp_path) -> None:
     assert "**Prefill TP:** 4" in markdown
     assert "**Decode TP:** 4" in markdown
     assert "**Total GPUs:** 8" in markdown
+    assert "**Sampling top-p:** 1" in markdown
     assert "**Observed GPU coverage:** torchinferno=8/8" in markdown
     assert f"**Harness commit:** `{'a' * 40}`" in markdown
     assert "**TP:** 4" not in markdown
@@ -164,6 +167,7 @@ def test_v3_result_eligibility_fails_closed_for_invalid_outputs() -> None:
         minimum_correctness_rate=0.95,
         require_request_count_parity=True,
         output_token_ratio_tolerance=0.10,
+        sampling_top_p=1.0,
     )
 
     def benchmark(
@@ -182,7 +186,10 @@ def test_v3_result_eligibility_fails_closed_for_invalid_outputs() -> None:
         return BenchmarkResult(
             name="bench",
             metrics=metrics,
-            raw_requests=[RequestMetrics(output_tokens=value) for value in raw_tokens],
+            raw_requests=[
+                RequestMetrics(output_tokens=value, metadata={"top_p": 1.0})
+                for value in raw_tokens
+            ],
         )
 
     results.providers["valid"] = ProviderResults(
@@ -228,6 +235,13 @@ def test_v3_result_eligibility_fails_closed_for_invalid_outputs() -> None:
             "bench": benchmark(raw_tokens=(), total_tokens=math.inf)
         },
     )
+    results.providers["wrong_top_p"] = ProviderResults(
+        provider="wrong_top_p",
+        benchmarks={"bench": benchmark()},
+    )
+    results.providers["wrong_top_p"].benchmarks["bench"].raw_requests[0].metadata[
+        "top_p"
+    ] = 0.9
 
     results._refresh_integrity_status()
 

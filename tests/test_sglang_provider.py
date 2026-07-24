@@ -4,6 +4,7 @@ import os
 import subprocess
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import mock
 
 from inference_bench.deployment import DISAGGREGATED_PREFILL_DECODE
@@ -11,6 +12,33 @@ from inference_bench.providers.sglang import SglangProvider
 
 
 class SglangProviderTest(unittest.TestCase):
+    def test_hardens_custom_allreduce_for_pinned_tvm_ffi(self) -> None:
+        with TemporaryDirectory() as tmp:
+            provider = SglangProvider(build_dir=tmp)
+            ipc_header = (
+                provider._python_dir
+                / "sglang"
+                / "kernels"
+                / "jit"
+                / "csrc"
+                / "distributed"
+                / "ipc.cuh"
+            )
+            ipc_header.parent.mkdir(parents=True)
+            ipc_header.write_text(
+                "const auto ipc_handle = to_ipc_handle(get<0>(pair));\n"
+                "const auto offset = get<1>(pair);\n"
+            )
+
+            provider._harden_custom_allreduce_tvm_ffi_compat()
+            patched = ipc_header.read_text()
+            provider._harden_custom_allreduce_tvm_ffi_compat()
+            patched_twice = ipc_header.read_text()
+
+        self.assertIn("pair.template get<0>()", patched)
+        self.assertIn("pair.template get<1>()", patched)
+        self.assertEqual(patched_twice, patched)
+
     def test_runtime_imports_match_version_derived_topology(self) -> None:
         standard = SglangProvider(build_dir="/tmp/inference-bench-test")
         standard.configure_deployment(
@@ -34,6 +62,57 @@ class SglangProviderTest(unittest.TestCase):
             disaggregated.runtime_import_names,
             ("sglang", "sglang_router"),
         )
+
+    def test_scored_standard_run_requires_active_custom_allreduce(self) -> None:
+        with TemporaryDirectory() as tmp:
+            provider = SglangProvider(build_dir=tmp)
+            provider.configure_deployment(
+                deployment_mode="standard",
+                tensor_parallel_size=8,
+                model_revision="a" * 40,
+                evaluation_version=3,
+            )
+            provider._log_path = Path(tmp) / "sglang_server.log"
+            provider._log_path.write_text(
+                "[TP0] All Reduce config: symmetric_memory = 18.01 MB\n"
+            )
+
+            observation = provider.verify_runtime_integrity()
+
+        self.assertEqual(observation["custom_allreduce_check"], "passed")
+        self.assertEqual(observation["custom_allreduce_roles"], ["standard"])
+
+    def test_scored_standard_run_rejects_custom_allreduce_fallback(self) -> None:
+        with TemporaryDirectory() as tmp:
+            provider = SglangProvider(build_dir=tmp)
+            provider.configure_deployment(
+                deployment_mode="standard",
+                tensor_parallel_size=8,
+                model_revision="a" * 40,
+                evaluation_version=3,
+            )
+            provider._log_path = Path(tmp) / "sglang_server.log"
+            provider._log_path.write_text(
+                "Setup Custom allreduce failed with ninja exited with status 1\n"
+            )
+
+            with self.assertRaisesRegex(RuntimeError, "fell back"):
+                provider.verify_runtime_integrity()
+
+    def test_scored_standard_run_rejects_missing_custom_allreduce_evidence(self) -> None:
+        with TemporaryDirectory() as tmp:
+            provider = SglangProvider(build_dir=tmp)
+            provider.configure_deployment(
+                deployment_mode="standard",
+                tensor_parallel_size=8,
+                model_revision="a" * 40,
+                evaluation_version=3,
+            )
+            provider._log_path = Path(tmp) / "sglang_server.log"
+            provider._log_path.write_text("server ready\n")
+
+            with self.assertRaisesRegex(RuntimeError, "did not report"):
+                provider.verify_runtime_integrity()
 
     def test_server_cmd_uses_current_tensor_parallel_flag(self) -> None:
         provider = SglangProvider(build_dir="/tmp/inference-bench-test")

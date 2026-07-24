@@ -145,6 +145,7 @@ class RunResults:
     output_token_ratio_tolerance: float | None = None
     retain_response_text: bool = False
     output_token_count_method: str = "sse_content_chunks"
+    sampling_top_p: float | None = None
     harness_provenance: dict[str, object] = field(default_factory=dict)
     finalized: bool = False
     providers: dict[str, ProviderResults] = field(default_factory=dict)
@@ -173,6 +174,8 @@ class RunResults:
             "harness_provenance": self.harness_provenance,
             "providers": {},
         }
+        if self.sampling_top_p is not None:
+            data["sampling_top_p"] = self.sampling_top_p
         if self.minimum_correctness_rate is not None:
             data["minimum_correctness_rate"] = self.minimum_correctness_rate
         if self.require_request_count_parity:
@@ -286,6 +289,8 @@ class RunResults:
             ]
         )
         w.writerow(["output_token_count_method", self.output_token_count_method])
+        if self.sampling_top_p is not None:
+            w.writerow(["sampling_top_p", self.sampling_top_p])
         if self.prefill_tensor_parallel_size is not None:
             w.writerow(
                 ["prefill_tensor_parallel_size", self.prefill_tensor_parallel_size]
@@ -484,6 +489,7 @@ class RunResults:
             self.minimum_correctness_rate is not None
             or self.require_request_count_parity
             or self.output_token_ratio_tolerance is not None
+            or self.sampling_top_p is not None
         )
         if not enabled:
             return
@@ -576,6 +582,17 @@ class RunResults:
                         warnings.append(
                             f"Benchmark {benchmark_name!r} output token metric does not "
                             "match its raw request records."
+                        )
+                if self.sampling_top_p is not None:
+                    mismatched_top_p = sum(
+                        request.metadata.get("top_p") != self.sampling_top_p
+                        for request in result.raw_requests
+                    )
+                    if mismatched_top_p:
+                        warnings.append(
+                            f"Benchmark {benchmark_name!r} has {mismatched_top_p} "
+                            "raw request(s) without the required explicit "
+                            f"top_p={self.sampling_top_p}."
                         )
             self._add_integrity_warnings(provider, warnings)
 

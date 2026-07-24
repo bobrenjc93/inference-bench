@@ -138,7 +138,8 @@ python -m inference_bench \
 
 Results go to `results/v2/`. Evaluation v3 is standard serving by definition;
 deployment topology is derived from the evaluation version and is not a config
-toggle.
+toggle. Every request explicitly sends `top_p=1.0`; scored results record that
+value per request and become non-comparable if it is missing or different.
 
 ### Evaluation v4: disaggregated prefill/decode
 

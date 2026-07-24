@@ -67,6 +67,8 @@ def _write_mooncake_rdma_logs(
         "Topology discovery complete. Found 4 HCAs.\n"
         "installTransport, type=rdma\n"
     )
+    if provider == "sglang":
+        common += "All Reduce config: local_buffer = 8.00 MB\n"
     (build_dir / f"{provider}_disagg_prefill.log").write_text(common + metrics)
     (build_dir / f"{provider}_disagg_decode.log").write_text(common)
 
@@ -1129,6 +1131,7 @@ def test_sglang_runtime_integrity_requires_native_kv_transfer_stats(
     assert observation["kv_handoff_check"] == "passed"
     assert observation["observed_kv_transfer_speed_gb_s"] == 91.5
     assert observation["mooncake_data_plane_transport"] == "rdma"
+    assert observation["custom_allreduce_check"] == "passed"
 
 
 def test_sglang_disaggregated_build_installs_router_and_transfer_engine(

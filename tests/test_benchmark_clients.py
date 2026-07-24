@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import concurrent.futures
+import json
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -75,7 +76,8 @@ class _ChunkedSSEHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         length = int(self.headers.get("content-length", "0"))
         if length:
-            self.rfile.read(length)
+            payload = json.loads(self.rfile.read(length))
+            self.server.payloads.append(payload)  # type: ignore[attr-defined]
         self.server.connection_ids.add(id(self.connection))  # type: ignore[attr-defined]
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
@@ -103,6 +105,7 @@ class _ChunkedSSEServer(ThreadingHTTPServer):
     def __init__(self) -> None:
         super().__init__(("127.0.0.1", 0), _ChunkedSSEHandler)
         self.connection_ids: set[int] = set()
+        self.payloads: list[dict[str, object]] = []
 
 
 def test_stream_request_drains_chunked_sse_for_keepalive_reuse() -> None:
@@ -135,3 +138,6 @@ def test_stream_request_drains_chunked_sse_for_keepalive_reuse() -> None:
     assert first_metrics.ttft_ms > 0
     assert second_metrics.ttft_ms > 0
     assert len(server.connection_ids) == 1
+    assert [payload["top_p"] for payload in server.payloads] == [1.0, 1.0]
+    assert first_metrics.metadata["top_p"] == 1.0
+    assert second_metrics.metadata["top_p"] == 1.0

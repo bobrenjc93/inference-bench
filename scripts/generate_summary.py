@@ -170,6 +170,9 @@ def generate(results_json: str | Path) -> str:
         lines.append(f"- **Hardware:** {hardware}")
     lines.append(f"- **Metric schema:** v{metric_schema_version}")
     lines.append(f"- **Output token count:** {output_token_count_method}")
+    sampling_top_p = data.get("sampling_top_p")
+    if isinstance(sampling_top_p, (int, float)):
+        lines.append(f"- **Sampling top-p:** {sampling_top_p:g}")
     minimum_correctness = data.get("minimum_correctness_rate")
     if isinstance(minimum_correctness, (int, float)):
         lines.append(f"- **Minimum correctness:** {minimum_correctness:.0%}")

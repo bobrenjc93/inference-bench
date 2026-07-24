@@ -41,8 +41,34 @@ class SglangProvider(Provider):
             ):
                 raise
             self._pip_install_binary_wheel()
+        self._harden_custom_allreduce_tvm_ffi_compat()
         if self.is_disaggregated_prefill_decode:
             self._install_disaggregated_dependencies()
+
+    def _harden_custom_allreduce_tvm_ffi_compat(self) -> None:
+        ipc_header = (
+            self._python_dir
+            / "sglang"
+            / "kernels"
+            / "jit"
+            / "csrc"
+            / "distributed"
+            / "ipc.cuh"
+        )
+        if not ipc_header.is_file():
+            return
+        text = ipc_header.read_text()
+        replacements = {
+            "to_ipc_handle(get<0>(pair))": "to_ipc_handle(pair.template get<0>())",
+            "const auto offset = get<1>(pair);": (
+                "const auto offset = pair.template get<1>();"
+            ),
+        }
+        patched = text
+        for old, new in replacements.items():
+            patched = patched.replace(old, new)
+        if patched != text:
+            ipc_header.write_text(patched)
 
     def _install_disaggregated_dependencies(self) -> None:
         router_dir = (
@@ -283,7 +309,9 @@ class SglangProvider(Provider):
 
     def verify_runtime_integrity(self) -> dict[str, object]:
         if not self.is_disaggregated_prefill_decode:
-            return {}
+            return self._verify_custom_allreduce_logs(
+                {"standard": getattr(self, "_log_path", None)}
+            )
         prefill_port = getattr(self, "_disagg_prefill_port", None)
         if not isinstance(prefill_port, int):
             raise RuntimeError("[sglang] Prefill runtime endpoint is unavailable")
@@ -316,6 +344,14 @@ class SglangProvider(Provider):
             "observed_kv_transfer_latency_ms": max(latency for _, latency in observations),
             "transport": str(getattr(self, "_disagg_transfer_backend", "unknown")),
         }
+        observation.update(
+            self._verify_custom_allreduce_logs(
+                {
+                    "prefill": self.build_dir / "sglang_disagg_prefill.log",
+                    "decode": self.build_dir / "sglang_disagg_decode.log",
+                }
+            )
+        )
         backend = str(getattr(self, "_disagg_transfer_backend", "unknown"))
         if backend == "mooncake":
             observation.update(
@@ -328,6 +364,37 @@ class SglangProvider(Provider):
                 )
             )
         return observation
+
+    def _verify_custom_allreduce_logs(
+        self,
+        log_paths: dict[str, object],
+    ) -> dict[str, object]:
+        if not self.is_scored_evaluation:
+            return {}
+        verified_roles: list[str] = []
+        for role, raw_path in log_paths.items():
+            if raw_path is None:
+                raise RuntimeError(f"[sglang] {role} server log is unavailable")
+            try:
+                log_text = raw_path.read_text(errors="replace")
+            except (AttributeError, OSError) as exc:
+                raise RuntimeError(
+                    f"[sglang] Could not read {role} server log: {raw_path}"
+                ) from exc
+            if "Setup Custom allreduce failed" in log_text:
+                raise RuntimeError(
+                    f"[sglang] {role} server fell back from custom all-reduce"
+                )
+            if "All Reduce config:" not in log_text:
+                raise RuntimeError(
+                    f"[sglang] {role} server did not report an active custom "
+                    "all-reduce configuration"
+                )
+            verified_roles.append(role)
+        return {
+            "custom_allreduce_check": "passed",
+            "custom_allreduce_roles": verified_roles,
+        }
 
     def _gpu_memory_wait_fraction(self) -> float | None:
         if "INFERENCE_BENCH_SGLANG_MIN_GPU_FREE_FRACTION" in os.environ:

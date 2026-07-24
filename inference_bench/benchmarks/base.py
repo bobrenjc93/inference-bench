@@ -209,6 +209,7 @@ class Benchmark(ABC):
         model: str,
         messages: list[dict],
         temperature: float = 0.0,
+        top_p: float = 1.0,
         max_tokens: int = 256,
     ) -> tuple[str, RequestMetrics]:
         """
@@ -225,9 +226,17 @@ class Benchmark(ABC):
             "model": model,
             "messages": messages,
             "temperature": temperature,
+            "top_p": top_p,
             "max_tokens": max_tokens,
             "stream": True,
         }
+        metrics.metadata.update(
+            {
+                "temperature": temperature,
+                "top_p": top_p,
+                "max_tokens": max_tokens,
+            }
+        )
 
         first_token_seen = False
         done_seen_s: float | None = None

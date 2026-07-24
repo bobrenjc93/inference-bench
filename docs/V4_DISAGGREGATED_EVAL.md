@@ -5,7 +5,8 @@ checks. The deployment changes to four H100s for prefill and four H100s for
 decode. V4 also closes scoring loopholes exposed during adversarial review:
 completed text is retokenized by the model tokenizer after timing, full
 responses are retained, and correctness/request/output eligibility gates run
-before any provider can win a metric.
+before any provider can win a metric. Every request also sends and records
+`top_p=1.0`, overriding provider-specific model generation defaults.
 
 The checked-in configuration is [`config_v4.yaml`](../config_v4.yaml).
 Evaluation v3 writes `results/v2`, so evaluation v4 writes `results/v3`.
@@ -82,7 +83,9 @@ and excluded from winners if any required benchmark is missing, reports an
 error, falls below 95% correctness, completes a different request count, or
 falls outside the +/-10% run-median output-token band. Output tokens are counted
 by the client-side model tokenizer, not by SSE event count. The result records
-metric schema v2 and keeps the original stream chunk count for auditing.
+metric schema v2 and keeps the original stream chunk count for auditing. A
+missing or different per-request `top_p` value also makes the provider
+non-comparable.
 
 The same policy fails closed when runtime handoff evidence, GPU telemetry,
 benchmark markers, or cache-integrity counters are missing or malformed.

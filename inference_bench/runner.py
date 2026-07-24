@@ -246,6 +246,7 @@ def run_all(
             if config.authoritative_output_token_count
             else "sse_content_chunks"
         ),
+        sampling_top_p=(1.0 if config.evaluation_version >= 3 else None),
         harness_provenance=harness_provenance,
     )
     build_times = build_times or {}
