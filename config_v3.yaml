@@ -15,4 +15,4 @@ benchmarks:
   - long_output
 build_dir: ./builds/v3
 server_port: 8001
-server_startup_timeout: 3600
+server_startup_timeout: 7200

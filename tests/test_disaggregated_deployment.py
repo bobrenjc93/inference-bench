@@ -82,6 +82,7 @@ def test_v3_config_uses_standard_tp4_and_results_v2() -> None:
     assert config.tensor_parallel_size == 4
     assert config.gpu_count == 4
     assert config.results_dir == "./results/v2"
+    assert config.server_startup_timeout == 7200
     assert config.minimum_correctness_rate == 0.95
     assert config.require_request_count_parity
     assert config.output_token_ratio_tolerance == 0.10
