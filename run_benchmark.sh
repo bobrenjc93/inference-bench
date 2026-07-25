@@ -64,10 +64,7 @@ fi
 
 echo "=== $(date) Job complete, results synced back ==="
 
-echo "=== $(date) Regenerating progress plots locally ==="
 cd "$PROJECT_DIR"
-PYTHONPATH=. python3 scripts/plot_progress.py \
-  results/v2/meta-llama--Meta-Llama-3.1-70B-Instruct/4xH100 2>&1 || true
 
 (
     flock -w 300 9 || { echo "=== $(date) Could not acquire git lock ==="; exit 1; }
@@ -75,6 +72,13 @@ PYTHONPATH=. python3 scripts/plot_progress.py \
     git stash --include-untracked
     git pull --rebase
     git stash pop || true
+    # Regenerate progress plots AFTER the rebase so they reflect the full run
+    # set on main (including runs pushed concurrently by other runs), not just
+    # the subset present in this clone. Generating before the pull leaves the
+    # committed plot missing runs that landed while this run was executing.
+    echo "=== $(date) Regenerating progress plots ==="
+    PYTHONPATH=. python3 scripts/plot_progress.py \
+      results/v2/meta-llama--Meta-Llama-3.1-70B-Instruct/4xH100 2>&1 || true
     git add results/
     git commit -m "Benchmark run $(date +%Y%m%d_%H%M%S)"
     git push
