@@ -76,9 +76,13 @@ cd "$PROJECT_DIR"
     # set on main (including runs pushed concurrently by other runs), not just
     # the subset present in this clone. Generating before the pull leaves the
     # committed plot missing runs that landed while this run was executing.
+    # Non-blocking (a plot error must never drop this run's data) but loud, so a
+    # persistent plot-gen failure can't silently ship stale dashboards.
     echo "=== $(date) Regenerating progress plots ==="
-    PYTHONPATH=. python3 scripts/plot_progress.py \
-      results/v2/meta-llama--Meta-Llama-3.1-70B-Instruct/4xH100 2>&1 || true
+    if ! PYTHONPATH=. python3 scripts/plot_progress.py \
+      results/v2/meta-llama--Meta-Llama-3.1-70B-Instruct/4xH100 2>&1; then
+        echo "=== $(date) WARNING: plot regeneration FAILED -- dashboard may be stale until the next run ==="
+    fi
     git add results/
     git commit -m "Benchmark run $(date +%Y%m%d_%H%M%S)"
     git push
