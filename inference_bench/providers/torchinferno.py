@@ -126,7 +126,28 @@ class TorchInfernoProvider(Provider):
         self._reject_scored_environment_overrides(
             prefixes=("INFERENCE_BENCH_TORCHINFERNO_", "TORCHINFERNO_"),
         )
-        if not self.is_disaggregated_prefill_decode or not self._configured_for_deepseek_v4():
+        is_deepseek_v4 = self._configured_for_deepseek_v4()
+        if "h100" in str(getattr(self, "hardware", "")).lower() and not is_deepseek_v4:
+            artifact_root = self.build_dir / "torchinferno-kernel-artifacts"
+            command = [
+                self.venv_python,
+                "-m",
+                "torchinferno.kernels.sgl_fp8_out_builder",
+                "--artifact-root",
+                str(artifact_root),
+            ]
+            self._log(
+                "[torchinferno] Preparing H100 FP8 output adapter: "
+                + " ".join(command)
+            )
+            subprocess.run(command, cwd=self.repo_dir, check=True)
+            libraries = tuple(artifact_root.glob("sgl-fp8-out/*/*.so"))
+            if not libraries:
+                raise RuntimeError(
+                    "TorchInferno H100 FP8 output adapter preparation was incomplete"
+                )
+            self._h100_kernel_artifact_root = artifact_root
+        if not self.is_disaggregated_prefill_decode or not is_deepseek_v4:
             return
         forbidden = [
             name
@@ -230,6 +251,15 @@ class TorchInfernoProvider(Provider):
         env = super()._server_env()
         self._extra_log_paths = {}
         is_deepseek_v4 = self._configured_for_deepseek_v4()
+        if "h100" in str(getattr(self, "hardware", "")).lower() and not is_deepseek_v4:
+            artifact_root = getattr(self, "_h100_kernel_artifact_root", None)
+            if not isinstance(artifact_root, Path):
+                if self.is_scored_evaluation:
+                    raise RuntimeError(
+                        "TorchInferno H100 kernel artifacts were not prepared"
+                    )
+            else:
+                env["TORCHINFERNO_KERNEL_ARTIFACT_DIR"] = str(artifact_root)
         if self.is_disaggregated_prefill_decode:
             env["TORCHINFERNO_OPENAI_DISAGG_MAX_BATCH_SIZE"] = (
                 "64" if is_deepseek_v4 else "128"

@@ -159,6 +159,50 @@ class TorchInfernoProviderTest(unittest.TestCase):
             ],
         )
 
+    def test_prepare_model_assets_builds_h100_fp8_output_adapter(self) -> None:
+        with TemporaryDirectory() as tmp:
+            provider = TorchInfernoProvider(build_dir=tmp)
+            provider.hardware = "4xH100"
+            commands: list[list[str]] = []
+
+            def prepare(command, **kwargs):  # noqa: ANN001, ANN003
+                commands.append(command)
+                artifact_root = Path(command[-1])
+                library = artifact_root / "sgl-fp8-out" / "test-key" / "adapter.so"
+                library.parent.mkdir(parents=True)
+                library.write_bytes(b"adapter")
+                self.assertEqual(kwargs["cwd"], provider.repo_dir)
+                return mock.Mock(returncode=0)
+
+            with (
+                mock.patch.dict(os.environ, {}, clear=True),
+                mock.patch(
+                    "inference_bench.providers.torchinferno.subprocess.run",
+                    side_effect=prepare,
+                ),
+            ):
+                provider.prepare_model_assets(
+                    "meta-llama/Meta-Llama-3.1-70B-Instruct"
+                )
+                env = provider._server_env()
+
+            self.assertEqual(
+                commands,
+                [
+                    [
+                        provider.venv_python,
+                        "-m",
+                        "torchinferno.kernels.sgl_fp8_out_builder",
+                        "--artifact-root",
+                        str(provider.build_dir / "torchinferno-kernel-artifacts"),
+                    ]
+                ],
+            )
+            self.assertEqual(
+                env["TORCHINFERNO_KERNEL_ARTIFACT_DIR"],
+                str(provider.build_dir / "torchinferno-kernel-artifacts"),
+            )
+
     def test_build_falls_back_to_serve_when_default_flashinfer_extra_fails(self) -> None:
         provider = TorchInfernoProvider(build_dir="/tmp/inference-bench-test")
         calls: list[tuple[tuple[str, ...], object]] = []
